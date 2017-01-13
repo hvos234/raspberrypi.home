@@ -1,0 +1,16 @@
+HomeRFM69	KEYWORD1
+initialize	KEYWORD2
+getError		KEYWORD2
+getErrorMessage	KEYWORD2
+resetError	KEYWORD2
+send	KEYWORD2
+sendWithAck	KEYWORD2
+sendWithRetry	KEYWORD2
+receive	KEYWORD2
+receiveWithTimeOut	KEYWORD2
+getData	KEYWORD2
+receiveDone	KEYWORD2
+sendAndreceiveWithTimeOut	KEYWORD2
+sendWithRetryAndreceiveWithTimeOut	KEYWORD2
+getSenderId	KEYWORD2
+getRssi	KEYWORD2

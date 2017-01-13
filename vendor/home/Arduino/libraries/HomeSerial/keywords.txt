@@ -1,0 +1,11 @@
+HomeSerial	KEYWORD1
+getError		KEYWORD2
+getErrorMessage	KEYWORD2
+getSerial	KEYWORD2
+sscanfSerial	KEYWORD2
+writeSerial	KEYWORD2
+getFrom	KEYWORD2
+getTo	KEYWORD2
+getTask	KEYWORD2
+getAction	KEYWORD2
+getMessage	KEYWORD2

@@ -1,0 +1,5 @@
+HomeDHT	KEYWORD1
+getError	KEYWORD2
+getErrorMessage	KEYWORD2
+getTemperature	KEYWORD2
+getHumdity	KEYWORD2
