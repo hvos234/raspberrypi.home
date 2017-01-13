@@ -10,8 +10,7 @@ use yii\filters\VerbFilter;
 
 // Models
 use app\models\Data;
-use app\models\Device;
-use app\models\Action;
+use app\models\TaskDefined;
 
 // AccessControl is used form controlling access in behaviors()
 use yii\filters\AccessControl;
@@ -63,18 +62,20 @@ class DataController extends Controller
     {
 				$model = new Data();
 				
+				$modelsTaskDefined = TaskDefined::find()->all();
+				
 				if ($model->load(Yii::$app->request->post())){
 					
 				}
 				
         return $this->render('index', [
 						'model' => $model,
-            'devices' => $model->getDevicesAll(),
-            'actions' => $model->getActions(),
-            'chart_types' => $model->getChartTypes(),
-            'chart_date' => $model->getChartDate(),
-            'chart_interval' => $model->getChartInterval(),
-						'chart_data' => $model->getChartData(),
+						'modelsTaskDefined' => $modelsTaskDefined,
         ]);
     }
+		
+		public function actionAjaxGetChartDatas($chart_type, $chart_date, $chart_interval, $taskdefinded_id){
+			$chart_datas = Data::getChartDatas($chart_type, $chart_date, $chart_interval, $taskdefinded_id);
+			return json_encode($chart_datas);
+		}
 }

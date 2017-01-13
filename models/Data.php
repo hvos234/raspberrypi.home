@@ -8,21 +8,50 @@ use yii\base\Model;
 // The ArrayHelper, is used for building a map (key-value pairs).
 use yii\helpers\ArrayHelper;
 
-use app\models\Device;
-use app\models\Action;
-
 use app\models\Task;
+use app\models\TaskDefined;
 
 //use yii\helpers\Json;
 
-
 class Data extends Model {
 	
-	public $device_id = '1';
-	public $action_id = '3';
+	public $chart_types = [];
+	public $chart_dates = [];
+	public $chart_intervals = [];
+	public $chart_datas = [];
+	
 	public $chart_type = 'line';
 	public $chart_date = 'today';
 	public $chart_interval = 'every_hour';
+	public $taskdefinded_id = 2;
+	
+	public function init() {		
+		$this->chart_types = Data::getChartTypes();
+		$this->chart_dates = Data::getChartDates();
+		$this->chart_intervals = Data::getChartIntervals();
+		//$this->chart_datas = Data::getChartDatas($this->chart_type, $this->chart_date, $this->chart_interval, $this->taskdefinded_id);
+		$this->chart_datas = [
+			'char' => [
+				'chart' => ['type' => $this->chart_type],
+				'title' => ['text' => 'title']
+			],
+			'xAxis' => [
+				'categories' => ''
+			],
+			'yAxis' => [
+				0 => [
+					'title' => ['text' => 'title'],
+					'labels' => ['format' => '{value}']
+				]
+			],
+			'series' => [
+				0 => []
+			]
+		];
+		
+		parent::init();
+	}
+	
 	
 	public function rules(){
 			return [
@@ -41,46 +70,12 @@ class Data extends Model {
 					'chart_interval' => Yii::t('app', 'Chart Interval'),
 			];
 	}
-	
-	public function getDevicesAll(){
-		return ArrayHelper::map(Device::find()->all(), 'id', 'name');
-	}
-	
-	public function getActionsAll(){
-		return ArrayHelper::map(Action::find()->all(), 'id', 'name');
-	}
-	
-	public function getDeviceActions(){
-		return ArrayHelper::map(DeviceAction::find()->where(['device_id' => $this->device_id])->asArray()->all(), 'action_id', 'action_id');
-	}
-	
-	/**
-	 * Create a list with all the actions joined with the device
-	 * 
-	 * @return array
-	 */
-	public function getActions(){
-		$array = array();
 		
-		if(!empty($this->device_id)){
-			$actions = $this->getActionsAll();
-
-			$array = array();
-			foreach($this->getDeviceActions() as $action_id){
-				$array[] = ['id' => $action_id, 'name' => $actions[$action_id]];
-			}
-			
-			return ArrayHelper::map($array, 'id', 'name');
-		}
-		
-		return $array;
-	}
-	
-	public function getChartTypes(){
+	public static function getChartTypes(){
 		return ['line' => Yii::t('app', 'Line')];
 	}
 	
-	public function getChartDate(){
+	public static function getChartDates(){
 		return [
 			'today' => Yii::t('app', 'Today'),
 			'yesterday' => Yii::t('app', 'Yesterday'),
@@ -101,7 +96,7 @@ class Data extends Model {
 		];
 	}
 	
-	public function getChartInterval(){
+	public static function getChartIntervals(){
 		return [
 			'a_minute' => Yii::t('app', 'A minute'),
 			'every_hour' => Yii::t('app', 'Every hour'),
@@ -115,9 +110,9 @@ class Data extends Model {
 		];
 	}
 	
-	public function getChartIntervalGroupBy(){
+	public static function getChartIntervalGroupBy($chart_interval){
 		$groupby = '';
-		switch($this->chart_interval){
+		switch($chart_interval){
 			case 'a_minute':
 				break;
 			case 'every_hour':
@@ -141,10 +136,10 @@ class Data extends Model {
 		return $groupby;
 	}
 
-	public function getChartDateFromTo(){
+	public static function getChartDateFromTo($chart_date){
 		$from = '';
 		$to = '';
-		switch($this->chart_date){
+		switch($chart_date){
 			case 'today':
 				$from = date('Y-m-d') . ' 00:00:00';
 				$to = date('Y-m-d') . ' 23:59:59';
@@ -216,109 +211,31 @@ class Data extends Model {
 		return ['from' => $from, 'to' => $to];
 	}
 
-	public function getChartData(){
-		/*echo('getChartDateFromTo<pre>');
-		print_r($this->getChartDateFromTo());
-		echo('</pre>');
-		echo('$this->device_id: ' . $this->device_id) . '<br/>' . PHP_EOL;
-		echo('$this->action_id: ' . $this->action_id) . '<br/>' . PHP_EOL;
-		echo('$this->getChartIntervalGroupBy(): ' . $this->getChartIntervalGroupBy()) . '<br/>' . PHP_EOL;*/
+	public static function getChartDatas($chart_type, $chart_date, $chart_interval, $taskdefinded_id){
+		$between = Data::getChartDateFromTo($chart_date);
+		$taskdefined = TaskDefined::findOne($taskdefinded_id);
+		$tasks = Task::getMultipleBetweenDate($between, $taskdefined->from_device_id, $taskdefined->to_device_id, $taskdefined->action_id);
 		
-		/*$tasks = Task::find()
-			->select([
-				'id',
-				'from_device_id',
-				'to_device_id',
-				'action_id',
-				'data',
-				'created_at',
-				"SUBSTRING_INDEX(data, ';', 1) AS temp",
-				"SUBSTRING_INDEX(SUBSTRING_INDEX(data, ';', 2), ';', -1) AS hum",
-				"AVG(SUBSTRING_INDEX(data, ';', 1)) AS avgTemp",
-				"AVG(SUBSTRING_INDEX(SUBSTRING_INDEX(data, ';', 2), ';', -1)) AS avgHum",
-			])
-			->where([
-				'from_device_id' => '1',
-				'to_device_id' => $this->device_id,
-				'action_id' => $this->action_id,
-			])
-			->andwhere(['between', 'created_at', $this->getChartDateFromTo()['from'], $this->getChartDateFromTo()['to']])
-			->groupBy($this->getChartIntervalGroupBy())
-			->orderBy('created_at')
-			->asArray()
-			->all();*/
-		
-		$modelTask = new Task();
-		$modelDevice = new Device();
-		
-		/*echo('$this->getChartDateFromTo(): <pre>');
-		print_r($this->getChartDateFromTo());
-		echo('</pre>');*/
-		
-		$tasks = Task::getMultipleBetweenDate($this->getChartDateFromTo(), $modelDevice->getDeviceMaster()[0]['id'], $this->device_id, $this->action_id);
-		
-		/*echo('$tasks: <pre>');
-		print_r($tasks);
-		echo('</pre>');*/
-		
-		//echo('date(Y-m-d 00:00:00);: ' . date('Y-m-d')) . '<br/>' . PHP_EOL;
-		
-		/*echo('$this->getChartDateFromTo():<pre>');
-		print_r($this->getChartDateFromTo());
-		echo('</pre>');*/
-		
-		//SUBSTRING_INDEX(`data`, `;`, 1) as temp)
-		/*echo('$tasks<pre>');
-		print_r($tasks);
-		echo('</pre>');*/
-		
-		/*
-		 * chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Fruit Consumption'
-        },
-        xAxis: {
-            categories: ['Apples', 'Bananas', 'Oranges']
-        },
-        yAxis: {
-            title: {
-                text: 'Fruit eaten'
-            }
-        },
-        series: [{
-            name: 'Jane',
-            data: [1, 0, 4]
-        }, {
-            name: 'John',
-            data: [5, 7, 3]
-        }]
-		 */
 		$chart = [
-			'chart' => ['type' => $this->chart_type],
-			'title' => ['text' => 'Temperature / Humidity ' . $this->getChartDate()[$this->chart_date]],
+			'chart' => ['type' => $chart_type],
+			//'title' => ['text' => 'Temperature / Humidity ' . Data::getChartDates()[$chart_date]]
+			//'title' => ['text' => Data::getChartDates()[$chart_date]]
+			'title' => ['text' => Data::getChartDates()[$chart_date] . ' (' . $between['from'] . ' - ' . $between['to'] . ')']
 		];
 		
 		$xAxis = [];
 		$yAxis = [
 			[ // Primary yAxis
 				'title' => ['text' => 'Temperature'],
-				'labels' => ['format' => '{value}'],
+				//'labels' => ['format' => '{value}'],
 			],[ // Secondary yAxis
 				'title' => ['text' => 'Humidity'],
-				'labels' => ['format' => '{value}'],
+				//'labels' => ['format' => '{value}'],
 				'opposite' => true,
 			],
 		];
 		
-		/*echo('$yAxis<pre>');
-		print_r($yAxis);
-		echo('</pre>');*/
-		
 		$series = [];
-		//$series[] = ['name' => 'Temperature', 'data' => []];
-		//$series[] = ['name' => 'Humidity', 'data' => []];
 		$series = [
 			[ // Primary yAxis
 				'yAxis' => 0,
@@ -339,23 +256,6 @@ class Data extends Model {
 			$series[1]['data'][] = number_format((float)$task['data']['h'], 2, '.', '');
 		}
 		
-		// create from the data a string (for highcharts to read the values good, its a javascript thing)
-		//$series[0]['data'] = '[' . implode(',', $series[0]['data']) . ']';
-		//$series[1]['data'] = '[' . implode(',', $series[1]['data']) . ']';
-		
-		/*echo('$xAxis<pre>');
-		print_r($xAxis);
-		echo('</pre>');*/
-		
-		/*echo('$series<pre>');
-		print_r($series);
-		echo('</pre>');*/
-		
-		/*$options = array_merge($chart, array('xAxis' => $xAxis), array('yAxis' => $yAxis), array('series' => $series));
-		echo('$options<pre>');
-		print_r($options);
-		echo('</pre>');*/
-		
-		return [$chart, $xAxis, $yAxis, $series];
+		return ['char' => $chart, 'xAxis' => $xAxis, 'yAxis' => $yAxis, 'series' => $series];
 	}
 }

@@ -29,180 +29,46 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="data-index">
 	
-	<div class="data-form">
-	<?php
-	/*print_r($devices);
-	print_r($actions);
-	print_r($chart_types);
-	
-	print_r($chart_data);*/
-	
-	?>
-	
+	<div class="data-form">	
 	<?php //$form = ActiveForm::begin(['type' => 'inline']); ?>
 	<?php $form = ActiveForm::begin(['layout' => 'horizontal']); ?>
-	
-		<?php /*
-$form = ActiveForm::begin([
-    'options' => [
-				'class' => 'form-horizontal',
-				],
-]);*/
-?>
 
-	<?php /*
-		
-		<table>
-			<tr>
-				<th><?= Yii::t('app', 'Device Id'); ?></th>
-				<th></th>
-				<th><?= Yii::t('app', 'Action Id'); ?></th>
-				<th></th>
-				<th><?= Yii::t('app', 'Chart Type'); ?></th>
-				<th></th>
-				<th><?= Yii::t('app', 'Chart Date'); ?></th>
-				<th></th>
-				<th><?= Yii::t('app', 'Chart Interval'); ?></th>
-				<th></th>
-			</tr>
-			<tr>
-				<td><?= $form->field($model, 'device_id')->dropDownList($devices)->label(false); ?></td>
-				<td>&nbsp;</td>
-				<td><?= $form->field($model, 'action_id')->dropDownList($actions)->label(false); ?></td>
-				<td>&nbsp;</td>
-				<td><?= $form->field($model, 'chart_type')->dropDownList($chart_types)->label(false); ?></td>
-				<td>&nbsp;</td>
-				<td><?= $form->field($model, 'chart_date')->dropDownList($chart_date)->label(false); ?></td>
-				<td>&nbsp;</td>
-				<td><?= $form->field($model, 'chart_interval')->dropDownList($chart_interval)->label(false); ?></td>
-				<td>&nbsp;</td>
-				<td><div class="form-group"><?= Html::submitButton(Yii::t('app', 'Update'), ['class' => 'btn btn-primary']) ?></div></td>
-			</tr>
-		</table>
-	*/ ?>
-	
-	<?= $form->field($model, 'device_id')->dropDownList($devices); ?>
-	
-	<?= $form->field($model, 'action_id')->dropDownList($actions); ?>
-	
-	<?= $form->field($model, 'chart_type')->dropDownList($chart_types); ?>
-	
-	<?= $form->field($model, 'chart_date')->dropDownList($chart_date); ?>
-	
-	<?= $form->field($model, 'chart_interval')->dropDownList($chart_interval); ?>
-		
+		<?= $form->field($model, 'chart_type')->dropDownList($model->chart_types); ?>
+
+		<?= $form->field($model, 'chart_date')->dropDownList($model->chart_dates); ?>
+
+		<?= $form->field($model, 'chart_interval')->dropDownList($model->chart_intervals); ?>
+				
 		<?php
-		/*$array = [];
-		$array[] = ['html' => $form->field($model, 'device_id')->dropDownList($devices), 'name' => Yii::t('app', 'Device Id')];
-		$array[] = ['html' => $form->field($model, 'action_id')->dropDownList($actions), 'name' => Yii::t('app', 'Action Id')];
-		$array[] = ['html' => $form->field($model, 'chart_type')->dropDownList($chart_types), 'name' => Yii::t('app', 'Chart Type')];
-		$array[] = ['html' => $form->field($model, 'chart_date')->dropDownList($chart_date), 'name' => Yii::t('app', 'Chart Date')];
-		$array[] = ['html' => $form->field($model, 'chart_interval')->dropDownList($chart_interval), 'name' => Yii::t('app', 'Chart Interval')];
+		$tasksdefined = [];
+		foreach($modelsTaskDefined as $index => $modelTaskDefined){
+			$tasksdefined[$modelTaskDefined->id] = $modelTaskDefined->name;
+		}
+		?>
 		
-	$dataProvider = new ArrayDataProvider([
-			//'key'=>'name', // now it now what the name of the field the key is, the ActionColumn in the GridView knows what the id is (or else it is zero &id=0)
-			'allModels' => $array,
-			//'sort' => [
-				//'attributes' => ['html', 'name'],
-			//],
-		]);*/
-	?>
-		
-	<?php /*DetailView::widget([
-        'model' => $dataProvider,
-        'attributes' => [
-            'name',
-            'html',
-        ],
-    ])*/ ?>
-	
-		<?php /*
-	
-	<div class="form-group">
-			<?= Html::submitButton(Yii::t('app', 'Update'), ['class' => 'btn btn-primary']) ?>
-	</div>
-	*/ ?>
+		<?= $form->field($model, 'taskdefinded_id')->dropDownList($tasksdefined); ?>
 		
 	<?php ActiveForm::end(); ?>
 		
 	</div>
 	
 	<?php // Highcharts::widget(list($chart, $xAxis, $yAxis, $series) = $chart_data); ?>
-	<?= HighchartsWidget::widget(['wrapper' => '.data-index', 'container' => ['attr' => 'id', 'value' => 'highcharts'], 'data' => $chart_data]); ?>
-	
-	<?php
-	/*echo Highcharts::widget([
-   'options' => [
-      'title' => ['text' => 'Fruit Consumption'],
-      'xAxis' => [
-         'categories' => ['Apples', 'Bananas', 'Oranges']
-      ],
-      'yAxis' => [
-         'title' => ['text' => 'Fruit eaten']
-      ],
-      'series' => [
-         ['name' => 'Jane', 'data' => [1, 0, 4]],
-         ['name' => 'John', 'data' => [5, 7, 3]]
-      ]
-   ]
-	]);*/
-	?>
-	
-	<?php /*<div id="container" style="width:100%; height:400px;"></div>*/ ?>
-	
+	<?= HighchartsWidget::widget(['wrapper' => '.data-index', 'container' => ['attr' => 'id', 'value' => 'highcharts'], 'data' => [$model->chart_datas['char'], $model->chart_datas['xAxis'], $model->chart_datas['yAxis'], $model->chart_datas['series']]]); ?>
 </div>
+<?php
+// this way i do not have to copy the script from
+// the file below here
+ob_start();		
+include('index.js');
+$script_contents = ob_get_contents();
+ob_end_clean();
 
-<script type="text/javascript">
-/*$(function () { 
-    $('#container').highcharts({
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Fruit Consumption'
-        },
-        xAxis: {
-            categories: ['Apples', 'Bananas', 'Oranges']
-        },
-        yAxis: {
-            title: {
-                text: 'Fruit eaten'
-            }
-        },
-        series: [{
-            name: 'Jane',
-            data: [1, 0, 4]
-        }, {
-            name: 'John',
-            data: [5, 7, 3]
-        }]
-    });
-});*/
+$script = <<< JS
+{$script_contents}
+JS;
 
-/*$(function () { 
-    $('#container').highcharts(<?php //echo($chart_data); ?>);
-});*/
-/*$(function () { 
-    $('#container').highcharts({
-				char: {
-						type: "line"
-				},
-				title: {
-						text:"Temperature / Humidity Today"
-				},
-				xAxis: {
-						categories: ["00","01"]
-				},
-				yAxis:{
-					
-				},
-				series:[{
-						name: "Temperature",
-						data: ["29.00","29.00"]
-				}, {
-					name: "Humidity", 
-					data:["34.00","34.00"]
-				}]
-		});
-});*/
-</script>
+// jQuery will be loaded as last, therefor you need to use
+// registerJs to add javascript with jQuery
+$this->registerJs($script /*, $position*/);
+// where $position can be View::POS_READY (the default), 
+// or View::POS_HEAD, View::POS_BEGIN, View::POS_END
