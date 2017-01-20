@@ -21,6 +21,7 @@ class AppAsset extends AssetBundle
         'css/site.css',
     ];
     public $js = [
+				'js/jquery.mobile.custom/jquery.mobile.custom.min.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

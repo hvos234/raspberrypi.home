@@ -98,7 +98,14 @@ class Data extends Model {
 	
 	public static function getChartIntervals(){
 		return [
-			'a_minute' => Yii::t('app', 'A minute'),
+			'all' => Yii::t('app', 'All'),
+			//'a_minute' => Yii::t('app', 'A minute'),
+			'every_five_minutes' => Yii::t('app', 'Every five minutes'),
+			'every_ten_minutes' => Yii::t('app', 'Every ten minutes'),
+			'every_fifteen_minutes' => Yii::t('app', 'Every fifteen minutes'),
+			'every_twenty_minutes' => Yii::t('app', 'Every twenty minutes'),
+			'every_twenty_five_minutes' => Yii::t('app', 'Every twenty five minutes'),
+			'every_half_an_hour_minutes' => Yii::t('app', 'Every half an hour minutes'),
 			'every_hour' => Yii::t('app', 'Every hour'),
 			'every_two_hours' => Yii::t('app', 'Every two hours'),
 			'every_three_hours' => Yii::t('app', 'Every three hours'),
@@ -110,7 +117,7 @@ class Data extends Model {
 		];
 	}
 	
-	public static function getChartIntervalGroupBy($chart_interval){
+	/*public static function getChartIntervalGroupBy($chart_interval){
 		$groupby = '';
 		switch($chart_interval){
 			case 'a_minute':
@@ -134,7 +141,7 @@ class Data extends Model {
 				break;
 		}
 		return $groupby;
-	}
+	}*/
 
 	public static function getChartDateFromTo($chart_date){
 		$from = '';
@@ -211,19 +218,355 @@ class Data extends Model {
 		return ['from' => $from, 'to' => $to];
 	}
 
+	public static function getChartDateFromToLabel($chart_date, $between){
+		$chart_dates = Data::getChartDates();
+		
+		switch($chart_date){
+			case 'today':
+			case 'yesterday':
+			case 'day_before_yesterday':
+			case 'three_days_ago':
+				return $chart_dates[$chart_date] . ' (' . date('Y-m-d H:i', strtotime($between['from'])) . '-' . date('H:i', strtotime($between['to'])) . ')';
+				break;
+			
+			case 'this_week':
+			case 'last_week':
+			case 'two_weeks_ago':
+			case 'three_weeks_ago':
+				return $chart_dates[$chart_date] . ' (' . date('W') . ', ' . date('Y-m-d', strtotime($between['from'])) . '-' . date('Y-m-d', strtotime($between['to'])) . ')';
+				break;
+			
+			case 'this_month':
+			case 'last_month':
+			case 'two_months_ago':
+			case 'three_months_ago':
+				return $chart_dates[$chart_date] . ' (' . date('F') . ', ' . date('Y-m-d', strtotime($between['from'])) . '-' . date('Y-m-d', strtotime($between['to'])) . ')';
+				
+			case 'this_year':
+			case 'last_year':
+			case 'two_year_ago':
+			case 'three_year_ago':
+				return $chart_dates[$chart_date] . ' (' . date('Y') . ', ' . date('Y-m-d', strtotime($between['from'])) . '-' . date('Y-m-d', strtotime($between['to'])) . ')';
+		}
+		
+		return '';
+	}
+	
+	public static function getChartIntervalGrowthTime($chart_interval){			
+		switch($chart_interval){
+			case 'all':
+				return NULL;
+				break;
+			case 'every_five_minutes':
+				return (60*5);
+				break;
+			case 'every_ten_minutes':
+				return (60*10);
+				break;
+			case 'every_fifteen_minutes':
+				return (60*15);
+				break;
+			case 'every_twenty_minutes':
+				return (60*20);
+				break;
+			case 'every_twenty_five_minutes':
+				return (60*25);
+				break;
+			case 'every_half_an_hour_minutes':
+				return (60*30);
+				break;
+			case 'every_hour':
+				return (60*60);
+				break;
+			case 'every_two_hours':
+				return (60*60*2);
+				break;
+			case 'every_three_hours':
+				return (60*60*3);
+				break;
+			case 'every_four_hours':
+				return (60*60*4);
+				break;
+			case 'every_day':
+				return (60*60*24);
+				break;
+			case 'every_week':
+				return (60*60*24*7);
+				break;
+			case 'every_month':
+				return (60*60*24*31);
+				break;
+			case 'every_year':
+				return (60*60*24*365);
+				break;
+		}
+		
+		return false;
+	}
+	
 	public static function getChartDatas($chart_type, $chart_date, $chart_interval, $taskdefinded_id){
 		$between = Data::getChartDateFromTo($chart_date);
+		
+		/*echo('$between: <pre>');
+		print_r($between);
+		echo('</pre>');*/		
+		
 		$taskdefined = TaskDefined::findOne($taskdefinded_id);
 		$tasks = Task::getMultipleBetweenDate($between, $taskdefined->from_device_id, $taskdefined->to_device_id, $taskdefined->action_id);
 		
+		/*echo('$tasks: <pre>');
+		print_r($tasks);
+		echo('</pre>');	*/
+		
+		$data_structures = [];
+		foreach($tasks as $key => $task){
+			foreach ($task['data_structure'] as $key_data_structure => $data_structure){
+				$data_structures[$key_data_structure] = $data_structure;
+			}
+		}
+		
+		/*echo('$data_structures: <pre>');
+		print_r($data_structures);
+		echo('</pre>');*/
+		
+		$timestamp_from = strtotime($between['from']);
+		$timestamp_to = strtotime($between['to']);
+		$chart_interval_growth = Data::getChartIntervalGrowthTime($chart_interval);
+		
+		/*echo('$timestamp_from: ' . $timestamp_from) . '<br/>' . PHP_EOL;
+		echo('$timestamp_to: ' . $timestamp_to) . '<br/>' . PHP_EOL;*/
+		
+		//exit();
+		
+		$dates = [];
+		switch($chart_date){
+			case 'today':
+			case 'yesterday':
+			case 'day_before_yesterday':
+			case 'three_days_ago':
+				// 60 * 60
+				for($timestamp = $timestamp_from; $timestamp <= $timestamp_to; $timestamp = $timestamp + (60 * 60)){
+					$dates[date('H', $timestamp)] = ['date' => date('Y-m-d H:i', $timestamp), 'categories' => date('H', $timestamp)];
+				}
+				
+				break;
+			
+			case 'this_week':
+			case 'last_week':
+			case 'two_weeks_ago':
+			case 'three_weeks_ago':
+				// 60 * 60 * 24
+				for($timestamp = $timestamp_from; $timestamp <= $timestamp_to; $timestamp = $timestamp + (60 * 60 * 24)){
+					$dates[] = ['date' => date('Y-m-d H:i', $timestamp), 'categories' => date('d', $timestamp)];
+				}
+				break;
+			
+			case 'this_month':
+			case 'last_month':
+			case 'two_months_ago':
+			case 'three_months_ago':
+				// 60 * 60 * 24
+				for($timestamp = $timestamp_from; $timestamp <= $timestamp_to; $timestamp = $timestamp + (60 * 60 * 24)){
+					$dates[] = ['date' => date('Y-m-d H:i', $timestamp), 'categories' => date('d', $timestamp)];
+				}			
+				break;
+				
+			case 'this_year':
+			case 'last_year':
+			case 'two_year_ago':
+			case 'three_year_ago':
+				/*$month = date('m', $timestamp_from);
+				$year = date('Y', $timestamp_from);
+				for($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++){ 
+					$timestamp = strtotime($year . '-' . $month . '-' . $day); 
+					//$day_month = date('d', $timestamp);
+					$xAxis['categories'][] = date('d', $timestamp);
+				}
+				
+				$months = array('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12');
+				$year = date('Y', $timestamp_from);
+				foreach($months as $month){
+					$timestamp = strtotime($year . '-' . $month . '-01'); 
+					$data[$key][] = ['date' => date('Y-m-d H:i', $timestamp)];
+				}*/
+		}
+		
+		/*echo('$dates: <pre>');
+		print_r($dates);
+		echo('</pre>');*/
+		
+		$datas = [];
+		
+		// determine count and amount
+		foreach($tasks as $key => $task){
+			switch($chart_date){
+				case 'today':
+				case 'yesterday':
+				case 'day_before_yesterday':
+				case 'three_days_ago':
+					if(!isset($data[date('H', strtotime($task['created_at']))])){
+						$datas[date('H', strtotime($task['created_at']))] = [];
+					}
+					
+					foreach($task['data_structure'] as $key_data_structure => $data_structure){
+						if(!isset($data[date('H', strtotime($task['created_at']))][$key_data_structure])){
+							$datas[date('H', strtotime($task['created_at']))][$key_data_structure] = ['count' => 0, 'amount' => 0];
+						}
+						$datas[date('H', strtotime($task['created_at']))][$key_data_structure]['count'] = $datas[date('H', strtotime($task['created_at']))][$key_data_structure]['count'] + 1;
+						$datas[date('H', strtotime($task['created_at']))][$key_data_structure]['amount'] = $datas[date('H', strtotime($task['created_at']))][$key_data_structure]['amount'] + $task['data'][$key_data_structure];
+					}
+					break;
+
+				case 'this_week':
+				case 'last_week':
+				case 'two_weeks_ago':
+				case 'three_weeks_ago':
+					/*// 60 * 60 * 24
+					for($timestamp = $timestamp_from; $timestamp <= $timestamp_to; $timestamp = $timestamp + (60 * 60 * 24)){
+						$dates[] = ['date' => date('Y-m-d H:i', $timestamp), 'categories' => date('d', $timestamp)];
+					}*/
+					
+					if(!isset($data[date('d', strtotime($task['created_at']))])){
+						$datas[date('d', strtotime($task['created_at']))] = [];
+					}
+					
+					foreach($task['data_structure'] as $key_data_structure => $data_structure){
+						if(!isset($data[date('d', strtotime($task['created_at']))][$key_data_structure])){
+							$datas[date('d', strtotime($task['created_at']))][$key_data_structure] = ['count' => 0, 'amount' => 0];
+						}
+						$datas[date('d', strtotime($task['created_at']))][$key_data_structure]['count'] = $datas[date('d', strtotime($task['created_at']))][$key_data_structure]['count'] + 1;
+						$datas[date('d', strtotime($task['created_at']))][$key_data_structure]['amount'] = $datas[date('d', strtotime($task['created_at']))][$key_data_structure]['amount'] + $task['data'][$key_data_structure];
+					}
+					
+					break;
+
+				case 'this_month':
+				case 'last_month':
+				case 'two_months_ago':
+				case 'three_months_ago':
+					if(!isset($data[date('d', strtotime($task['created_at']))])){
+						$datas[date('d', strtotime($task['created_at']))] = [];
+					}
+					
+					foreach($task['data_structure'] as $key_data_structure => $data_structure){
+						if(!isset($data[date('d', strtotime($task['created_at']))][$key_data_structure])){
+							$datas[date('d', strtotime($task['created_at']))][$key_data_structure] = ['count' => 0, 'amount' => 0];
+						}
+						$datas[date('d', strtotime($task['created_at']))][$key_data_structure]['count'] = $datas[date('d', strtotime($task['created_at']))][$key_data_structure]['count'] + 1;
+						$datas[date('d', strtotime($task['created_at']))][$key_data_structure]['amount'] = $datas[date('d', strtotime($task['created_at']))][$key_data_structure]['amount'] + $task['data'][$key_data_structure];
+					}
+					break;
+
+				case 'this_year':
+				case 'last_year':
+				case 'two_year_ago':
+				case 'three_year_ago':
+					/*$month = date('m', $timestamp_from);
+					$year = date('Y', $timestamp_from);
+					for($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++){ 
+						$timestamp = strtotime($year . '-' . $month . '-' . $day); 
+						//$day_month = date('d', $timestamp);
+						$xAxis['categories'][] = date('d', $timestamp);
+					}
+
+					$months = array('01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12');
+					$year = date('Y', $timestamp_from);
+					foreach($months as $month){
+						$timestamp = strtotime($year . '-' . $month . '-01'); 
+						$data[$key][] = ['date' => date('Y-m-d H:i', $timestamp)];
+					}*/
+			}
+			
+		}
+		
+		/*echo('$datas: <pre>');
+		print_r($datas);
+		echo('</pre>');*/
+		
+		$datas_series = [];
+		
+		// add diffrent series
+		foreach ($data_structures as $key_data_structure => $data_structure){
+			$datas_series[$key_data_structure] = [];
+		}
+		
+		/*echo('$datas_series: <pre>');
+		print_r($datas_series);
+		echo('</pre>');*/
+		
+		// split data into diffrent series
+		foreach($datas as $key => $data){
+			foreach ($datas_series as $key_serie => $serie){
+				if(!isset($datas_series[$key_serie])){
+					$datas_series[$key_serie] = [];
+				}
+				$datas_series[$key_serie]['yAxis'] = 
+				$datas_series[$key_serie]['name'] = 
+				$datas_series[$key_serie]['data'][] = $data[$key_serie]['amount'] / $data[$key_serie]['count'];
+			}
+			
+		}
+		
+		/*echo('$datas_series2: <pre>');
+		print_r($datas_series);
+		echo('</pre>');*/
+		
+		$series = [];
+		$count = 0;
+		foreach ($datas_series as $key => $data){
+			$series[$count] = [];
+			$series[$count]['yAxis'] = $count;
+			$series[$count]['name'] = $data_structures[$key];
+			$series[$count]['data'] = $data['data'];
+			$count++;
+		}
+		
+		/*echo('$series: <pre>');
+		print_r($series);
+		echo('</pre>');*/
+		
+		
 		$chart = [
 			'chart' => ['type' => $chart_type],
-			//'title' => ['text' => 'Temperature / Humidity ' . Data::getChartDates()[$chart_date]]
-			//'title' => ['text' => Data::getChartDates()[$chart_date]]
-			'title' => ['text' => Data::getChartDates()[$chart_date] . ' (' . $between['from'] . ' - ' . $between['to'] . ')']
+			'title' => ['text' => Data::getChartDateFromToLabel($chart_date, $between)]
 		];
 		
+		// create xAxis categories
 		$xAxis = [];
+		//$xAxis['categories'] = [];
+		/*foreach ($data_structures as $key_data_structure => $data_structure){
+			/*if(!isset($xAxis['categories'][$key_data_structure])){
+				$xAxis['categories'][$key_data_structure] = [];
+			}
+			$xAxis['categories'][$key_data_structure] = $key_data_structure;
+		}*/
+		
+		foreach ($dates as $key => $date){
+			$xAxis['categories'][] = $key;
+		}
+		
+		/*echo('$xAxis: <pre>');
+		print_r($xAxis);
+		echo('</pre>');*/
+		
+		// create yAxis
+		$yAxis = [];
+		$count= 0;
+		foreach ($data_structures as $key_data_structure => $data_structure){
+			//$yAxis[$key_data_structure] = ['title' => ['text' => $data_structure]];
+			$yAxis[$count] = ['title' => ['text' => $data_structure]];
+			if(!is_int($count/2)){
+				$yAxis[$count]['opposite'] = true;
+			}
+			$count++;
+		}
+		
+		/*echo('$yAxis: <pre>');
+		print_r($yAxis);
+		echo('</pre>');*/
+		//exit();
+		
+		/*$xAxis = [];
 		$yAxis = [
 			[ // Primary yAxis
 				'title' => ['text' => 'Temperature'],
@@ -235,7 +578,6 @@ class Data extends Model {
 			],
 		];
 		
-		$series = [];
 		$series = [
 			[ // Primary yAxis
 				'yAxis' => 0,
@@ -254,7 +596,7 @@ class Data extends Model {
 			$series[0]['data'][] = number_format((float)$task['data']['t'], 2, '.', '');
 			//$series[1]['data'][] = $task['avgHum'];
 			$series[1]['data'][] = number_format((float)$task['data']['h'], 2, '.', '');
-		}
+		}*/
 		
 		return ['char' => $chart, 'xAxis' => $xAxis, 'yAxis' => $yAxis, 'series' => $series];
 	}

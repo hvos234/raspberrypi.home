@@ -46,6 +46,7 @@ AppAsset::register($this);
 		if(Yii::$app->user->isGuest){
 			$widget['items'][] = ['label' => 'Login', 'url' => ['/site/login']];
 		}else {
+			$widget['items'][] = ['label' => Yii::t('app', 'Thermostat'), 'url' => ['/thermostat/index']];
 			$widget['items'][] = ['label' => Yii::t('app', 'Data'), 'url' => ['/data/index']];
 			$widget['items'][] = ['label' => Yii::t('app', 'Settings'), 'url' => false,
 				'items' => [

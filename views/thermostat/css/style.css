@@ -1,0 +1,103 @@
+#thermostate {position: relative; width: 300px; height: 300px;}
+#thermostate .back-light {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%; 
+    background: url(../images/thermostat/back-light.png) no-repeat;
+    background-size: contain;
+}
+//#thermostate .back-light {position:absolute; width: 100%; height: 100%;}
+#thermostate .thermostate {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%; 
+    background: url(../images/thermostat/thermostat.png) no-repeat;
+    background-size: contain;
+}
+#thermostate .overlay {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%;
+    background: url(../images/thermostat/overlay.png) no-repeat;
+    background-size: contain;
+}
+#thermostate .temperature {
+    position:absolute; 
+    top: 107px; 
+    width: 100%; 
+    //height: 100%;
+    //display: table;
+    //text-align: center;
+    
+    pointer-events: none;
+    font-size: 60px;
+}
+
+#thermostate .temperature .minus {
+    //display: table-cell;
+    //vertical-align: middle;
+    //font-size: 60px;
+}
+
+#thermostate .temperature .degrees {
+    //display: table-cell;
+    //vertical-align: middle;
+    //font-size: 60px;
+}
+
+#thermostate .temperature .plus {
+    //display: table-cell;
+    //vertical-align: middle;
+    //font-size: 60px;
+}
+
+#thermostate .temperature .symbol {
+    position: relative;
+    top: 16px;
+    vertical-align: top;
+    font-size: 20px;
+}
+
+#thermostate .temperature .minus {
+    position: absolute;
+    width: 20px;
+    left: 50px;
+    
+    pointer-events: auto;
+}
+
+#thermostate .temperature .degrees {
+    position: absolute;
+    width: 140px;
+    left: 80px;
+    
+    text-align: center;
+    
+    pointer-events: auto;
+}
+
+#thermostate .temperature .degree {
+    //float: right;
+}
+#thermostate .temperature .symbol {
+    float: right;
+}
+
+#thermostate .temperature .plus {
+    position: absolute;
+    width: 20px;
+    right: 50px;
+    
+    pointer-events: auto;
+}
+
+#legend {position: relative; width: 300px; height: 300px;}
+#legend .label {
+    //float: left;
+}
+#legend .degrees {
+    //float: left;
+}
