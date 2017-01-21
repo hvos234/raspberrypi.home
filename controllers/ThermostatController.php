@@ -70,8 +70,8 @@ class ThermostatController extends Controller
         ]);
     }
 		
-		public function actionAjaxThermostat($chart_type, $chart_date, $chart_interval, $taskdefinded_id){
-			$chart_datas = Data::getChartDatas($chart_type, $chart_date, $chart_interval, $taskdefinded_id);
-			return json_encode($chart_datas);
+		public function actionAjaxGetData(){
+			$model = new Thermostat();			
+			return json_encode(['current' => $model->current, 'target' => $model->target, 'min' => $model->min, 'max' => $model->max]); 
 		}
 }

@@ -1,13 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
-
-/* @var $this yii\web\View */
-/* @var $searchModel app\models\ActionSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
-
-//use yii\helpers\ArrayHelper;
+use yii\widgets\DetailView;
 
 $this->title = Yii::t('app', 'Thermostat');
 $this->params['breadcrumbs'][] = $this->title;
@@ -16,84 +10,75 @@ $this->registerCssFile("../views/thermostat/css/style.css");
 ?>
 <div class="data-index">
 	
-	<div class="data-form">	
-	<?php $form = ActiveForm::begin(); ?>
+	<div class="device-view table">
+		
 		<div id="thermostate">
 		
 			<div class="back-light">
 
-				<div class="thermostate">
+				<div class="thermostate-plate">
 
-					<div class="overlay"></div>
-
-					<div class="temperature">
-
-						<?php //<span class="degrees"> ?>
-							<a href="javascript:void(0);" class="minus">-</a>
-							<div class="degrees">
-								<div class="symbol">º</div>
-								<div class="degree">22</div>
-							</div>
-							<a href="javascript:void(0);" class="plus">+</a>
-						<?php //</span> ?>
+					<div class="current-pointer-ovelay"></div>
+					<div class="plate-pointer"></div>
+					<div class="min-pointer"></div>
+					<div class="max-pointer"></div>
+					<div class="target-pointer"></div>
+					
+					<div class="target">
+						<a href="javascript:void(0);" class="minus">-</a>
+						<div class="degrees">
+							<div class="symbol">º</div>
+							<div class="degree"><?= $model->target; ?></div>
+						</div>
+						<a href="javascript:void(0);" class="plus">+</a>
+					</div>
+					
+					<div class="current">
+						<div class="degrees">
+							<div class="symbol">º</div>
+							<div class="degree"><?= $model->current; ?></div>
+						</div>
 					</div>
 
 				</div>
 			</div>
 		</div>
-		
-		<div id="legend">
-			<div class="date-time">
-				20-01-2017 23:05
-			</div>			
-			<div class="current-temperature">
-				<div class="label">Current: </div>
-				<div class="degrees">
-					<a href="javascript:void(0);" class="minus">-</a>
-					<span class="degree">20</span>
-					<span class="symbol">º</span>
-					<a href="javascript:void(0);" class="plus">+</a>
-				</div>
-			</div>
-			<div class="target-temperature">
-				<div class="label">Target: </div>
-				<div class="degrees">
-					<a href="javascript:void(0);" class="minus">-</a>
-					<span class="degree">20</span>
-					<span class="symbol">º</span>
-					<a href="javascript:void(0);" class="plus">+</a>
-				</div>
-			</div>
-			<div class="min-temperature">
-				<div class="label">Minimum: </div>
-				<div class="degrees">
-					<a href="javascript:void(0);" class="minus">-</a>
-					<span class="degree">16</span>
-					<span class="symbol">º</span>
-					<a href="javascript:void(0);" class="plus">+</a>
-				</div>
-			</div>
-			<div class="max-temperature">
-				<div class="label">Maximum: </div>
-				<div class="degrees">
-					<a href="javascript:void(0);" class="minus">-</a>
-					<span class="degree">22</span>
-					<span class="symbol">º</span>
-					<a href="javascript:void(0);" class="plus">+</a>
-				</div>
-			</div>
-			<div class="i-am-really-at-home">
-				<div class="label">I'am home: </div>
-				<div>No</div>
-				<div>Yes</div>
-			</div>
-		</div>
-	<?php ActiveForm::end(); ?>
-		
 	</div>
-	
-	
-	
+	<?= DetailView::widget([
+			'model' => $model,
+			'attributes' => [
+					[
+						'attribute' => 'date_time',
+						'format' => 'raw',
+						'value' => Html::tag('span', $model->date_time, ['class' => 'date_time']),
+					],
+					[
+						'attribute' => 'current',
+						'format' => 'raw',
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'current-minus']) . Html::tag('span', $model->current, ['class' => 'current']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'current-plus']),
+					],
+					[
+						'attribute' => 'target',
+						'format' => 'raw',
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus']) . Html::tag('span', $model->target, ['class' => 'target']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus']),
+					],
+					[
+						'attribute' => 'min',
+						'format' => 'raw',
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'min-minus']) . Html::tag('span', $model->min, ['class' => 'min']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'min-plus']),
+					],
+					[
+						'attribute' => 'max',
+						'format' => 'raw',
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'max-minus']) . Html::tag('span', $model->max, ['class' => 'max']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'max-plus']),
+					],
+					[
+						'attribute' => 'i_am_really_at_home',
+						'format' => 'raw',
+						'value' => Html::tag('span', ($model->i_am_really_at_home == 0) ? 'No' : 'Yes', ['class' => 'i_am_really_at_home']),
+					],
+			],
+	]) ?>
 </div>
 <?php
 // this way i do not have to copy the script from
@@ -104,6 +89,11 @@ $script_contents = ob_get_contents();
 ob_end_clean();
 
 $script = <<< JS
+var current = '{$model->current}';
+var target = '{$model->target}';
+var min = '{$model->min}';
+var max = '{$model->max}';
+var i_am_really_at_home = '{$model->i_am_really_at_home}';
 {$script_contents}
 JS;
 

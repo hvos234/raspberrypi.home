@@ -130,9 +130,13 @@ class Setting extends \yii\db\ActiveRecord
 			return $model->save();
 		}
 
+		public static function getOneByName($name){
+			$setting = Setting::find()->where(['name' => $name])->asArray()->one();
+			
+			return Setting::explodeData($setting);
+		}
 
 		public static function getAll(){
-			// get all the task defined
 			return Setting::find()->asArray()->all();
 		}
 		
@@ -144,6 +148,21 @@ class Setting extends \yii\db\ActiveRecord
 			return ArrayHelper::map(Setting::find()->asArray()->all(), 'name', 'description');
 		}
 		
+		public static function explodeData($settings){
+			foreach($settings as $key => $setting){
+				if(!is_array($setting)){ // just one setting
+					if('data' == $key){
+						$settings[$key] = HelperData::dataExplode($setting);
+					}
+				}else {
+					$settings[$key]['data'] = HelperData::dataExplode($setting['data']);
+				}
+			}
+			
+			return $settings;
+		}
+
+
 		public static function getAllEncoded(){
 			$return = [];
 			
