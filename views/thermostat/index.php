@@ -60,12 +60,12 @@ $this->registerCssFile("../views/thermostat/css/style.css");
 					[
 						'attribute' => 'target',
 						'format' => 'raw',
-						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus']) . Html::tag('span', $model->target, ['class' => 'target']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus']),
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus minus']) . Html::tag('span', $model->target, ['class' => 'target']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus plus']),
 					],
 					[
 						'attribute' => 'default',
 						'format' => 'raw',
-						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'default-minus']) . Html::tag('span', $model->default, ['class' => 'default']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'default-plus']),
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'default-minus minus']) . Html::tag('span', $model->default, ['class' => 'default']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'default-plus plus']),
 					],
 					[
 						'attribute' => 'i_am_really_at_home',

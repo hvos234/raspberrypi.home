@@ -130,61 +130,7 @@
     float: right;
 }
 
-
-// thermostat current
-
-
-/*
-#thermostate .current {
-    position:absolute; 
-    top: 107px; 
-    width: 100%; 
-    
-    pointer-events: none;
-    font-size: 60px;
-}
-
-#thermostate .symbol {
-    position: relative;
-    top: 16px;
-    vertical-align: top;
-    font-size: 20px;
-}
-
-#thermostate .minus {
-    position: absolute;
-    width: 20px;
-    left: 50px;
-    
-    pointer-events: auto;
-}
-
-#thermostate .degrees {
-    position: absolute;
-    width: 140px;
-    left: 80px;
-    
-    text-align: center;
-    
-    pointer-events: auto;
-}
-
-#thermostate .degree {
-    //float: right;
-}
-#thermostate .symbol {
-    float: right;
-}
-
-#thermostate .plus {
-    position: absolute;
-    width: 20px;
-    right: 50px;
-    
-    pointer-events: auto;
-}
-*/
-
-.detail-view {
-    
+/* detail-view */
+.detail-view .minus, .detail-view .plus {
+    padding: 10px; /* easyer to click or push */
 }
