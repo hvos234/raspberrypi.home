@@ -36,23 +36,12 @@
     pointer-events: none; // allow javascript click on elements below
 }
 
-#thermostate .min-pointer {
+#thermostate .default-pointer {
     position:absolute; 
     top:0; 
     width: 100%; 
     height: 100%;
-    background: url(../images/thermostat/min-pointer.png) no-repeat;
-    background-size: contain;
-    
-    pointer-events: none;
-}
-
-#thermostate .max-pointer {
-    position:absolute; 
-    top:0; 
-    width: 100%; 
-    height: 100%;
-    background: url(../images/thermostat/max-pointer.png) no-repeat;
+    background: url(../images/thermostat/default-pointer.png) no-repeat;
     background-size: contain;
     
     pointer-events: none;

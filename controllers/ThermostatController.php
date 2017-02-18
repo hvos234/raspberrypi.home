@@ -10,6 +10,7 @@ use yii\filters\VerbFilter;
 
 // Models
 use app\models\Thermostat;
+use app\models\Setting;
 
 // AccessControl is used form controlling access in behaviors()
 use yii\filters\AccessControl;
@@ -59,19 +60,39 @@ class ThermostatController extends Controller
      */
     public function actionIndex()
     {
-				$model = new Thermostat();
-				
-				if ($model->load(Yii::$app->request->post())){
-					
-				}
+        $model = new Thermostat();
+
+        if ($model->load(Yii::$app->request->post())){
+
+        }
 				
         return $this->render('index', [
 						'model' => $model,
         ]);
     }
 		
-		public function actionAjaxGetData(){
-			$model = new Thermostat();			
-			return json_encode(['current' => $model->current, 'target' => $model->target, 'min' => $model->min, 'max' => $model->max]); 
-		}
+    public function actionAjaxGetData(){
+        $model = new Thermostat();			
+        return json_encode(['current' => $model->current, 'target' => $model->target, 'min' => $model->min, 'max' => $model->max]); 
+    }
+
+    public function actionAjaxSetSettingTarget(){
+        $data = Yii::$app->request->post();
+                
+        $result = json_encode(Setting::changeOneByName('temperature_living_room_target_max', ['data' => 't::' . ($data['target']+1)]));
+        if(!$result){
+            return false;
+        }
+        return json_encode(Setting::changeOneByName('temperature_living_room_target', ['data' => 't::' . $data['target']]));
+    }
+
+    public function actionAjaxSetSettingDefault(){
+        $data = Yii::$app->request->post();
+        
+        $result = json_encode(Setting::changeOneByName('temperature_living_room_default_max', ['data' => 't::' . ($data['default']+1)]));
+        if(!$result){
+            return false;
+        }
+        return json_encode(Setting::changeOneByName('temperature_living_room_default', ['data' => 't::' . $data['default']]));
+    }
 }

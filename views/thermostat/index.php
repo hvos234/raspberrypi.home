@@ -20,8 +20,8 @@ $this->registerCssFile("../views/thermostat/css/style.css");
 
 					<div class="current-pointer-ovelay"></div>
 					<div class="plate-pointer"></div>
-					<div class="min-pointer"></div>
-					<div class="max-pointer"></div>
+					<div class="default-pointer"></div>
+					<?php /*<div class="max-pointer"></div>*/ ?>
 					<div class="target-pointer"></div>
 					
 					<div class="target">
@@ -55,7 +55,7 @@ $this->registerCssFile("../views/thermostat/css/style.css");
 					[
 						'attribute' => 'current',
 						'format' => 'raw',
-						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'current-minus']) . Html::tag('span', $model->current, ['class' => 'current']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'current-plus']),
+						'value' => Html::tag('span', $model->current, ['class' => 'current']) . 'º',
 					],
 					[
 						'attribute' => 'target',
@@ -63,14 +63,9 @@ $this->registerCssFile("../views/thermostat/css/style.css");
 						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus']) . Html::tag('span', $model->target, ['class' => 'target']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus']),
 					],
 					[
-						'attribute' => 'min',
+						'attribute' => 'default',
 						'format' => 'raw',
-						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'min-minus']) . Html::tag('span', $model->min, ['class' => 'min']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'min-plus']),
-					],
-					[
-						'attribute' => 'max',
-						'format' => 'raw',
-						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'max-minus']) . Html::tag('span', $model->max, ['class' => 'max']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'max-plus']),
+						'value' => Html::a('-', 'javascript:void(0);', ['class' => 'default-minus']) . Html::tag('span', $model->default, ['class' => 'default']) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'default-plus']),
 					],
 					[
 						'attribute' => 'i_am_really_at_home',
@@ -91,8 +86,7 @@ ob_end_clean();
 $script = <<< JS
 var current = '{$model->current}';
 var target = '{$model->target}';
-var min = '{$model->min}';
-var max = '{$model->max}';
+var _default = '{$model->default}';
 var i_am_really_at_home = '{$model->i_am_really_at_home}';
 {$script_contents}
 JS;

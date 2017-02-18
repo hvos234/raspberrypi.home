@@ -14,8 +14,7 @@ class Thermostat extends Model {
 	public $i_am_really_at_home;
 	public $current;
 	public $target;
-	public $min;
-	public $max;
+	public $default;
 	
 	public function init() {
 		$this->date_time = date('Y-m-d H:i');
@@ -29,11 +28,8 @@ class Thermostat extends Model {
 		$target = Setting::getOneByName('temperature_living_room_target');
 		$this->target = $target['data']['t'];
 		
-		$min = Setting::getOneByName('temperature_living_room_min');
-		$this->min = $min['data']['t'];
-		
-		$max = Setting::getOneByName('temperature_living_room_max');
-		$this->max = $max['data']['t'];
+		$default = Setting::getOneByName('temperature_living_room_default');
+		$this->default = $default['data']['t'];
 	}
 	
 	public function rules(){
@@ -47,11 +43,10 @@ class Thermostat extends Model {
 	{
 			return [
 					'date_time' => Yii::t('app', 'Date / Time'),
-					'i_am_really_at_home' => Yii::t('app', 'Iam really at home'),
+					'i_am_really_at_home' => Yii::t('app', 'I am really at home'),
 					'current' => Yii::t('app', 'Current'),
-					'target' => Yii::t('app', 'Traget'),
-					'min' => Yii::t('app', 'Minimal'),
-					'max' => Yii::t('app', 'Maximum'),
+					'target' => Yii::t('app', 'Target'),
+					'default' => Yii::t('app', 'Default'),
 			];
 	}
 }

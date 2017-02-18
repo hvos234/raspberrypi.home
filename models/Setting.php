@@ -110,20 +110,30 @@ class Setting extends \yii\db\ActiveRecord
 			return $name;
 		}
 		
-		public function createOne($paramters){
+		public static function createOne($parameters){
 			$model = new Setting();
 			
-			foreach($paramters as $field => $value){
+			foreach($parameters as $field => $value){
 				$model->{$field} = $value;
 			}
 			
 			return $model->save();
 		}
 		
-		public function changeOne($id, $parameters){
+		public static function changeOne($id, $parameters){
 			$model = Setting::findOne($id);
 			
-			foreach($paramters as $field => $value){
+			foreach($parameters as $field => $value){
+				$model->{$field} = $value;
+			}
+			
+			return $model->save();
+		}
+		
+		public static function changeOneByName($name, $parameters){
+			$model = Setting::find()->where(['name' => $name])->one();
+            
+			foreach($parameters as $field => $value){
 				$model->{$field} = $value;
 			}
 			

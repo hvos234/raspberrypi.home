@@ -56,6 +56,7 @@ char message[17];
 int thermostatStatusSwitch = 0;
 int thermoSensor = 0;
 float thermoVoltage = 0.0;
+float thermoCurrent = 0.0;
 int thermostatStatus = 0;
 int thermostatStatusPrevious = 0;
 
@@ -256,13 +257,19 @@ void loop() {
   }
     
   // Thermostate status
-  /*thermoSensor = analogRead(THERMOSTATPIN);
-  thermoVoltage = thermoSensor * (5.0 / 1024.0);
+  thermoSensor = analogRead(THERMOSTATPIN);
+  /*thermoVoltage = thermoSensor * (5.0 / 1024.0);
   if(1.00 > thermoVoltage){
     thermostatStatus = 1; // is on
   }else {
     thermostatStatus = 0; // is off
-  }
+  }*/ 
+  thermoCurrent = (thermoSensor * 5.0 )/ 1024.0; // scale the ADC  
+       
+  Serial.print("Current = "); // shows the voltage measured     
+  Serial.print(thermoCurrent,3); //3 digits after decimal point
+  Serial.println(" amps DC"); //3 digits after decimal point  
+  delay(1500);  
   
   if(thermostatStatus != thermostatStatusPrevious){
     thermostatStatusPrevious = thermostatStatus;
@@ -289,7 +296,7 @@ void loop() {
       Serial.print("err:rfm69,");
       Serial.println(homerfm69.getErrorId());
     }
-  }*/
+  }
   
   // fail safe, turn thermostate of every hour
   unsigned long thermostatFailSafeCurrentPeriod = millis();
