@@ -12,6 +12,8 @@ use yii\behaviors\TimestampBehavior;
 // The ArrayHelper, is used for building a map (key-value pairs).
 use yii\helpers\ArrayHelper;
 
+use app\models\Data;
+
 /**
  * This is the model class for table "{{%setting}}".
  *
@@ -90,6 +92,28 @@ class Setting extends \yii\db\ActiveRecord
 					],
 			 ];
 		}
+        
+        public function afterSave($insert, $changedAttributes){
+            $modelData = new Data();
+            $modelData->model = 'setting';
+            $modelData->model_id = $this->id;
+            
+            $datas = HelperData::dataExplode($this->data);
+            
+            $i = 1;
+            foreach($datas as $key => $data){
+                if(empty($key)){
+                    $key = $this->name;
+                }
+                $modelData->{"key$i"} = $key;
+                $modelData->{"data$i"} = $data;
+                $i++;
+            }
+            
+            $modelData->save();
+            
+            return parent::afterSave($insert, $changedAttributes);
+        }
 		
 		public static function encodeName($name){
 			$name = strtolower($name);

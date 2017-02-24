@@ -13,6 +13,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\helpers\ArrayHelper;
 
 use app\models\Setting;
+use app\models\Data;
 
 /**
  * This is the model class for table "{{%task}}".
@@ -100,6 +101,25 @@ class Task extends \yii\db\ActiveRecord
 			
 			return parent::beforeSave($insert);
 		}
+        
+        public function afterSave($insert, $changedAttributes){
+            $modelData = new Data();
+            $modelData->model = 'task';
+            $modelData->model_id = $this->id;
+            
+            $datas = HelperData::dataExplode($this->data);
+            
+            $i = 1;
+            foreach($datas as $key => $data){
+                $modelData->{"key$i"} = $key;
+                $modelData->{"data$i"} = $data;
+                $i++;
+            }
+            
+            $modelData->save();
+            
+            return parent::afterSave($insert, $changedAttributes);
+        }
 		
 		/**
 		 * execute

@@ -15,11 +15,8 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $id
  * @property string $model
  * @property integer $model_id
- * @property string $key1
  * @property string $data1
- * @property string $key2
  * @property string $data2
- * @property string $key3
  * @property string $data3
  * @property string $created_at
  */
@@ -39,10 +36,10 @@ class Data extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['model', 'model_id', 'key1', 'data1'], 'required'],
+            [['model', 'model_id', 'data1'], 'required'],
             [['model_id'], 'integer'],
             [['created_at'], 'safe'],
-            [['model', 'key1', 'key2', 'key3'], 'string', 'max' => 255],
+            [['model'], 'string', 'max' => 128],
             [['data1', 'data2', 'data3'], 'string', 'max' => 255],
         ];
     }
@@ -56,11 +53,8 @@ class Data extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'Id'),
             'model' => Yii::t('app', 'Model'),
             'model_id' => Yii::t('app', 'Model Id'),
-            'key1' => Yii::t('app', 'Key 1'),
             'data1' => Yii::t('app', 'Data 1'),
-            'key2' => Yii::t('app', 'Key 2'),
             'data2' => Yii::t('app', 'Data 2'),
-            'key3' => Yii::t('app', 'Key 3'),
             'data3' => Yii::t('app', 'Data 3'),
             'created_at' => Yii::t('app', 'Created At'),
         ];

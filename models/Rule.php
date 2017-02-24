@@ -60,7 +60,7 @@ class Rule extends \yii\db\ActiveRecord
         return [
             [['name', 'description', 'weight'], 'required'],
             [['description'], 'string'],
-						[['weight'], 'integer'],
+            [['weight'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255]
         ];
