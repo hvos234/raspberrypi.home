@@ -276,7 +276,7 @@ class TaskDefined extends \yii\db\ActiveRecord
                 return $taskDefined['id'];
             }
             
-            $id = TaskDefined::createOne(['from_device_id' => $from_device_id, 'to_device_id' => $to_device_id, 'action_id' => $action_id]);
+            $id = TaskDefined::createOne(['name' => 'No name yet', 'from_device_id' => $from_device_id, 'to_device_id' => $to_device_id, 'action_id' => $action_id]);
             if(!$id){
                 return 0;
             }
