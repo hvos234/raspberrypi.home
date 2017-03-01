@@ -27,17 +27,17 @@ class CronController extends Controller
      */
     public function actionIndex()
     {
-				Yii::info('CronController', 'cronjob');
-				/**
-				 * If cron execute it the default date and time are wrong,
-				 * this fix it (date_default_timezone_set)
-				 */
-				$settingModel = Setting::find()->where(['name' => 'date_default_timezone'])->one();
-				if(isset($settingModel->data) and !empty($settingModel->data)){
-					date_default_timezone_set($settingModel->data);
-				}
+        Yii::info('CronController', 'cronjob');
+        /**
+         * If cron execute it the default date and time are wrong,
+         * this fix it (date_default_timezone_set)
+         */
+        $settingModel = Setting::find()->where(['name' => 'date_default_timezone'])->one();
+        if(isset($settingModel->data) and !empty($settingModel->data)){
+            date_default_timezone_set($settingModel->data);
+        }
 				
         $modelCronjob = new Cronjob();
-				$modelCronjob->cron();
+        $modelCronjob->cron();
     }
 }

@@ -15,6 +15,7 @@ use yii\filters\AccessControl;
 use app\models\Device;
 use app\models\Action;
 use app\models\DeviceAction;
+use app\models\Log;
 
 use yii\helpers\ArrayHelper;
 
@@ -95,13 +96,13 @@ class TaskDefinedController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //return $this->redirect(['view', 'id' => $model->id]);
-						return $this->redirect(['task/index']);
+            return $this->redirect(['task/index']);
         } else {
             return $this->render('create', [
                 'model' => $model,
-								'from_device_ids' => ArrayHelper::map($modelDevice->getDeviceMaster(), 'id', 'name'),
-								'to_device_ids' => ArrayHelper::map($modelDevice->getDeviceAll(), 'id', 'name'),
-								'action_ids' => ArrayHelper::map($modelAction->getActionAll(), 'id', 'name'),
+                'from_device_ids' => ArrayHelper::map($modelDevice->getDeviceMaster(), 'id', 'name'),
+                'to_device_ids' => ArrayHelper::map($modelDevice->getDeviceAll(), 'id', 'name'),
+                'action_ids' => ArrayHelper::map($modelAction->getActionAll(), 'id', 'name'),
             ]);
         }
     }
@@ -116,8 +117,8 @@ class TaskDefinedController extends Controller
     {
         $model = $this->findModel($id);
 
-				$modelDevice = new Device();
-				$modelAction = new Action();
+        $modelDevice = new Device();
+        $modelAction = new Action();
 				
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //return $this->redirect(['view', 'id' => $model->id]);
@@ -125,9 +126,9 @@ class TaskDefinedController extends Controller
         } else {
             return $this->render('update', [
                 'model' => $model,
-								'from_device_ids' => ArrayHelper::map($modelDevice->getDeviceMaster(), 'id', 'name'),
-								'to_device_ids' => ArrayHelper::map($modelDevice->getDeviceAll(), 'id', 'name'),
-								'action_ids' => ArrayHelper::map($modelAction->getActionAll(), 'id', 'name'),
+                'from_device_ids' => ArrayHelper::map($modelDevice->getDeviceMaster(), 'id', 'name'),
+                'to_device_ids' => ArrayHelper::map($modelDevice->getDeviceAll(), 'id', 'name'),
+                'action_ids' => ArrayHelper::map($modelAction->getActionAll(), 'id', 'name'),
             ]);
         }
     }
@@ -145,12 +146,12 @@ class TaskDefinedController extends Controller
         return $this->redirect(['task/index']);
     }
 		
-		public function actionExecute($id){
-			$model = new TaskDefined();
-			$model->execute($id);
-			
-			return $this->redirect(['task/index']);
-		}
+    public function actionExecute($id){
+        $model = new TaskDefined();
+        $model->execute($id);
+
+        return $this->redirect(['task/index']);
+    }
 
 		/**
      * Finds the TaskDefined model based on its primary key value.
@@ -168,11 +169,11 @@ class TaskDefinedController extends Controller
         }
     }
 		
-		public function actionAjaxDeviceAction($to_device_id){
-			$modelDeviceAction = new DeviceAction();
-			$deviceaction = $modelDeviceAction->getDeviceActionByDeviceAll($to_device_id);
-			$deviceaction = ArrayHelper::map($deviceaction, 'action_id', 'action_id');
-			
-			return json_encode($deviceaction);
-		}
+    public function actionAjaxDeviceAction($to_device_id){
+        $modelDeviceAction = new DeviceAction();
+        $deviceaction = $modelDeviceAction->getDeviceActionByDeviceAll($to_device_id);
+        $deviceaction = ArrayHelper::map($deviceaction, 'action_id', 'action_id');
+
+        return json_encode($deviceaction);
+    }
 }

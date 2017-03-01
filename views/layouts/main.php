@@ -59,6 +59,7 @@ AppAsset::register($this);
 					['label' => Yii::t('app', 'CronJobs'), 'url' => ['/cronjob/index']],
 					['label' => Yii::t('app', 'Settings'), 'url' => ['/setting/index']],
 					['label' => Yii::t('app', 'Data'), 'url' => ['/data/index']],
+					['label' => Yii::t('app', 'Log'), 'url' => ['/log/index']],
 			]];
 			$widget['items'][] = ['label' => 'Logout (' . Yii::$app->user->identity->username . ')',
 				'url' => ['/site/logout'],

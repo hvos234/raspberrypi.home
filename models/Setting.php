@@ -94,23 +94,24 @@ class Setting extends \yii\db\ActiveRecord
 		}
         
         public function afterSave($insert, $changedAttributes){
-            $modelData = new Data();
-            $modelData->model = 'setting';
-            $modelData->model_id = $this->id;
+            
             
             $datas = HelperData::dataExplode($this->data);
             
-            $i = 1;
-            foreach($datas as $key => $data){
-                if(empty($key)){
-                    $key = $this->name;
-                }
-                $modelData->{"key$i"} = $key;
-                $modelData->{"data$i"} = $data;
-                $i++;
-            }
+            foreach($datas as $name => $data){
+                $modelLog = new Log();
+                $modelLog->model = 'setting';
+                $modelLog->model_id = $this->id;
             
-            $modelData->save();
+                if(empty($name)){
+                    $name = $this->name;
+                }
+                $modelLog->name = $name;
+                $modelLog->value = $data;
+                if(!$modelLog->save()){
+                    return false;
+                }
+            }
             
             return parent::afterSave($insert, $changedAttributes);
         }

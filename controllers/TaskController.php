@@ -64,11 +64,11 @@ class TaskController extends Controller
     {
         $searchModel = new TaskSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-				$dataProvider->setSort([
-					'defaultOrder' => ['created_at' => SORT_DESC]
-				]);
+        $dataProvider->setSort([
+            'defaultOrder' => ['created_at' => SORT_DESC]
+        ]);
 				
-				$searchModelTaskDefined = new TaskDefinedSearch();
+        $searchModelTaskDefined = new TaskDefinedSearch();
         $dataProviderTaskDefined = $searchModelTaskDefined->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [

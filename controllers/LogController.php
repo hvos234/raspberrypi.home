@@ -3,8 +3,8 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Data;
-use app\models\DataSearch;
+use app\models\Log;
+use app\models\LogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -13,9 +13,9 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
 /**
- * DataController implements the CRUD actions for Data model.
+ * LogController implements the CRUD actions for Log model.
  */
-class DataController extends Controller
+class LogController extends Controller
 {
     /**
      * @inheritdoc
@@ -52,17 +52,18 @@ class DataController extends Controller
     }
 
     /**
-     * Lists all Data models.
+     * Lists all Log models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new DataSearch();
+        $searchModel = new LogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        
         $dataProvider->setSort([
             'defaultOrder' => ['created_at' => SORT_DESC]
         ]);
-
+        
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -70,7 +71,7 @@ class DataController extends Controller
     }
 
     /**
-     * Displays a single Data model.
+     * Displays a single Log model.
      * @param integer $id
      * @return mixed
      */
@@ -82,13 +83,13 @@ class DataController extends Controller
     }
 
     /**
-     * Creates a new Data model.
+     * Creates a new Log model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Data();
+        $model = new Log();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -100,7 +101,7 @@ class DataController extends Controller
     }
 
     /**
-     * Updates an existing Data model.
+     * Updates an existing Log model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -119,7 +120,7 @@ class DataController extends Controller
     }
 
     /**
-     * Deletes an existing Data model.
+     * Deletes an existing Log model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -132,15 +133,15 @@ class DataController extends Controller
     }
 
     /**
-     * Finds the Data model based on its primary key value.
+     * Finds the Log model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Data the loaded model
+     * @return Log the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Data::findOne($id)) !== null) {
+        if (($model = Log::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

@@ -44,7 +44,7 @@ class Task extends \yii\db\ActiveRecord
             [['from_device_id', 'to_device_id', 'action_id'], 'required'],
             [['from_device_id', 'to_device_id', 'action_id'], 'integer'],
             [['created_at', 'data'], 'safe'],
-						[['data'], 'string', 'max' => 32]
+            [['data'], 'string', 'max' => 32]
         ];
     }
 
@@ -69,7 +69,7 @@ class Task extends \yii\db\ActiveRecord
      */
     public static function find()
     {
-				return new TaskQuery(get_called_class());
+        return new TaskQuery(get_called_class());
     }
 		
 		/**
