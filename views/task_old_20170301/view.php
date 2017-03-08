@@ -1,44 +1,45 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Task */
-/* @var $form yii\widgets\ActiveForm */
+
+$this->title = $model->id;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Tasks'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
+<div class="task-view">
 
-<div class="task-form">
+    <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php $form = ActiveForm::begin(); ?>
+    <p>
+        <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->id], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                'method' => 'post',
+            ],
+        ]) ?>
+    </p>
 
-		<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-	
-    <?php //<?= $form->field($model, 'from_device_id')->textInput() ?>
-		<?= $form->field($model, 'from_device_id')->listBox($from_device_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 5]); ?>
-
-    <?php //<?= $form->field($model, 'to_device_id')->textInput() ?>
-		<?= $form->field($model, 'to_device_id')->listBox($to_device_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 10]); ?>
-
-    <?php //<?= $form->field($model, 'action_id')->textInput() ?>
-		<?= $form->field($model, 'action_id')->listBox($action_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 10, 'disabled' => true]); ?>
-
-    <?php //<?= $form->field($model, 'created_at')->textInput() ?>
-
-    <?php //<?= $form->field($model, 'updated_at')->textInput() ?>
-
-    <div class="form-group">
-        <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
-    </div>
-
-    <?php ActiveForm::end(); ?>
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            'id',
+            'from_device_id',
+            'to_device_id',
+            'action_id',
+            'data',
+            'created_at',
+        ],
+    ]) ?>
 
 </div>
 
-<?php
-// this is the script that hide or show the action, when the 
-// to device is changed or select.
-$script = <<< JS
+<script type="text/javascript">
 $(document).ready(function(){
 	
 	function setHideShowAction(){
@@ -92,10 +93,4 @@ $(document).ready(function(){
 	});
 	
 });
-JS;
-
-// jQuery will be loaded as last, therefor you need to use
-// registerJs to add javascript with jQuery
-$this->registerJs($script /*, $position*/);
-// where $position can be View::POS_READY (the default), 
-// or View::POS_HEAD, View::POS_BEGIN, View::POS_END
+</script>

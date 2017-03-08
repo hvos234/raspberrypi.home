@@ -6,26 +6,27 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Task */
 /* @var $form yii\widgets\ActiveForm */
+
+use app\models\Device;
+use app\models\Action;
 ?>
 
 <div class="task-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-		<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-	
-    <?php //<?= $form->field($model, 'from_device_id')->textInput() ?>
+    <?php // $form->field($model, 'from_device_id')->textInput() ?>
 		<?= $form->field($model, 'from_device_id')->listBox($from_device_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 5]); ?>
 
-    <?php //<?= $form->field($model, 'to_device_id')->textInput() ?>
+    <?php // $form->field($model, 'to_device_id')->textInput() ?>
 		<?= $form->field($model, 'to_device_id')->listBox($to_device_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 10]); ?>
 
-    <?php //<?= $form->field($model, 'action_id')->textInput() ?>
+    <?php // $form->field($model, 'action_id')->textInput() ?>
 		<?= $form->field($model, 'action_id')->listBox($action_ids, ['unselect'=>NULL, 'multiple' => false, 'size' => 10, 'disabled' => true]); ?>
 
-    <?php //<?= $form->field($model, 'created_at')->textInput() ?>
+    <?php //<?= $form->field($model, 'data')->textInput(['maxlength' => true]) ?>
 
-    <?php //<?= $form->field($model, 'updated_at')->textInput() ?>
+    <?php // $form->field($model, 'created_at')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

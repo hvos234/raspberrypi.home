@@ -272,11 +272,13 @@ class TaskDefined extends \yii\db\ActiveRecord
         
         public static function getOneByFromDeviceIdToDeviceIdActionIdOrCreateOne($from_device_id, $to_device_id, $action_id){
             $taskDefined = TaskDefined::getOneByFromDeviceIdToDeviceIdActionId($from_device_id, $to_device_id, $action_id);
-            if(empty($taskDefined)){
+
+            if(!empty($taskDefined)){
                 return $taskDefined['id'];
             }
             
             $id = TaskDefined::createOne(['name' => 'No name yet', 'from_device_id' => $from_device_id, 'to_device_id' => $to_device_id, 'action_id' => $action_id]);
+            
             if(!$id){
                 return 0;
             }

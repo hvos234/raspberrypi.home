@@ -11,7 +11,7 @@ use Yii;
 
 use yii\console\Controller;
 
-use app\models\Task;
+use app\models\TaskDefined;
 //use app\models\CronjobSearch;
 
 //use app\models\Setting;

@@ -12,9 +12,6 @@ use app\models\Task;
  */
 class TaskSearch extends Task
 {
-		public $created_at_from;
-		public $created_at_to;
-		
     /**
      * @inheritdoc
      */
@@ -22,7 +19,7 @@ class TaskSearch extends Task
     {
         return [
             [['id', 'from_device_id', 'to_device_id', 'action_id'], 'integer'],
-            [['data', 'created_at','created_at_from', 'created_at_to'], 'safe'],
+            [['name', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -44,8 +41,6 @@ class TaskSearch extends Task
      */
     public function search($params)
     {
-			var_dump($params);
-			//exit();*/
         $query = Task::find();
 
         $dataProvider = new ActiveDataProvider([
@@ -62,13 +57,13 @@ class TaskSearch extends Task
 
         $query->andFilterWhere([
             'id' => $this->id,
+            'name' => $this->name,
             'from_device_id' => $this->from_device_id,
             'to_device_id' => $this->to_device_id,
             'action_id' => $this->action_id,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ]);
-
-        $query->andFilterWhere(['like', 'data', $this->data]);
 
         return $dataProvider;
     }

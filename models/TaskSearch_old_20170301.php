@@ -5,21 +5,24 @@ namespace app\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Data;
+use app\models\Task;
 
 /**
- * DataSearch represents the model behind the search form about `app\models\Data`.
+ * TaskSearch represents the model behind the search form about `app\models\Task`.
  */
-class DataSearch extends Data
+class TaskSearch extends Task
 {
+		public $created_at_from;
+		public $created_at_to;
+		
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'model_id'], 'integer'],
-            [['model', 'data1', 'data2', 'data3', 'created_at'], 'safe'],
+            [['id', 'from_device_id', 'to_device_id', 'action_id'], 'integer'],
+            [['data', 'created_at','created_at_from', 'created_at_to'], 'safe'],
         ];
     }
 
@@ -41,9 +44,9 @@ class DataSearch extends Data
      */
     public function search($params)
     {
-        $query = Data::find();
-
-        // add conditions that should always apply here
+			var_dump($params);
+			//exit();*/
+        $query = Task::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -57,17 +60,15 @@ class DataSearch extends Data
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'model_id' => $this->model_id,
+            'from_device_id' => $this->from_device_id,
+            'to_device_id' => $this->to_device_id,
+            'action_id' => $this->action_id,
             'created_at' => $this->created_at,
         ]);
 
-        $query->andFilterWhere(['like', 'model', $this->model])
-            ->andFilterWhere(['like', 'data1', $this->data1])
-            ->andFilterWhere(['like', 'data2', $this->data2])
-            ->andFilterWhere(['like', 'data3', $this->data3]);
+        $query->andFilterWhere(['like', 'data', $this->data]);
 
         return $dataProvider;
     }

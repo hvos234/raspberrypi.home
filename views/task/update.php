@@ -18,9 +18,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 
     <?= $this->render('_form', [
         'model' => $model,
-				'from_device_ids' => $from_device_ids,
-				'to_device_ids' => $to_device_ids,
-				'action_ids' => $action_ids,
+        'from_device_ids' => $from_device_ids,
+        'to_device_ids' => $to_device_ids,
+        'action_ids' => $action_ids,
     ]) ?>
 
 </div>

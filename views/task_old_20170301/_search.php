@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\DataSearch */
+/* @var $model app\models\TaskSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="data-search">
+<div class="task-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -17,21 +17,13 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'id') ?>
 
-    <?= $form->field($model, 'model') ?>
+    <?= $form->field($model, 'from_device_id') ?>
 
-    <?= $form->field($model, 'model_id') ?>
+    <?= $form->field($model, 'to_device_id') ?>
 
-    <?= $form->field($model, 'key1') ?>
+    <?= $form->field($model, 'action_id') ?>
 
-    <?= $form->field($model, 'data1') ?>
-
-    <?php // echo $form->field($model, 'key2') ?>
-
-    <?php // echo $form->field($model, 'data2') ?>
-
-    <?php // echo $form->field($model, 'key3') ?>
-
-    <?php // echo $form->field($model, 'data3') ?>
+    <?= $form->field($model, 'data') ?>
 
     <?php // echo $form->field($model, 'created_at') ?>
 

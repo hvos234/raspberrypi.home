@@ -13,7 +13,8 @@ use yii\behaviors\TimestampBehavior;
 use yii\helpers\ArrayHelper;
 
 use app\models\Setting;
-use app\models\Data;
+use app\models\HelperData;
+use app\models\Log;
 
 /**
  * This is the model class for table "{{%task}}".
@@ -22,11 +23,11 @@ use app\models\Data;
  * @property integer $from_device_id
  * @property integer $to_device_id
  * @property integer $action_id
- * @property string $data
  * @property string $created_at
+ * @property string $updated_at
  */
 class Task extends \yii\db\ActiveRecord
-{			
+{
     /**
      * @inheritdoc
      */
@@ -41,10 +42,10 @@ class Task extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['from_device_id', 'to_device_id', 'action_id'], 'required'],
+            [['name', 'from_device_id', 'to_device_id', 'action_id'], 'required'],
             [['from_device_id', 'to_device_id', 'action_id'], 'integer'],
-            [['created_at', 'data'], 'safe'],
-            [['data'], 'string', 'max' => 32]
+            [['created_at', 'updated_at'], 'safe'],
+            [['name'], 'string', 'max' => 255],
         ];
     }
 
@@ -55,11 +56,12 @@ class Task extends \yii\db\ActiveRecord
     {
         return [
             'id' => Yii::t('app', 'ID'),
+            'name' => Yii::t('app', 'Name'),
             'from_device_id' => Yii::t('app', 'From Device ID'),
             'to_device_id' => Yii::t('app', 'To Device ID'),
             'action_id' => Yii::t('app', 'Action ID'),
-            'data' => Yii::t('app', 'Data'),
             'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),
         ];
     }
 
@@ -75,7 +77,6 @@ class Task extends \yii\db\ActiveRecord
 		/**
 		 * Auto add date time to created_at and updated_at
 		 */
-		// only works if both created_at and updated_at exist !
 		public function behaviors()
 		{
 			return [
@@ -84,54 +85,38 @@ class Task extends \yii\db\ActiveRecord
 					[
 						'class' => TimestampBehavior::className(),
 						'createdAtAttribute' => 'created_at',
-						'updatedAtAttribute' => false, // this must be set to false or it rease a error that update_at does not exist
+						'updatedAtAttribute' => 'updated_at',
 						'value' => new Expression('NOW()'),
 					],
 			 ];
 		}
 		
-		public function beforeSave($insert){
-			if($insert){ // if true it is inserted if false it is updated
-				if(empty($this->data)){
-					$this->data = Task::execute($this->from_device_id, $this->to_device_id, $this->action_id);
-				}
-				// change data with one : to two ::
-				$this->data = str_replace(':', '::', $this->data);
-			}
+		public static function execute($id){
+			$model = Task::findOne($id);
 			
-			return parent::beforeSave($insert);
-		}
-        
-        public function afterSave($insert, $changedAttributes){
-            $modelData = new Data();
-            $modelData->model = 'task';
-            $modelData->model_id = $this->id;
+			$data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
+            $data = str_replace(':', '::', $data);
+            $datas = HelperData::dataExplode($data);
             
-            $datas = HelperData::dataExplode($this->data);
-            
-            $i = 1;
-            foreach($datas as $key => $data){
-                $modelData->{"key$i"} = $key;
-                $modelData->{"data$i"} = $data;
-                $i++;
+            foreach ($datas as $name => $value){
+                $modelLog = new Log();
+                $modelLog->model = 'task';
+                $modelLog->model_id = $id;
+                $modelLog->name = $name;
+                $modelLog->value = $value;
+                if(!$modelLog->save()){
+                    return false;
+                }
             }
             
-            $modelData->save();
+            // check for a error in the data
+			foreach (['error:', 'err:'] as $needle){
+				if(false !== strpos($data, $needle)){
+					return false;
+				}
+			}	
             
-            return parent::afterSave($insert, $changedAttributes);
-        }
-		
-		/**
-		 * execute
-		 * 
-		 * @param type $from_device_id
-		 * @param type $to_device_id
-		 * @param type $action_id
-		 * @return type
-		 */
-		public static function execute($from_device_id, $to_device_id, $action_id){	
-			Yii::info('execute: ' . $from_device_id . ',' . $to_device_id . ',' . $action_id, 'task');
-			return Task::transmitter($from_device_id, $to_device_id, $action_id);
+            return $datas;
 		}
 		
 		public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3){
@@ -143,22 +128,14 @@ class Task extends \yii\db\ActiveRecord
 				// to grant execute right python
 				$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
 				
-				Yii::info('$command: ' . $command, 'task-transmitter');
 				exec(escapeshellcmd($command), $output, $return_var);
-				
-				foreach($output as $line){
-					Yii::info('$line: ' . $line, 'task-transmitter');
-				}
-				Yii::info('$return_var: ' . $return_var, 'task-transmitter');
 				
 				if(0 != $return_var){
 					if($try < $retry){
-						Yii::info('!return_var, retry and delay', 'task-transmitter');
 						sleep($delay);
 						continue;
 						
 					}else {
-						Yii::error('!return_var, failed exec', 'task-transmitter');
 						return 'err:failed exec';
 					}
 				}
@@ -166,19 +143,14 @@ class Task extends \yii\db\ActiveRecord
 				$return = Task::sscanfOutput($output);
 				
 				if(!$return){
-					Yii::info('sscanfOutput, !return', 'task-transmitter');
-					
 					if($try < $retry){
-						Yii::info('!return, retry and delay', 'task-transmitter');
 						sleep($delay);
 						continue;
 						
 					}else {
-						Yii::error('!return, no output', 'task-transmitter');
 						return 'err:no output';
 					}
 				}
-				Yii::info('sscanfOutput, return', 'task-transmitter');
 
 				// from and to are exchanged
 				$from = 0;
@@ -188,62 +160,53 @@ class Task extends \yii\db\ActiveRecord
 				list($from, $to, $action, $message) = $return;
 
 				if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
-					Yii::info('$message: ' . $message, 'task-transmitter');
 					return $message;
 					
 				}else {
-					Yii::info('transmitter function to receiver function', 'task-transmitter');
 					// there is output but not for this task-transmitter
 					Task::receiver($output);
 					$try--;
 				}
 				
 				if($try >= $retry){
-					Yii::error('!retry, failed trying', 'task-transmitter');
 					return 'err:failed trying';
 				}else {
-					Yii::info('retry', 'task-transmitter');
 					sleep($delay);
 				}
 			}
 			
-			Yii::error('end, failed return', 'task-transmitter');
 			return 'err:failed return';
 		}
 				
 		public static function receiver($output){
-			foreach($output as $line){
-				Yii::info('$line: ' . $line, 'task-receiver');
-			}
 			$return = Task::sscanfOutput($output);
 			
 			if($return){
-				Yii::info('sscanfOutput, return', 'task-receiver');
-				
 				$from = 0;
 				$to = 0;
 				$action = 0;
 				$message = '';
 				list($from, $to, $action, $message) = $return;
-				Yii::info('$message: ' . $message, 'task-receiver');
-				
-				$modelTask = new Task();			
-				$modelTask->from_device_id = $from;
-				$modelTask->to_device_id = $to;
-				$modelTask->action_id = $action;
-				$modelTask->data = $message;
+                
+                $data = str_replace(':', '::', $message);
+                $datas = HelperData::dataExplode($data);
+                
+                $id = Task::getOneByFromDeviceIdToDeviceIdActionIdOrCreateOne($from, $to, $action);
+                
+                foreach ($datas as $name => $value){
+                    $modelLog = new Log();
+                    $modelLog->model = 'task';
+                    $modelLog->model_id = $id;
+                    $modelLog->name = $name;
+                    $modelLog->value = $value;
+                    if(!$modelLog->save()){
+                        return false;
+                    }
+                }
 
-				if (!$modelTask->insert()){ 
-					print_r($modelTask->errors);
-					Yii::error($modelTask->errors, 'task-receiver');
-					Yii::error('return 0 (false)', 'task-receiver');
-					return 0;
-				}
-				Yii::info('return 1 (true)', 'task-receiver');
 				return 1;
 			}
-			Yii::info('sscanfOutput, !return', 'task-receiver');
-			Yii::error('return 0 (false)', 'task-receiver');
+            
 			return 0;
 		}
 		
@@ -262,49 +225,70 @@ class Task extends \yii\db\ActiveRecord
 			return false;
 		}
 		
-		public static function improveData($tasks){
-			$actions = Action::getAll();
-			
-			foreach ($tasks as $key => $task){
-				$tasks[$key]['data'] = HelperData::dataExplode($task['data']);
-				$tasks[$key]['data_structure'] = $actions[$task['action_id']]['data_structure'];
-			}
-			
-			return $tasks;
-		}
-
-
-		public static function getMultipleBetweenDate($between, $from_device_id = '', $to_device_id = '', $action_id = ''){
-			$where = [];
-			if(!empty($from_device_id)){
-				$where['from_device_id'] = $from_device_id;
-			}
-			if(!empty($to_device_id)){
-				$where['to_device_id'] = $to_device_id;
-			}
-			if(!empty($action_id)){
-				$where['action_id'] = $action_id;
-			}
-			
-			/*echo('$where: <pre>');
-			print_r($where);
-			echo('</pre>');*/
-			
-			/*echo('$between: <pre>');
-			print_r($between);
-			echo('</pre>');*/
-			
-			$tasks = Task::find()->where($where)->andwhere(['between', 'created_at', $between['from'], $between['to']])->asArray()->all();			
-			$tasks = Task::improveData($tasks);
-			
-			/*echo('$tasks: <pre>');
-			print_r($tasks);
-			echo('</pre>');*/
-			
-			return $tasks;
+		public static function cronjob($id){
+			return Task::execute($id);
 		}
 		
-		public static function getAllIdId(){
-			return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'id');
+        public static function createOne($parameters){
+			$model = new Task();
+			
+			foreach($parameters as $field => $value){
+				$model->{$field} = $value;
+			}
+			
+            if(!$model->save()){
+                return false;
+            }
+            
+			return $model->id;
+		}
+        
+		public static function getAllIdName(){
+			return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'name');
+		}
+		
+		public static function getAllEncoded(){
+			$return = [];
+			
+			$tasks = Task::getAll();
+			foreach($tasks as $task){
+				$array = ['class' => 'Task', 'function' => 'execute', 'id' => $task['id']];
+				$return[HelperData::dataImplode($array)] = sprintf('(%d) %s', $task['id'], $task['name']);
+				//$return[sprintf('{"class":"Task","function":"execute","id":"%d"}', $task['id'])] = sprintf('(%d) %s', $task['id'], $task['name']);
+			}
+			
+			return $return;
+		}
+        
+        public static function getOneByFromDeviceIdToDeviceIdActionId($from_device_id, $to_device_id, $action_id){
+            return Task::find()->where(['from_device_id' => $from_device_id, 'to_device_id' => $to_device_id, 'action_id' => $action_id])->asArray()->one();
+        }
+        
+        public static function getOneByFromDeviceIdToDeviceIdActionIdOrCreateOne($from_device_id, $to_device_id, $action_id){
+            $task = Task::getOneByFromDeviceIdToDeviceIdActionId($from_device_id, $to_device_id, $action_id);
+
+            if(!empty($task)){
+                return $task['id'];
+            }
+            
+            $id = Task::createOne(['name' => 'No name yet', 'from_device_id' => $from_device_id, 'to_device_id' => $to_device_id, 'action_id' => $action_id]);
+            
+            if(!$id){
+                return 0;
+            }
+            
+            return $id;
+        }
+		
+		public static function ruleCondition($id){
+			return Task::ruleExecute($id);
+		}
+
+		public static function ruleAction($id){
+			return Task::ruleExecute($id);
+		}
+		
+		public static function ruleExecute($id){
+            return Task::execute($id);
 		}
 }

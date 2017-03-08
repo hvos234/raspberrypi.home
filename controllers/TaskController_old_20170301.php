@@ -15,7 +15,8 @@ use yii\filters\AccessControl;
 use app\models\Device;
 use app\models\Action;
 use app\models\DeviceAction;
-use app\models\Log;
+use app\models\TaskDefined;
+use app\models\TaskDefinedSearch;
 
 use yii\helpers\ArrayHelper;
 
@@ -26,33 +27,33 @@ class TaskController extends Controller
 {
     public function behaviors()
     {
-        return [
-            'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                            'delete' => ['post'],
-                    ],
-            ],
-            // this will allow authenticated users to access the create update and delete
-            // and deny all other users from accessing these three actions.
-            'access' => [
-                'class' => AccessControl::className(),
-                //'only' => ['create', 'update', 'delete'],
-                'rules' => [
-                        // deny all POST requests
-                        /*[
-                                'allow' => false,
-                                'verbs' => ['POST'],
-                        ],*/
-                        // allow authenticated users
-                        [
-                                'allow' => true,
-                                'roles' => ['@'],
-                        ],
-                        // everything else is denied
-                ],
-            ],
-        ];
+			return [
+				'verbs' => [
+						'class' => VerbFilter::className(),
+						'actions' => [
+								'delete' => ['post'],
+						],
+				],
+				// this will allow authenticated users to access the create update and delete
+				// and deny all other users from accessing these three actions.
+				'access' => [
+					'class' => AccessControl::className(),
+					//'only' => ['create', 'update', 'delete'],
+					'rules' => [
+							// deny all POST requests
+							/*[
+									'allow' => false,
+									'verbs' => ['POST'],
+							],*/
+							// allow authenticated users
+							[
+									'allow' => true,
+									'roles' => ['@'],
+							],
+							// everything else is denied
+					],
+				],
+			];
     }
 
     /**
@@ -63,10 +64,18 @@ class TaskController extends Controller
     {
         $searchModel = new TaskSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->setSort([
+            'defaultOrder' => ['created_at' => SORT_DESC]
+        ]);
+				
+        $searchModelTaskDefined = new TaskDefinedSearch();
+        $dataProviderTaskDefined = $searchModelTaskDefined->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'searchModelTaskDefined' => $searchModelTaskDefined,
+            'dataProviderTaskDefined' => $dataProviderTaskDefined,
         ]);
     }
 
@@ -93,10 +102,9 @@ class TaskController extends Controller
 				
         $modelDevice = new Device();
         $modelAction = new Action();
-
+        	
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            //return $this->redirect(['view', 'id' => $model->id]);
-            return $this->redirect(['index']);
+            return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -116,10 +124,10 @@ class TaskController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
+				
         $modelDevice = new Device();
         $modelAction = new Action();
-				
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             //return $this->redirect(['view', 'id' => $model->id]);
             return $this->redirect(['index']);
@@ -145,15 +153,8 @@ class TaskController extends Controller
 
         return $this->redirect(['index']);
     }
-		
-    public function actionExecute($id){
-        $model = new Task();
-        $model->execute($id);
 
-        return $this->redirect(['index']);
-    }
-
-		/**
+    /**
      * Finds the Task model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
@@ -176,4 +177,6 @@ class TaskController extends Controller
 
         return json_encode($deviceaction);
     }
+    
+    
 }

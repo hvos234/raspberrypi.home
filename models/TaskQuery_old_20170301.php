@@ -3,20 +3,21 @@
 namespace app\models;
 
 /**
- * This is the ActiveQuery class for [[Data]].
+ * This is the ActiveQuery class for [[Task]].
  *
- * @see Data
+ * @see Task
  */
-class DataQuery extends \yii\db\ActiveQuery
+class TaskQuery extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
-        return $this->andWhere('[[status]]=1');
+        $this->andWhere('[[status]]=1');
+        return $this;
     }*/
 
     /**
      * @inheritdoc
-     * @return Data[]|array
+     * @return Task[]|array
      */
     public function all($db = null)
     {
@@ -25,7 +26,7 @@ class DataQuery extends \yii\db\ActiveQuery
 
     /**
      * @inheritdoc
-     * @return Data|array|null
+     * @return Task|array|null
      */
     public function one($db = null)
     {
