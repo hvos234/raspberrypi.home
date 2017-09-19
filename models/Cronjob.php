@@ -11,8 +11,8 @@ use yii\behaviors\TimestampBehavior;
 
 use yii\helpers\ArrayHelper;
 
-use app\models\TaskDefined;
-use app\models\TaskDefinedSearch;
+use app\models\Task;
+use app\models\TaskSearch;
 
 /**
  * This is the model class for table "{{%cronjob}}".
@@ -108,7 +108,7 @@ class Cronjob extends \yii\db\ActiveRecord
 		];
 		
 		public $jobs = [
-			'taskdefined' => 'TaskDefined',
+			'task' => 'Task',
 			'rule' => 'Rule',
 		];
 		
@@ -118,10 +118,10 @@ class Cronjob extends \yii\db\ActiveRecord
 		public $weights = [];
 	
 		public function init() {
-			// add all task defined
-			$this->job_ids['taskdefined'] = TaskDefined::getAllIdName();
+			// add all tasks
+			$this->job_ids['task'] = Task::getAllIdName();
 			
-			// add all task defined
+			// add all rules
 			$this->job_ids['rule'] = Rule::getAllIdName();
 			
 			// translate all

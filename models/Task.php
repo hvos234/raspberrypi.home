@@ -74,22 +74,27 @@ class Task extends \yii\db\ActiveRecord
         return new TaskQuery(get_called_class());
     }
 		
-		/**
-		 * Auto add date time to created_at and updated_at
-		 */
-		public function behaviors()
-		{
-			return [
-					// This set the create_at and updated_at by create, and 
-					// update_at by update, with the date time / timestamp
-					[
-						'class' => TimestampBehavior::className(),
-						'createdAtAttribute' => 'created_at',
-						'updatedAtAttribute' => 'updated_at',
-						'value' => new Expression('NOW()'),
-					],
-			 ];
-		}
+    /**
+     * Auto add date time to created_at and updated_at
+     */
+    public function behaviors()
+    {
+        return [
+            // This set the create_at and updated_at by create, and 
+            // update_at by update, with the date time / timestamp
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => new Expression('NOW()'),
+            ],
+         ];
+    }
+    
+    // Joining with Relations
+    /*public function getAction(){
+        return $this->hasOne(Task::className(), ['id' => 'action_id']);
+    }*/
 		
 		public static function execute($id){
 			$model = Task::findOne($id);
@@ -124,8 +129,10 @@ class Task extends \yii\db\ActiveRecord
 			
 			for($try = 1; $try <= $retry; $try++){
 				// sudo visudo
-				// add www-data ALL=(ALL) NOPASSWD: ALL
-				// to grant execute right python
+				// ##add www-data ALL=(ALL) NOPASSWD: ALL
+                // # Allow www-data run only python
+                // %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
+
 				$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
 				
 				exec(escapeshellcmd($command), $output, $return_var);
@@ -243,9 +250,14 @@ class Task extends \yii\db\ActiveRecord
 			return $model->id;
 		}
         
-		public static function getAllIdName(){
+        /*public static function getModelIds(){
+            return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'name');
+        }*/
+        
+        
+		/*public static function getAllIdName(){
 			return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'name');
-		}
+		}*/
 		
 		public static function getAllEncoded(){
 			$return = [];
@@ -280,15 +292,35 @@ class Task extends \yii\db\ActiveRecord
             return $id;
         }
 		
-		public static function ruleCondition($id){
-			return Task::ruleExecute($id);
-		}
+    public static function ruleCondition($id){
+        return Task::ruleExecute($id);
+    }
 
-		public static function ruleAction($id){
-			return Task::ruleExecute($id);
-		}
-		
-		public static function ruleExecute($id){
-            return Task::execute($id);
-		}
+    public static function ruleAction($id){
+        return Task::ruleExecute($id);
+    }
+
+    public static function ruleExecute($id){
+        return Task::execute($id);
+    }
+    
+    public static function ids(){
+        $ids = Task::find()           
+            ->asArray()
+            ->all();
+        
+        return ArrayHelper::map($ids, 'id', 'name');
+    }
+    
+    public static function getModelIds(){
+        $model_ids = Task::find()           
+            ->asArray()
+            ->all();
+        
+        return ArrayHelper::map($model_ids, 'id', 'name');
+    }
+    
+    public static function thermostatExecute($id){
+        return Task::execute($id);
+    }
 }

@@ -175,9 +175,17 @@ class Setting extends \yii\db\ActiveRecord
 			return Setting::find()->asArray()->all();
 		}
 		
-		public static function getAllIdName(){
+		/*public static function getAllIdName(){
 			return ArrayHelper::map(Setting::find()->asArray()->all(), 'id', 'name');
-		}
+		}*/
+        
+        public static function ids(){
+            $ids = Setting::find()           
+                ->asArray()
+                ->all();
+
+            return ArrayHelper::map($ids, 'id', 'name');
+        }
 		
 		public static function getAllByIdAndName(){
 			return ArrayHelper::map(Setting::find()->asArray()->all(), 'name', 'description');

@@ -1,0 +1,136 @@
+#thermostate {position: relative; width: 300px; height: 300px;}
+#thermostate .back-light {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%; 
+    background: url(../images/thermostat/back-light.png) no-repeat;
+    background-size: contain;
+}
+
+#thermostate .thermostate-plate {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%; 
+    background: url(../images/thermostat/thermostate-plate.png) no-repeat;
+    background-size: contain;
+}
+#thermostate .current-pointer-ovelay {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%;
+    background: url(../images/thermostat/current-pointer-ovelay.png) no-repeat;
+    background-size: contain;
+}
+
+#thermostate .plate-pointer {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%;
+    background: url(../images/thermostat/plate-pointer.png) no-repeat;
+    background-size: contain;
+    
+    pointer-events: none; // allow javascript click on elements below
+}
+
+#thermostate .default-pointer {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%;
+    background: url(../images/thermostat/default-pointer.png) no-repeat;
+    background-size: contain;
+    
+    pointer-events: none;
+}
+
+#thermostate .target-pointer {
+    position:absolute; 
+    top:0; 
+    width: 100%; 
+    height: 100%;
+    background: url(../images/thermostat/target-pointer.png) no-repeat;
+    background-size: contain;
+}
+
+/* thermostat target */
+#thermostate .target {
+    position: absolute;
+    width: 100%;
+    top: 90px;
+    
+    pointer-events: none;
+    font-size: 30px;
+}
+
+#thermostate .target .degrees {
+    position: absolute;
+    width: 90px;
+    left: 110px;
+    
+    text-align: center;
+    
+    pointer-events: auto;
+}
+
+#thermostate .target .symbol {
+    position: relative;
+    top: 4px;
+    vertical-align: top;
+    font-size: 20px;
+    
+    float: right;
+}
+
+#thermostate .target .minus {
+    position: absolute;
+    width: 20px;
+    left: 80px;
+    
+    pointer-events: auto;
+}
+
+#thermostate .target .plus {
+    position: absolute;
+    width: 20px;
+    right: 80px;
+    
+    pointer-events: auto;
+}
+
+/* thermostat current */
+#thermostate .current {
+    position: absolute;
+    width: 100%;
+    top: 126px;
+    
+    pointer-events: none;
+    font-size: 60px;
+}
+
+#thermostate .current .degrees {
+    position: absolute;
+    width: 170px;
+    left: 70px;
+    
+    text-align: center;
+    
+    pointer-events: auto;
+}
+
+#thermostate .current .symbol {
+    position: relative;
+    top: 16px;
+    vertical-align: top;
+    font-size: 20px;
+    
+    float: right;
+}
+
+/* detail-view */
+.detail-view .minus, .detail-view .plus {
+    padding: 10px; /* easyer to click or push */
+}

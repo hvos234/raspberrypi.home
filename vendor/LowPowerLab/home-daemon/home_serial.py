@@ -16,6 +16,9 @@ class home_serial:
         #self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=Non)
         self.ser.baudrate = 9600
         self.ser.port = '/dev/ttyUSB0'
+        #self.ser.port = '/dev/arduino'
+        #self.ser.port = '/dev/ttyAMA0'
+        #self.ser.port = '/dev/ttyS0'
         #self.ser.port = '/dev/tty.usbserial'
         self.ser.timeout = seconds
         #self.ser = serial.Serial()

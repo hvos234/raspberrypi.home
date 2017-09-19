@@ -9,6 +9,9 @@ use Yii;
 use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
 
+// The ArrayHelper, is used for building a map (key-value pairs).
+use yii\helpers\ArrayHelper;
+
 /**
  * This is the model class for table "{{%log}}".
  *
@@ -86,5 +89,81 @@ class Log extends \yii\db\ActiveRecord
                     ],
                 ],
          ];
+    }
+    
+    // Joining with Relations
+    public function getTask(){
+        return $this->hasOne(Task::className(), ['id' => 'model_id']);
+    }
+    
+    public function getTaskName(){
+        return $this->hasOne(Setting::className(), ['name' => 'name'])
+            ->from(Setting::tableName() . ' taskname'); // alias for table name setting
+    }
+    
+    /*public function getTaskName(){
+        return $this->hasOne(Setting::className(), ['name' => 'name'])
+            ->via('task'); // chaning / level / parent table
+    }*/
+    
+    public function getSetting(){
+        return $this->hasOne(Setting::className(), ['id' => 'model_id']);
+    }
+    
+    /*public static function getAllByModelModelIdName($model, $model_id, $name){        
+        return ArrayHelper::index(Log::find()->where(['model' => $model, 'model_id' => $model_id, 'name' => $name])->orderBy('id')->asArray()->all(), 'id');
+    }*/
+    
+    /*public static function getAllModelsGroupBy(){        
+        return ArrayHelper::map(Log::find()->groupBy('model')->asArray()->all(), 'model', 'model');
+    }*/
+    
+    public static function getAllModelIdsByModel($model){
+        $models = Log::find()
+            ->joinWith(['task', 'setting'])
+            ->where(['model' => $model])
+            ->groupBy('model_id')
+            ->asArray()
+            ->all();
+        
+        switch($model){
+            case 'task':
+                $model_ids = ArrayHelper::map($models, 'model_id', 'task.name');
+                break;
+                
+            case 'setting':
+                $model_ids = ArrayHelper::map($models, 'model_id', 'setting.description');
+                break;
+            default:
+                return [];
+        }
+        
+        return HelperData::dataTranslate($model_ids);
+        
+        //return ArrayHelper::map(Log::find()->where(['model' => $model])->groupBy('model_id')->asArray()->all(), 'model_id', 'model_id');
+    }
+    
+    public static function getAllNamesByModelId($model, $model_id){ 
+        $models = Log::find()
+            ->joinWith(['task', 'taskName', 'setting'])              
+            ->where(['model' => $model, 'model_id' => $model_id])
+            ->groupBy('name')
+            ->asArray()
+            ->all();
+        
+        switch($model){
+            case 'task':
+                $names = ArrayHelper::map($models, 'name', 'taskName.data');
+                break;
+                
+            case 'setting':
+                //$models = Log::find()->where(['model' => $model, 'model_id' => $model_id])->joinWith(['setting'])->groupBy('name')->asArray()->all();
+                $names = ArrayHelper::map($models, 'name', 'setting.description');
+                break;
+            default:
+                return [];
+        }
+        
+        return HelperData::dataTranslate($names);
     }
 }

@@ -27,6 +27,7 @@ use yii\widgets\ActiveForm;
 			<tr>
 				<th><?= Yii::t('app', 'Condition'); ?></th>
 				<th>&nbsp;</th>
+				<th>&nbsp;</th>
 				<th><?= Yii::t('app', 'Equation'); ?></th>
 				<th><?= Yii::t('app', 'Value'); ?></th>
 				<th>&nbsp;</th>
@@ -53,6 +54,7 @@ use yii\widgets\ActiveForm;
 				<tr id="RuleCondition_<?= $index; ?>" class="RuleCondition-row" style="display:<?= (Yii::t('app', '- None -') == $modelRuleCondition['value_value'] ? 'none' : 'table-row') ?>;">
 					<td><?= $form->field($modelRuleCondition, "[$index]condition", ['inputOptions' => ['class' => 'form-control RuleCondition-condition', 'index' => $index]])->dropDownList($modelRuleCondition->conditions)->label(false) ?></td>
 					<td><?= $form->field($modelRuleCondition, "[$index]condition_value", ['inputOptions' => ['class' => 'form-control RuleCondition-condition_value', 'index' => $index]])->dropDownList($modelRuleCondition->conditions_values)->label(false) ?></td>
+					<td><?= $form->field($modelRuleCondition, "[$index]condition_sub_value", ['inputOptions' => ['class' => 'form-control RuleCondition-condition_sub_value', 'index' => $index]])->dropDownList($modelRuleCondition->conditions_sub_values)->label(false) ?></td>
 					<td><?= $form->field($modelRuleCondition, "[$index]equation")->dropDownList($modelRuleCondition->equations)->label(false) ?></td>
 					
 					<?php /*<td><?= $form->field($modelRuleCondition, "[$index]value", ['inputOptions' => ['class' => 'form-control RuleCondition-value']])->textInput(['maxlength' => true])->label(false) ?></td>*/ ?>
@@ -61,8 +63,9 @@ use yii\widgets\ActiveForm;
 						<table>
 							<tr>								
 								<td><?= $form->field($modelRuleCondition, "[$index]values_values", ['inputOptions' => ['class' => 'form-control RuleCondition-values_values', 'index' => $index]])->dropDownList($modelRuleCondition->values_values, ['options' => [$modelRuleCondition['value_value'] => ['Selected' => true]]])->label(false) ?></td>
-								<td><?= $form->field($modelRuleCondition, "[$index]value_value", ['inputOptions' => ['class' => 'form-control RuleCondition-value_value', 'index' => $index]])->textInput(['maxlength' => true, 'readonly' => array_key_exists($modelRuleCondition['value_value'], $modelRuleCondition->values)])->label(false) ?></td>
-							</tr>
+                                <td><?= $form->field($modelRuleCondition, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control RuleCondition-value_sub_value', 'index' => $index]])->dropDownList($modelRuleCondition->value_sub_values, ['options' => [$modelRuleCondition['value_sub_value'] => ['Selected' => true]]])->label(false) ?></td>
+                                <td><?= $form->field($modelRuleCondition, "[$index]value_value", ['inputOptions' => ['class' => 'form-control RuleCondition-value_value', 'index' => $index]])->textInput(['maxlength' => true, 'readonly' => array_key_exists($modelRuleCondition['value_value'], $modelRuleCondition->values)])->label(false) ?></td>
+                            </tr>
 						</table>
 					</td>
 					<td><?= $form->field($modelRuleCondition, "[$index]weight")->dropDownList($modelRuleCondition->weights)->label(false) ?></td>
@@ -84,6 +87,7 @@ use yii\widgets\ActiveForm;
 			<tr>
 				<th><?= Yii::t('app', 'Action'); ?></th>
 				<th>&nbsp;</th>
+				<th>&nbsp;</th>
 				<th><?= Yii::t('app', 'Value'); ?></th>
 				<th>&nbsp;</th>
 				<th><?= Yii::t('app', 'Weight'); ?></th>
@@ -95,14 +99,16 @@ use yii\widgets\ActiveForm;
 				<tr id="RuleAction<?= $index; ?>" class="RuleAction-row" style="display:<?= (Yii::t('app', '- None -') == $modelRuleAction['value_value'] ? 'none' : 'table-row') ?>;">
 					<td><?= $form->field($modelRuleAction, "[$index]action", ['inputOptions' => ['class' => 'form-control RuleAction-action', 'index' => $index]])->dropDownList($modelRuleAction->actions)->label(false) ?></td>
 					<td><?= $form->field($modelRuleAction, "[$index]action_value", ['inputOptions' => ['class' => 'form-control RuleAction-action_value', 'index' => $index]])->dropDownList($modelRuleAction->actions_values)->label(false) ?></td>
+					<td><?= $form->field($modelRuleAction, "[$index]action_sub_value", ['inputOptions' => ['class' => 'form-control RuleAction-action_sub_value', 'index' => $index]])->dropDownList($modelRuleAction->action_sub_values)->label(false) ?></td>
 					
 					<td><?= $form->field($modelRuleAction, "[$index]value", ['inputOptions' => ['class' => 'form-control RuleAction-value', 'index' => $index]])->dropDownList($modelRuleAction->values)->label(false) ?></td>
 					<td>
 						<table>
 							<tr>								
 								<td><?= $form->field($modelRuleAction, "[$index]values_values", ['inputOptions' => ['class' => 'form-control RuleAction-values_values', 'index' => $index]])->dropDownList($modelRuleAction->values_values, ['options' => [$modelRuleAction->value => ['Selected' => true]]])->label(false) ?></td>
+                                <td><?= $form->field($modelRuleAction, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control RuleAction-value_sub_value', 'index' => $index]])->dropDownList($modelRuleAction->value_sub_values, ['options' => [$modelRuleAction->value_sub_value => ['Selected' => true]]])->label(false) ?></td>
 								<td><?= $form->field($modelRuleAction, "[$index]value_value", ['inputOptions' => ['class' => 'form-control RuleAction-value_value', 'index' => $index]])->textInput(['maxlength' => true, 'readonly' => array_key_exists($modelRuleAction->value_value, $modelRuleAction->values)])->label(false) ?></td>
-							</tr>
+                            </tr>
 						</table>
 					</td>
 					<td><?= $form->field($modelRuleAction, "[$index]weight")->dropDownList($modelRuleAction->weights)->label(false) ?></td>

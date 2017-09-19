@@ -58,8 +58,13 @@ class RuleConditionSearch extends RuleCondition
         $query->andFilterWhere([
             'id' => $this->id,
             'condition_value' => $this->condition_value,
+            'condition_sub_value' => $this->condition_sub_value,
+            'value_value' => $this->value_value,
+            'value_sub_value' => $this->value_sub_value,
             'rule_id' => $this->rule_id,
             'weight' => $this->weight,
+            'number' => $this->number,
+            'number_parent' => $this->number_parent,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);

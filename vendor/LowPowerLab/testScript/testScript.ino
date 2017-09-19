@@ -51,7 +51,7 @@ char data[33];
 char message[17];
 
 // Thermostat
-#define THERMOPIN 4     // what pin the Thermostat switch is connected to
+#define THERMOPIN 3     // what pin the Thermostat switch is connected to
 #define THERMOSTATPIN A6 // what pin the Thermostat status is connected to
 int thermostatStatusSwitch = 0;
 int thermoSensor = 0;
@@ -115,10 +115,72 @@ void setup() {
   Serial.println("Setup Finished !");
 }
 
+int analogCurrent(int pin)
+{
+  float current;
+  for(int i = 0; i < 50; i++)
+  {
+    current = current + (((0.004887 * analogRead(pin) - 2.5) / 0.1)-0.12);
+  }
+  current = current / 50;
+  return current;
+}
+
 void loop() {
-  digitalWrite(THERMOPIN, HIGH);
+  /*digitalWrite(THERMOPIN, HIGH);
   delay(5000);
   digitalWrite(THERMOPIN, LOW);
+  delay(5000);*/
+  
+  
+  /*digitalWrite(LIGHTPIN, HIGH);
+  delay(5000);
+  digitalWrite(LIGHTPIN, LOW);
+  delay(5000);*/
+  
+  
+  
+  // Thermostate status
+  /*thermoSensor = analogRead(THERMOSTATPIN);
+  Serial.print("Current = "); // shows the voltage measured     
+  Serial.println(thermoSensor); //3 digits after decimal point*/
+  
+  /*thermoVoltage = thermoSensor * (5.0 / 1024.0);
+  if(1.00 > thermoVoltage){
+    thermostatStatus = 1; // is on
+  }else {
+    thermostatStatus = 0; // is off
+  }*/ 
+  /*thermoCurrent = (thermoSensor * 5.0 )/ 1024.0; // scale the ADC 
+       
+  Serial.print("Current = "); // shows the voltage measured     
+  Serial.print(thermoCurrent,3); //3 digits after decimal point
+  Serial.println(" amps DC"); //3 digits after decimal point  */
+  //delay(1500);
+   
+   
+   /*thermoSensor = analogRead(THERMOSTATPIN);
+   thermoVoltage = (thermoSensor / 1023.0) * 5000; // Gets you mV
+   thermoCurrent = ((thermoVoltage - 2500) / 185);
+   
+   Serial.print("Raw Value = " ); // shows pre-scaled value 
+   Serial.print(thermoSensor); 
+   Serial.print("\t mV = "); // shows the voltage measured 
+   Serial.print(thermoVoltage,3); // the '3' after voltage allows you to display 3 digits after decimal point
+   Serial.print("\t Amps = "); // shows the voltage measured 
+   Serial.println(thermoCurrent,3); // the '3' after voltage allows you to display 3 digits after decimal point
+   delay(2500);*/
+   
+   
+   /*Serial.println( analogCurrent(THERMOSTATPIN));
+   delay(2500);*/
+   
+   
+   thermoSensor = analogRead(THERMOSTATPIN);
+  Serial.print("Current = "); // shows the voltage measured
+   Serial.println(thermoSensor);
+  Serial.println((355 - thermoSensor) * 27.03 / 1023); //3 digits after decimal point*/
+  delay(2500);
   
   //process any receiving data
   /*if (homerfm69.receiveDone()){

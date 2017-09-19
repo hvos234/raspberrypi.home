@@ -11,7 +11,7 @@ use Yii;
 
 use yii\console\Controller;
 
-use app\models\TaskDefined;
+use app\models\Task;
 //use app\models\CronjobSearch;
 
 //use app\models\Setting;
@@ -28,6 +28,6 @@ class ReceiverController extends Controller
     public function actionIndex($output)
     {
         Yii::info('ReceiverController', 'task-receiver');
-        return TaskDefined::receiver(array($output));
+        return Task::receiver(array($output));
     }
 }

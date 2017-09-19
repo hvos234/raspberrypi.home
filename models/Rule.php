@@ -34,7 +34,7 @@ class Rule extends \yii\db\ActiveRecord
 	public function init() {		
 		// create weights
 		$key = 0;
-		foreach($this->getAllIdName() as $id => $name){
+		foreach($this->ids() as $id => $name){
 			$this->weights[$key] = $key;
 			$key++;
 		}
@@ -139,7 +139,15 @@ class Rule extends \yii\db\ActiveRecord
 			return Rule::execute($id);
 		}
 		
-		public static function getAllIdName(){
+		/*public static function getAllIdName(){
 			return ArrayHelper::map(Rule::find()->asArray()->all(), 'id', 'name');
-		}
+		}*/
+        
+        public static function ids(){
+            $ids = Rule::find()           
+                ->asArray()
+                ->all();
+
+            return ArrayHelper::map($ids, 'id', 'name');
+        }
 }

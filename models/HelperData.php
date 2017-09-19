@@ -187,9 +187,34 @@ class HelperData extends Model {
 		
 		return $data;
 	}
+        
+        public static function dataTranslate($data){
+            if(!is_array($data)){
+                $data = Yii::t('app', $data);
+            }else {
+                foreach($data as $key => $value){
+                    if(!is_array($value)){
+                        $data[$key] = Yii::t('app', $value);
+                    }else {
+                        foreach($value as $key2 => $value2){
+                            if(!is_array($value2)){
+                                $data[$key][$key2] = Yii::t('app', $value2);
+                            }else {
+                                foreach($value2 as $key3 => $value3){
+                                    if(!is_array($value3)){
+                                        $data[$key][$key2][$key3] = Yii::t('app', $value3);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return $data;
+        }
 
 
-	/**
+        /**
 	 * Trims all the data
 	 * 
 	 * @param type $data (string to trim)

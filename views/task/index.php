@@ -33,7 +33,16 @@ $this->params['breadcrumbs'][] = $this->title;
             // 'created_at',
             // 'updated_at',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn', 
+                'controller' => 'task',
+                'template' => '{view} {update} {delete} {execute}',
+                'buttons' => [
+                    'execute' => function ($url, $model, $key) {
+                        return Html::a('execute', $url);
+                    },
+                ],
+            ],
         ],
     ]); ?>
 

@@ -138,4 +138,19 @@ class RuleConditionController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+    
+    public function actionAjaxGetModels(){
+        $models = RuleCondition::getModels();
+        return json_encode($models); 
+    }
+    
+    public function actionAjaxGetIds($model){
+        $model_ids = RuleCondition::getIds($model);
+        return json_encode($model_ids);
+    }
+    
+    public function actionAjaxGetFields($model, $model_id){
+        $model_fields = RuleCondition::getFields($model, $model_id);
+        return json_encode($model_fields);
+    }
 }

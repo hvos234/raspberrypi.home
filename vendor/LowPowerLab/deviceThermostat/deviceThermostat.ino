@@ -21,8 +21,8 @@ char humdity[7];
 #define PROMISCUOUSMODE  false //set to 'true' to sniff all packets on the same network
 #define ACK         true
 #define ACK_RETRIES 2
-#define ACK_WAIT    1000 // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
-#define TIMEOUT     3000 // wait for respones
+#define ACK_WAIT    510 // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
+#define TIMEOUT     1530 // wait for respones
 
 byte sendSize=0;
 boolean requestACK = false;
@@ -52,11 +52,28 @@ char message[17];
 
 // Thermostat
 #define THERMOPIN 3     // what pin the Thermostat switch is connected to
-#define THERMOSTATPIN A6 // what pin the Thermostat status is connected to
+#define THERMOSTATPIN A5 // what pin the Thermostat status is connected to
 int thermostatStatusSwitch = 0;
+
+long thermostatSensorPeriod = 10000; // check Thermostat status every 10 seconds
+unsigned long thermostatSensorCurrentPeriod = 0;
+unsigned long thermostatSensorPreviousPeriod = 0;
+
 int thermoSensor = 0;
-float thermoVoltage = 0.0;
-float thermoCurrent = 0.0;
+int thermoSensorSum = 0;
+int thermoSensorAvarage = 0;
+int thermoSensorAvaragePrevious = 0;
+
+// current sensor high side http://henrysbench.capnfatz.com/henrys-bench/arduino-current-measurements/arduino-max471-current-sensor-module-tutorial/
+float thermoSensorCurrent = 0.00;
+float thermoSensorCurrentPrevious = 0.00;
+
+// voltage sensor http://henrysbench.capnfatz.com/henrys-bench/arduino-voltage-measurements/arduino-25v-voltage-sensor-module-user-manual/
+float thermoSensorVoltageOut = 0.00;
+float thermoSensorVoltageIn = 0.00;
+float thermoSensorVoltageR1 = 30000.0; //  
+float thermoSensorVoltageR2 = 7500.0; // 
+
 int thermostatStatus = 0;
 int thermostatStatusPrevious = 0;
 
@@ -212,7 +229,7 @@ void loop() {
       if(ACTIONTHERMOSTAT == homerfm69.getAction()){
         thermostatStatus = digitalRead(THERMOSTATPIN); 
         
-        if(1 == thermostatStatus){
+        if(3 <= thermostatStatus){
           sprintf(message, "s:%d", 1); // is on
         }else {
           sprintf(message, "s:%d", 0); // is off
@@ -255,46 +272,95 @@ void loop() {
       Serial.println(homerfm69.getErrorId());
     }
   }
-    
-  // Thermostate status
-  thermoSensor = analogRead(THERMOSTATPIN);
-  /*thermoVoltage = thermoSensor * (5.0 / 1024.0);
-  if(1.00 > thermoVoltage){
-    thermostatStatus = 1; // is on
-  }else {
-    thermostatStatus = 0; // is off
-  }*/ 
-  thermoCurrent = (thermoSensor * 5.0 )/ 1024.0; // scale the ADC  
-       
-  Serial.print("Current = "); // shows the voltage measured     
-  Serial.print(thermoCurrent,3); //3 digits after decimal point
-  Serial.println(" amps DC"); //3 digits after decimal point  
-  delay(1500);  
   
-  if(thermostatStatus != thermostatStatusPrevious){
-    thermostatStatusPrevious = thermostatStatus;
+  // Thermostate status
+  // check every 10 seconds
+  unsigned long thermostatSensorCurrentPeriod = millis();
+  if (thermostatSensorCurrentPeriod - thermostatSensorPreviousPeriod >= thermostatSensorPeriod || thermostatSensorCurrentPeriod < thermostatSensorPreviousPeriod) {
+    thermostatSensorPreviousPeriod = thermostatSensorCurrentPeriod;
+  
+    //Serial.println("Thermostate Sensor");
     
-    memset(&message, 0, sizeof(message)); // clear it
+    thermoSensorSum = 0;
+    thermoSensor = analogRead(THERMOSTATPIN);
     
-    if(1 == thermostatStatus){
-      sprintf(message, "s:%d", 1); // is on
-    }else {
-      sprintf(message, "s:%d", 0); // is off
+    thermoSensorAvarage = 0;
+    thermoSensorAvarage = thermoSensor;
+    
+    thermoSensorSum = 0;
+    /*for (int i=0; i <= 10; i++){
+      thermoSensor = 0;
+      thermoSensor = analogRead(THERMOSTATPIN);
+      thermoSensorSum = thermoSensorSum + thermoSensor;
+    }
+    thermoSensorAvarage = 0;
+    thermoSensorAvarage = thermoSensorSum / 10;*/
+    
+    //Serial.print("thermoSensorAvarage: ");
+    //Serial.println(thermoSensorAvarage);
+    
+    //thermoSensorCurrent = (thermoSensorAvarage * 5.0) / 1024.0;
+    
+    //Serial.print("thermoSensorCurrent: ");
+    //Serial.println(thermoSensorCurrent, 3);
+    
+    thermoSensorVoltageOut = 0;
+    thermoSensorVoltageIn = 0;
+    
+    thermoSensorVoltageOut = (thermoSensorAvarage * 5.0) / 1024.0; // see text
+    thermoSensorVoltageIn = thermoSensorVoltageOut / (thermoSensorVoltageR2/(thermoSensorVoltageR1+thermoSensorVoltageR2));
+    
+    //Serial.print("thermoSensorVoltageOut: ");
+    //Serial.println(thermoSensorVoltageOut, 2);
+    
+    //Serial.print("thermoSensorVoltageIn: ");
+    //Serial.println(thermoSensorVoltageIn, 2);
+    
+    if( 4.00 < thermoSensorVoltageOut){
+      thermostatStatus = 0; // is off, there is more than 4 volt
+    }
+    if( 2.00 > thermoSensorVoltageOut){
+      thermostatStatus = 1; // is on, there is less than 2 volt
     }
     
-    memset(&payload, 0, sizeof(payload)); // clear it
-    sprintf(payload, "ac:%d;msg:%s", ACTIONTHERMOSTAT, message);
+    //Serial.print("thermostatStatus: ");
+    //Serial.println(thermostatStatus);
     
-    Serial.print("Sending:  ");
-    Serial.println(payload);
+    /*if( 7 <= (thermoSensorAvarage - thermoSensorAvaragePrevious)){ // above 3 is on
+      thermostatStatus = 1; // is on
+    }
+    if( 7 <= (thermoSensorAvaragePrevious - thermoSensorAvarage)){ // above 3 is on
+      thermostatStatus = 0; // is off
+    }
     
-    bool success;
-    success = homerfm69.sendWithRetry(1, payload, strlen(payload)+2);
-    delay(1000);
+    thermoSensorCurrentPrevious = thermoSensorCurrent;
+    thermoSensorAvaragePrevious = thermoSensorAvarage;*/
     
-    if(homerfm69.getError()){
-      Serial.print("err:rfm69,");
-      Serial.println(homerfm69.getErrorId());
+    if(thermostatStatus != thermostatStatusPrevious){
+      thermostatStatusPrevious = thermostatStatus;
+      
+      memset(&message, 0, sizeof(message)); // clear it
+      
+      if(1 == thermostatStatus){
+        sprintf(message, "s:%d", 1); // is on
+      }else {
+        sprintf(message, "s:%d", 0); // is off
+      }
+      
+      memset(&payload, 0, sizeof(payload)); // clear it
+      sprintf(payload, "ac:%d;msg:%s", ACTIONTHERMOSTAT, message);
+      
+      Serial.print("Sending:  ");
+      Serial.println(payload);
+      
+      bool success;
+      success = homerfm69.sendWithRetry(1, payload, strlen(payload)+2);
+      delay(1000);
+      
+      if(homerfm69.getError()){
+        Serial.print("err:rfm69,");
+        Serial.println(homerfm69.getErrorId());
+      }
     }
   }
   

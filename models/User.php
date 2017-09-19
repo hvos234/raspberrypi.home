@@ -21,22 +21,22 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
             'id' => '100',
             'username' => 'admin',
             /**
-						 * Added by JD
-						 * See http://www.yiiframework.com/doc-2.0/guide-security-passwords.html
-						 * $hash = Yii::$app->getSecurity()->generatePasswordHash(password)
-						 */
-						//'password' => 'admin', // old
-            'password' => '$2y$13$bPCaFw4MsWOh.pOC4gdHculqnJcCqfxzi/M4ZS5SPsKJ47OztEdSW',
+             * Added by JD
+             * See http://www.yiiframework.com/doc-2.0/guide-security-passwords.html
+             * $hash = Yii::$app->getSecurity()->generatePasswordHash(password)
+             */
+            //'password' => 'admin', // old
+            'password' => '$2y$13$0/r76NqDc2X4wdb96ezZEuNKctP12crU83I2U5iuNL3RNyHC/b7Fy',
             'authKey' => 'test100key',
             'accessToken' => '100-token',
         ],
-        /*'101' => [
+        '101' => [
             'id' => '101',
             'username' => 'demo',
             'password' => 'demo',
             'authKey' => 'test101key',
             'accessToken' => '101-token',
-        ],*/
+        ],
     ];
 
 
@@ -112,11 +112,11 @@ class User extends \yii\base\Object implements \yii\web\IdentityInterface
     public function validatePassword($password)
     {
         /**
-			 * Added by JD
-			 * See http://www.yiiframework.com/doc-2.0/guide-security-passwords.html
-			 * $hash = Yii::$app->getSecurity()->generatePasswordHash(password)
-			 */
-      //return $this->password === $password; // old
-			return Yii::$app->getSecurity()->validatePassword($password, $this->password);
+         * Added by JD
+         * See http://www.yiiframework.com/doc-2.0/guide-security-passwords.html
+         * $hash = Yii::$app->getSecurity()->generatePasswordHash(password)
+         */
+        //return $this->password === $password; // old
+        return Yii::$app->getSecurity()->validatePassword($password, $this->password);
     }
 }
