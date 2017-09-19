@@ -2,7 +2,7 @@
 .idea
 
 # netbeans project files
-nbproject
+/nbproject/*
 
 # zend studio for eclipse project files
 .buildpath
@@ -12,8 +12,50 @@ nbproject
 # windows thumbnail cache
 Thumbs.db
 
+# config
+/config/db.php
+
+# runtime
+/runtime/*
+
 # composer vendor dir
-/vendor
+/vendor/behat/*
+/vendor/bin/*
+/vendor/bower/*
+/vendor/cebe/*
+/vendor/codeception/*
+/vendor/composer/*
+/vendor/doctrine/*
+/vendor/ezyang/*
+/vendor/fzaninotto/*
+/vendor/guzzlehttp/*
+/vendor/myclabs/*
+/vendor/phpdocumentor/*
+/vendor/phpspec/*
+/vendor/phpunit/*
+/vendor/psr/*
+/vendor/sebastian/*
+/vendor/stecman/*
+/vendor/swiftmailer/*
+/vendor/symfony/*
+/vendor/webmozart/*
+/vendor/yiisoft/*
+/vendor/autoload.php
+/vendor/composer.json
+/vendor/composer.lock
+
+# web
+/web/assets/*
+
+# rest
+/codeception.yml
+/composer.json
+/composer.lock
+/LICENSE.md
+/README.md
+/requirements.php
+/yii
+/yii.bat
 
 # composer itself is not needed
 composer.phar

@@ -8,6 +8,8 @@
 namespace yii\console\controllers;
 
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\base\InvalidParamException;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\helpers\Console;
@@ -56,7 +58,7 @@ class FixtureController extends Controller
      * that disables and enables integrity check, so your data can be safely loaded.
      */
     public $globalFixtures = [
-        'yii\test\InitDb',
+        'yii\test\InitDbFixture',
     ];
 
 
@@ -310,7 +312,7 @@ class FixtureController extends Controller
      * Prompts user with confirmation if fixtures should be loaded.
      * @param array $fixtures
      * @param array $except
-     * @return boolean
+     * @return bool
      */
     private function confirmLoad($fixtures, $except)
     {
@@ -342,7 +344,7 @@ class FixtureController extends Controller
      * Prompts user with confirmation for fixtures that should be unloaded.
      * @param array $fixtures
      * @param array $except
-     * @return boolean
+     * @return bool
      */
     private function confirmUnload($fixtures, $except)
     {
@@ -381,7 +383,7 @@ class FixtureController extends Controller
     /**
      * Checks if needed to apply all fixtures.
      * @param string $fixture
-     * @return boolean
+     * @return bool
      */
     public function needToApplyAll($fixture)
     {
@@ -413,10 +415,28 @@ class FixtureController extends Controller
         $foundFixtures = [];
 
         foreach ($files as $fixture) {
-            $foundFixtures[] = basename($fixture, 'Fixture.php');
+            $foundFixtures[] = $this->getFixtureRelativeName($fixture);
         }
 
         return $foundFixtures;
+    }
+
+    /**
+     * Calculates fixture's name
+     * Basically, strips [[getFixturePath()]] and `Fixture.php' suffix from fixture's full path
+     * @see getFixturePath()
+     * @param string $fullFixturePath Full fixture path
+     * @return string Relative fixture name
+     */
+    private function getFixtureRelativeName($fullFixturePath)
+    {
+        $fixturesPath = FileHelper::normalizePath($this->getFixturePath());
+        $fullFixturePath = FileHelper::normalizePath($fullFixturePath);
+
+        $relativeName = substr($fullFixturePath, strlen($fixturesPath)+1);
+        $relativeDir = dirname($relativeName) === '.' ? '' : dirname($relativeName) . DIRECTORY_SEPARATOR;
+
+        return $relativeDir . basename($fullFixturePath, 'Fixture.php');
     }
 
     /**
@@ -430,6 +450,8 @@ class FixtureController extends Controller
 
         foreach ($fixtures as $fixture) {
             $isNamespaced = (strpos($fixture, '\\') !== false);
+            // replace linux' path slashes to namespace backslashes, in case if $fixture is non-namespaced relative path
+            $fixture = str_replace('/', '\\', $fixture);
             $fullClassName = $isNamespaced ? $fixture . 'Fixture' : $this->namespace . '\\' . $fixture . 'Fixture';
 
             if (class_exists($fullClassName)) {
@@ -480,10 +502,15 @@ class FixtureController extends Controller
 
     /**
      * Returns fixture path that determined on fixtures namespace.
+     * @throws InvalidConfigException if fixture namespace is invalid
      * @return string fixture path
      */
     private function getFixturePath()
     {
-        return Yii::getAlias('@' . str_replace('\\', '/', $this->namespace));
+        try {
+            return Yii::getAlias('@' . str_replace('\\', '/', $this->namespace));
+        } catch (InvalidParamException $e) {
+            throw new InvalidConfigException('Invalid fixture namespace: "' . $this->namespace . '". Please, check your FixtureController::namespace parameter');
+        }
     }
 }

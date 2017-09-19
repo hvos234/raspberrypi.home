@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a
+class ComposerStaticInit16f3508247a73b640426e67fbf57f71f
 {
     public static $files = array (
         '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
@@ -19,6 +19,7 @@ class ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a
         ),
         'd' => 
         array (
+            'dosamigos\\datetimepicker\\' => 25,
             'dosamigos\\datepicker\\' => 21,
         ),
         'c' => 
@@ -39,6 +40,10 @@ class ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a
         'yii\\' => 
         array (
             0 => __DIR__ . '/..' . '/yiisoft/yii2',
+        ),
+        'dosamigos\\datetimepicker\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/2amigos/yii2-date-time-picker-widget/src',
         ),
         'dosamigos\\datepicker\\' => 
         array (
@@ -63,9 +68,9 @@ class ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc56e8f3f3d3a7400c3ef6d5e3df04d7a::$prefixesPsr0;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit16f3508247a73b640426e67fbf57f71f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit16f3508247a73b640426e67fbf57f71f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit16f3508247a73b640426e67fbf57f71f::$prefixesPsr0;
 
         }, null, ClassLoader::class);
     }
