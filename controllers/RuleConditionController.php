@@ -144,13 +144,13 @@ class RuleConditionController extends Controller
         return json_encode($models); 
     }
     
-    public function actionAjaxGetIds($model){
-        $model_ids = RuleCondition::getIds($model);
+    public function actionAjaxGetModelIds($model){
+        $model_ids = RuleCondition::getModelIds($model);
         return json_encode($model_ids);
     }
     
-    public function actionAjaxGetFields($model, $model_id){
-        $model_fields = RuleCondition::getFields($model, $model_id);
+    public function actionAjaxGetModelFields($model, $model_id){
+        $model_fields = RuleCondition::getModelFields($model, $model_id);
         return json_encode($model_fields);
     }
 }

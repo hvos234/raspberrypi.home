@@ -11,7 +11,7 @@ class HighchartsAsset extends AssetBundle
     public $css = [
     ];
     public $js = [
-        'js/highcharts-5.0.14',
+        'libraries/Highcharts-5.0.14/code/highcharts.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

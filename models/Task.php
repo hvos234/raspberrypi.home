@@ -291,7 +291,8 @@ class Task extends \yii\db\ActiveRecord
             
             return $id;
         }
-		
+    
+    // default rule functions
     public static function ruleCondition($id){
         return Task::ruleExecute($id);
     }
@@ -304,12 +305,18 @@ class Task extends \yii\db\ActiveRecord
         return Task::execute($id);
     }
     
-    public static function ids(){
-        $ids = Task::find()           
+    // default model functions
+    public static function modelIds(){
+        $ids = Task::find()
+            ->select(['id', 'name'])
             ->asArray()
             ->all();
         
         return ArrayHelper::map($ids, 'id', 'name');
+    }
+    
+    public static function moledFields($id){
+        return [];
     }
     
     public static function getModelIds(){

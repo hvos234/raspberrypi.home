@@ -28,43 +28,46 @@ use yii\helpers\ArrayHelper;
 class RuleAction extends \yii\db\ActiveRecord
 {
 	public $actions = [];
-	public $actions_values = [];
+	public $action_values = [];
 	public $action_sub_values = [];
 	public $values = [];
-	public $values_values = [];
+	public $value_values = [];
 	public $value_sub_values = [];
 	public $weights = [];
 	
 	public function init() {
-		// actions
-        $this->actions = RuleAction::getActionModels();
-        
-		// translate
-		foreach ($this->actions as $actions => $name){
-			$this->actions[$actions] = Yii::t('app', $name);
-		}
-        
-        $this->action = current($this->actions);
-        
-		// actions values
-        $this->actions_values = RuleAction::getIds($this->action);
+            // actions
+            $this->actions = RuleAction::getActionModels();
+
+            // translate
+            foreach ($this->actions as $actions => $name){
+                $this->actions[$actions] = Yii::t('app', $name);
+            }
+
+            $this->action = current($this->actions);
+            $this->action_values = RuleAction::getModelIds($this->action);
+            
+            $this->action_value = current($this->action_values);
+            $this->action_sub_values = RuleAction::getModelFields($this->action, $this->action_value);
+
+            // values
+            $this->values = RuleAction::getValueModels();
+
+            // translate
+            foreach ($this->values as $values => $name){
+                $this->values[$values] = Yii::t('app', $name);
+            }
+
+            $this->value = current($this->values);
+            $this->value_values = RuleAction::getModelIds($this->value);
+            
+            $this->value_value = current($this->value_values);
+            $this->value_sub_values = RuleAction::getModelFields($this->value, $this->value_value);
+            
+            // weight
+            $this->weights = RuleAction::getWeights($this->rule_id);
 		
-		// values
-        $this->values = RuleAction::getValueModels();
-        
-		// translate
-		foreach ($this->values as $values => $name){
-			$this->values[$values] = Yii::t('app', $name);
-		}
-        
-        $this->value = current($this->values);
-		
-		// values_values
-        $this->values_values = RuleAction::getIds($this->value);
-		
-        $this->weights = RuleAction::getWeights($this->rule_id);
-		
-		parent::init();
+            parent::init();
 	}
 	
     /**
@@ -133,13 +136,38 @@ class RuleAction extends \yii\db\ActiveRecord
          ];
     }
     
-    public static function modelAllIdName($rule_id = 0){
+    // default model functions
+    public static function modelIds($rule_id = 0){
         $model_ids_name = RuleAction::find()
             ->where(['rule_id' => $rule_id])
             ->asArray()
             ->all();
         
-        return ArrayHelper::map($model_ids_name, 'id', 'action');
+        return ArrayHelper::map($model_ids_name, 'id', 'condition');
+    }
+    
+    public static function modelFields(){
+        
+    }
+    
+    public static function getModelIds($model){
+        $model_ids = ['none' => Yii::t('app', '- None -')];
+    
+        if(class_exists('app\models\\' . $model)){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
+        }
+    
+        return $model_ids; 
+    }
+    
+    public static function getModelFields($model, $model_id){
+        $fields = ['none' => Yii::t('app', '- None -')];
+    
+        if(class_exists('app\models\\' . $model)){
+            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
+        }
+    
+        return $fields; 
     }
     
     public static function getActionModels(){
@@ -167,7 +195,7 @@ class RuleAction extends \yii\db\ActiveRecord
         // create weights
         $key = 0;
         $weights = [];
-        foreach(RuleAction::modelAllIdName($rule_id) as $id => $name){
+        foreach(RuleAction::modelIds($rule_id) as $id => $name){
             $weights[$key] = $key;
             $key++;
         }
@@ -178,17 +206,7 @@ class RuleAction extends \yii\db\ActiveRecord
         }
         
         return $weights;
-    }
-    
-    public static function getIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
-    
-        if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'ids'));	
-        }
-    
-        return $model_ids; 
-    }    
+    }   
 		
     public static function execute($rule_id){
         Yii::info('$rule_id: ' . $rule_id, 'RuleAction');

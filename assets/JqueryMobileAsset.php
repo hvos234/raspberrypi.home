@@ -14,7 +14,7 @@ class JqueryMobileAsset extends AssetBundle
         'assets/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css',
     ];*/
     public $js = [
-        'assets/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js',
+        'libraries/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

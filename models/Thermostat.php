@@ -159,7 +159,7 @@ class Thermostat extends \yii\db\ActiveRecord
         $model_ids = ['none' => Yii::t('app', '- None -')];
     
         if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'modelAllIdName'));	
+            $model_ids += call_user_func(array('app\models\\' . $model, 'ids'));	
         }
     
         return $model_ids; 

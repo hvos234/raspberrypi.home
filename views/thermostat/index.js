@@ -336,7 +336,6 @@ function thermostatSetModelIds(index, on_off_temperature){
         url: '?r=thermostat/ajax-get-model-ids',  
         data: {model: model},
         dataType: 'json', // the return is a json string
-        async: true,
         success: function(data) {
             if(data.error) {
                 alert(data.error);
@@ -477,7 +476,6 @@ function thermostatSetTemperature(index){
         url: '?r=thermostat/ajax-execute-model',  
         data: {model: temperature_model, model_id: temperature_model_id},
         dataType: 'json', // the return is a json string
-        async: true,
         success: function(data) {
             if(data.error) {
                 alert(data.error);
@@ -672,7 +670,6 @@ function thermostatTargetSetSetting(index){
             url: '?r=thermostat/ajax-execute-model',  
             data: {model: model, model_id: model_id},
             dataType: 'json', // the return is a json string
-            async: true,
             success: function(data) {
                 if(data.error) {
                     alert(data.error);
@@ -778,7 +775,6 @@ function thermostatDefaultSetSetting(index){
             url: '?r=thermostat/ajax-execute-model',  
             data: {model: model, model_id: model_id},
             dataType: 'json', // the return is a json string
-            async: true,
             success: function(data) {
                 if(data.error) {
                     alert(data.error);

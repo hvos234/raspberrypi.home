@@ -54,7 +54,7 @@ use yii\widgets\ActiveForm;
 				<tr id="RuleCondition_<?= $index; ?>" class="RuleCondition-row" style="display:<?= (Yii::t('app', '- None -') == $modelRuleCondition['value_value'] ? 'none' : 'table-row') ?>;">
 					<td><?= $form->field($modelRuleCondition, "[$index]condition", ['inputOptions' => ['class' => 'form-control RuleCondition-condition', 'index' => $index]])->dropDownList($modelRuleCondition->conditions)->label(false) ?></td>
 					<td><?= $form->field($modelRuleCondition, "[$index]condition_value", ['inputOptions' => ['class' => 'form-control RuleCondition-condition_value', 'index' => $index]])->dropDownList($modelRuleCondition->conditions_values)->label(false) ?></td>
-					<td><?= $form->field($modelRuleCondition, "[$index]condition_sub_value", ['inputOptions' => ['class' => 'form-control RuleCondition-condition_sub_value', 'index' => $index]])->dropDownList($modelRuleCondition->conditions_sub_values)->label(false) ?></td>
+					<td><?= $form->field($modelRuleCondition, "[$index]condition_sub_value", ['inputOptions' => ['class' => 'form-control RuleCondition-condition_sub_value', 'index' => $index]])->dropDownList($modelRuleCondition->condition_sub_values)->label(false) ?></td>
 					<td><?= $form->field($modelRuleCondition, "[$index]equation")->dropDownList($modelRuleCondition->equations)->label(false) ?></td>
 					
 					<?php /*<td><?= $form->field($modelRuleCondition, "[$index]value", ['inputOptions' => ['class' => 'form-control RuleCondition-value']])->textInput(['maxlength' => true])->label(false) ?></td>*/ ?>
@@ -62,7 +62,7 @@ use yii\widgets\ActiveForm;
 					<td>
 						<table>
 							<tr>								
-								<td><?= $form->field($modelRuleCondition, "[$index]values_values", ['inputOptions' => ['class' => 'form-control RuleCondition-values_values', 'index' => $index]])->dropDownList($modelRuleCondition->values_values, ['options' => [$modelRuleCondition['value_value'] => ['Selected' => true]]])->label(false) ?></td>
+								<td><?= $form->field($modelRuleCondition, "[$index]values_values", ['inputOptions' => ['class' => 'form-control RuleCondition-values_values', 'index' => $index]])->dropDownList($modelRuleCondition->value_values, ['options' => [$modelRuleCondition['value_value'] => ['Selected' => true]]])->label(false) ?></td>
                                 <td><?= $form->field($modelRuleCondition, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control RuleCondition-value_sub_value', 'index' => $index]])->dropDownList($modelRuleCondition->value_sub_values, ['options' => [$modelRuleCondition['value_sub_value'] => ['Selected' => true]]])->label(false) ?></td>
                                 <td><?= $form->field($modelRuleCondition, "[$index]value_value", ['inputOptions' => ['class' => 'form-control RuleCondition-value_value', 'index' => $index]])->textInput(['maxlength' => true, 'readonly' => array_key_exists($modelRuleCondition['value_value'], $modelRuleCondition->values)])->label(false) ?></td>
                             </tr>

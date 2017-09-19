@@ -178,13 +178,19 @@ class Setting extends \yii\db\ActiveRecord
 		/*public static function getAllIdName(){
 			return ArrayHelper::map(Setting::find()->asArray()->all(), 'id', 'name');
 		}*/
-        
-        public static function ids(){
-            $ids = Setting::find()           
+                
+        // default model functions
+        public static function modelIds(){
+            $ids = Setting::find()
+                ->select(['id', 'name'])
                 ->asArray()
                 ->all();
 
             return ArrayHelper::map($ids, 'id', 'name');
+        }
+        
+        public static function modelFields($id){
+            return [];
         }
 		
 		public static function getAllByIdAndName(){

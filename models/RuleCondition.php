@@ -32,11 +32,11 @@ class RuleCondition extends \yii\db\ActiveRecord
 {
 	public $conditions = [];
 	public $conditions_values = [];
-	public $conditions_sub_values = [];
+	public $condition_sub_values = [];
 	
 	public $equations = [];
 	public $values = [];
-	public $values_values = [];
+	public $value_values = [];
 	public $value_sub_values = [];
 	public $weights = [];
 	
@@ -44,49 +44,55 @@ class RuleCondition extends \yii\db\ActiveRecord
 	public $numbers_parent = [];
 	
 	public function init() {
-        // conditions
-		$this->conditions = RuleCondition::getConditionModels();
+            // conditions
+            $this->conditions = RuleCondition::getConditionModels();
         
-        // translate
-		foreach ($this->conditions as $condition => $name){
-			$this->conditions[$condition] = Yii::t('app', $name);
-		}
+            // translate
+            foreach ($this->conditions as $condition => $name){
+                $this->conditions[$condition] = Yii::t('app', $name);
+            }
         
-        $this->condition = current($this->conditions);
-        $this->conditions_values = RuleCondition::getIds($this->condition);
+            $this->condition = current($this->conditions);
+            $this->conditions_values = RuleCondition::getModelIds($this->condition);
+            
+            $this->condition_sub_value = current($this->conditions_values);
+            $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_sub_value);
         		
-		// equations
-        $this->equations = RuleCondition::getEquations();
+            // equations
+            $this->equations = RuleCondition::getEquations();
                 
-		// translate all equations
-		foreach ($this->equations as $key => $equation){
-			$this->equations[$key] = Yii::t('app', $equation);
-		}
+            // translate all equations
+            foreach ($this->equations as $key => $equation){
+                $this->equations[$key] = Yii::t('app', $equation);
+            }
+
+            // key before value equations
+            foreach ($this->equations as $key => $equation){
+                $this->equations[$key] = $key . ', ' .  $equation;
+            }
 		
-		// key before value equations
-		foreach ($this->equations as $key => $equation){
-			$this->equations[$key] = $key . ', ' .  $equation;
-		}
-		
-		// values
-        $this->values = RuleCondition::getValueModels();
+            // values
+            $this->values = RuleCondition::getValueModels();
         
-		// translate
-		foreach ($this->values as $value => $name){
-			$this->values[$value] = Yii::t('app', $name);
-		}
+            // translate
+            foreach ($this->values as $value => $name){
+                $this->values[$value] = Yii::t('app', $name);
+            }
         
-        $this->value = current($this->values);
-        $this->values_values = RuleCondition::getIds($this->value);
-        
-        // weight
-        $this->weights = RuleCondition::getWeights($this->rule_id);
-        
-        // numbers
-        $this->numbers = RuleCondition::getNumbers($this->rule_id);
-        $this->numbers_parent = RuleCondition::getNumbersParent($this->rule_id);
+            $this->value = current($this->values);
+            $this->value_value = RuleCondition::getModelIds($this->value);
+            
+            $this->value_sub_value = current($this->value_value);
+            $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_sub_value);
+
+            // weight
+            $this->weights = RuleCondition::getWeights($this->rule_id);
+
+            // numbers
+            $this->numbers = RuleCondition::getNumbers($this->rule_id);
+            $this->numbers_parent = RuleCondition::getNumbersParent($this->rule_id);
         				
-		parent::init();
+            parent::init();
 	}
 	
     /**
@@ -161,7 +167,8 @@ class RuleCondition extends \yii\db\ActiveRecord
          ];
     }
     
-    public static function modelAllIdName($rule_id = 0){
+    // default model functions
+    public static function modelIds($rule_id = 0){
         $model_ids_name = RuleCondition::find()
             ->where(['rule_id' => $rule_id])
             ->asArray()
@@ -170,10 +177,30 @@ class RuleCondition extends \yii\db\ActiveRecord
         return ArrayHelper::map($model_ids_name, 'id', 'condition');
     }
     
-    public static function modelAllNameField(){
+    public static function modelFields(){
         
     }
-        
+    
+    public static function getModelIds($model){
+        $model_ids = ['none' => Yii::t('app', '- None -')];
+    
+        if(class_exists('app\models\\' . $model)){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
+        }
+    
+        return $model_ids; 
+    }
+    
+    public static function getModelFields($model, $model_id){
+        $fields = ['none' => Yii::t('app', '- None -')];
+    
+        if(class_exists('app\models\\' . $model)){
+            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
+        }
+    
+        return $fields; 
+    }
+    
     public static function getConditionModels(){
         return [
             //'taskdefined' => 'TaskDefined',
@@ -198,26 +225,6 @@ class RuleCondition extends \yii\db\ActiveRecord
         ];
     }
     
-    public static function getIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
-    
-        if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'ids'));	
-        }
-    
-        return $model_ids; 
-    }
-    
-    public static function getFields($model, $model_id){
-        $fields = ['none' => Yii::t('app', '- None -')];
-    
-        if(class_exists('app\models\\' . $model)){
-            $fields += call_user_func(array('app\models\\' . $model, 'fields'), $model_id);	
-        }
-    
-        return $fields; 
-    }
-    
     public static function getEquations(){
         return [
             '==' => 'Equal',
@@ -237,7 +244,7 @@ class RuleCondition extends \yii\db\ActiveRecord
         // create weights
         $key = 0;
         $weights = [];
-        foreach(RuleCondition::modelAllIdName($rule_id) as $id => $name){
+        foreach(RuleCondition::modelIds($rule_id) as $id => $name){
             $weights[$key] = $key;
             $key++;
         }
@@ -254,7 +261,7 @@ class RuleCondition extends \yii\db\ActiveRecord
         // create weights
         $key = 0;
         $numbers = [];
-        foreach(RuleCondition::modelAllIdName($rule_id) as $id => $name){
+        foreach(RuleCondition::modelIds($rule_id) as $id => $name){
             $numbers[$key] = $key;
             $key++;
         }
@@ -271,7 +278,7 @@ class RuleCondition extends \yii\db\ActiveRecord
         // create weights
         $key = 0;
         $numbers_parent = [];
-        foreach(RuleCondition::modelAllIdName($rule_id) as $id => $name){
+        foreach(RuleCondition::modelIds($rule_id) as $id => $name){
             $numbers_parent[$key] = $key;
             $key++;
         }
