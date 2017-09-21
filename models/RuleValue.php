@@ -39,9 +39,9 @@ class RuleValue extends Model {
 		return false;
 	}
 	
-	public static function getAllIdName(){
+	/*public static function getAllIdName(){
 		return ArrayHelper::map(RuleValue::all(), 'id', 'name');
-	}
+	}*/
 	
 	public static function execute($id){
 		$model = RuleValue::one($id);
@@ -70,4 +70,13 @@ class RuleValue extends Model {
 	public static function ruleExecute($id){
 		return HelperData::dataExplode(RuleValue::execute($id));		
 	}
+    
+    public static function modelIds(){
+		$ids = RuleValue::all();
+        return ArrayHelper::map($ids, 'id', 'name');
+	}
+    
+    public static function modelFields(){
+        return [];
+    }
 }

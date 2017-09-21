@@ -139,12 +139,30 @@ class Thermostat extends \yii\db\ActiveRecord
          ];
     }
     
-    public static function ids(){
+    public static function modelIds(){
         $ids = Thermostat::find()           
             ->asArray()
             ->all();
         
         return ArrayHelper::map($ids, 'id', 'name');
+    }
+    
+    public static function modelFields($id){
+        if('none' == $id){
+            return [];
+        }
+        
+        $model = new Thermostat();
+        $attributeLabels = $model->attributeLabels();
+        
+        $fields = [];
+        foreach($attributeLabels as $field => $name){
+            if('id' != $field){
+                $fields[$field] = $name;
+            }
+        }
+                
+        return $fields;
     }
     
     public static function getModels(){
@@ -159,11 +177,21 @@ class Thermostat extends \yii\db\ActiveRecord
         $model_ids = ['none' => Yii::t('app', '- None -')];
     
         if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'ids'));	
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
         }
     
         return $model_ids; 
     }
+    
+    /*public static function getModelFields($model){
+        $model_ids = ['none' => Yii::t('app', '- None -')];
+    
+        if(class_exists('app\models\\' . $model)){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
+        }
+    
+        return $model_ids; 
+    }*/
     
     public static function getWeights(){
         // create weights

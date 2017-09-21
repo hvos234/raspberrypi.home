@@ -43,7 +43,7 @@ $this->registerCssFile('@web/css/chart.css');
                     <h3 class="chart-header" index="<?= $index; ?>"><span class="text"><?= (empty($model->name) ? 'Chart ' . $index : $model->name)?></span></h3>
 
                     <div>
-                        <?php echo $form->field($model, '[' . $index . ']id', ['inputOptions' => ['class' => 'form-control id', 'index' => $index]])->hiddenInput()->label(false); ?>
+                        <?= $form->field($model, '[' . $index . ']id', ['inputOptions' => ['class' => 'form-control id', 'index' => $index]])->hiddenInput()->label(false); ?>
 
                         <?= $form->field($model, '[' . $index . ']name', ['inputOptions' => ['class' => 'form-control name', 'index' => $index]])->textInput(['maxlength' => true]) ?>
                         

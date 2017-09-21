@@ -87,10 +87,13 @@ class RuleDate extends Model {
 		return ArrayHelper::map(RuleDate::all(), 'id', 'name');
 	}*/
     
-    public static function ids(){
+    public static function modelIds(){
         $ids = RuleDate::all();
-        
         return ArrayHelper::map($ids, 'id', 'name');
+    }
+    
+    public static function modelFields(){
+        return [];
     }
 	
 	public static function execute($id){

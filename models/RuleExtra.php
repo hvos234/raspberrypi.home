@@ -37,10 +37,10 @@ class RuleExtra extends Model {
 		return false;
 	}
 	
-	public static function getAllIdName(){
+	/*public static function getAllIdName(){
 		return ArrayHelper::map(RuleExtra::all(), 'id', 'name');
-	}
-	
+	}*/
+    
 	public static function execute($id){
 		$model = RuleExtra::one($id);
 		return call_user_func('app\models\RuleExtra::' . $model->function); // use app\models\ or else it cannot find class
@@ -57,8 +57,17 @@ class RuleExtra extends Model {
 	public static function ruleExecute($id){
 		return HelperData::dataExplode(RuleExtra::execute($id));		
 	}
-	
-	public static function IamReallyAthome(){
+    
+    public static function modelIds(){
+		$ids = RuleExtra::all();
+        return ArrayHelper::map($ids, 'id', 'name');
+	}
+    
+    public static function modelFields(){
+        return [];
+    }
+
+    public static function IamReallyAthome(){
 		$ip_addressen = Setting::find()->select('data')->where(['name' => 'i_am_really_at_home_ip_addressen'])->one();
 		$ip_addressen = HelperData::dataExplode($ip_addressen->data);
 		

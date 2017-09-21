@@ -19,7 +19,7 @@ class RuleConditionSearch extends RuleCondition
     {
         return [
             [['id', 'rule_id', 'weight'], 'integer'],
-            [['condition', 'condition_value', 'equation', 'value', 'created_at', 'updated_at'], 'safe'],
+            [['condition', 'condition_value', 'condition_sub_value', 'equation', 'value', 'value_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -61,6 +61,7 @@ class RuleConditionSearch extends RuleCondition
             'condition_sub_value' => $this->condition_sub_value,
             'value_value' => $this->value_value,
             'value_sub_value' => $this->value_sub_value,
+            'value_sub_value2' => $this->value_sub_value2,
             'rule_id' => $this->rule_id,
             'weight' => $this->weight,
             'number' => $this->number,

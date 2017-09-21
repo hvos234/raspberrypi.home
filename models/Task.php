@@ -315,7 +315,7 @@ class Task extends \yii\db\ActiveRecord
         return ArrayHelper::map($ids, 'id', 'name');
     }
     
-    public static function moledFields($id){
+    public static function modelFields($id){
         return [];
     }
     

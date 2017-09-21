@@ -31,7 +31,7 @@ use yii\helpers\ArrayHelper;
 class RuleCondition extends \yii\db\ActiveRecord
 {
 	public $conditions = [];
-	public $conditions_values = [];
+	public $condition_values = [];
 	public $condition_sub_values = [];
 	
 	public $equations = [];
@@ -44,19 +44,17 @@ class RuleCondition extends \yii\db\ActiveRecord
 	public $numbers_parent = [];
 	
 	public function init() {
+            $this->rule_id = 0;
+        
             // conditions
-            $this->conditions = RuleCondition::getConditionModels();
-        
-            // translate
-            foreach ($this->conditions as $condition => $name){
-                $this->conditions[$condition] = Yii::t('app', $name);
-            }
-        
+            $this->conditions = RuleCondition::getConditionModels(); 
             $this->condition = current($this->conditions);
-            $this->conditions_values = RuleCondition::getModelIds($this->condition);
             
-            $this->condition_sub_value = current($this->conditions_values);
-            $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_sub_value);
+            $this->condition_values = RuleCondition::getModelIds($this->condition);
+            $this->condition_value = current($this->condition_values);
+            
+            $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_value);
+            $this->condition_sub_value = current($this->condition_sub_values);
         		
             // equations
             $this->equations = RuleCondition::getEquations();
@@ -73,17 +71,13 @@ class RuleCondition extends \yii\db\ActiveRecord
 		
             // values
             $this->values = RuleCondition::getValueModels();
-        
-            // translate
-            foreach ($this->values as $value => $name){
-                $this->values[$value] = Yii::t('app', $name);
-            }
-        
             $this->value = current($this->values);
-            $this->value_value = RuleCondition::getModelIds($this->value);
             
-            $this->value_sub_value = current($this->value_value);
-            $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_sub_value);
+            $this->value_values = RuleCondition::getModelIds($this->value);
+            $this->value_value = current($this->value_values);
+            
+            $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_value);
+            $this->value_sub_value = current($this->value_sub_values);
 
             // weight
             $this->weights = RuleCondition::getWeights($this->rule_id);
@@ -113,7 +107,7 @@ class RuleCondition extends \yii\db\ActiveRecord
             [['rule_id', 'weight', 'number', 'number_parent'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['condition', 'value'], 'string', 'max' => 128],
-            [['condition_value', 'condition_sub_value', 'value_value', 'value_sub_value'], 'string', 'max' => 255],
+            [['condition_value', 'condition_sub_value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'string', 'max' => 255],
             [['equation'], 'string', 'max' => 4]
         ];
     }
@@ -132,6 +126,7 @@ class RuleCondition extends \yii\db\ActiveRecord
             'value' => Yii::t('app', 'Value'),
             'value_value' => Yii::t('app', 'Value Value'),
             'value_sub_value' => Yii::t('app', 'Sub Value Value'),
+            'value_sub_value2' => Yii::t('app', 'Second Sub Value Value'),
             'rule_id' => Yii::t('app', 'Id Rule'),
             'weight' => Yii::t('app', 'Weight'),
             'number' => Yii::t('app', 'Number'),
@@ -219,8 +214,8 @@ class RuleCondition extends \yii\db\ActiveRecord
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
             'Rule' => 'Rule',
-            'Rulevalue' => 'Value',
-            'Ruleextra' => 'Extra',
+            'RuleValue' => 'Value',
+            'RuleExtra' => 'Extra',
             'RuleDate' => 'Date'
         ];
     }

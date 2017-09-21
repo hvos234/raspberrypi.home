@@ -32,14 +32,8 @@ class Rule extends \yii\db\ActiveRecord
 	public $weights = [];
 	
 	public function init() {		
-		// create weights
-		$key = 0;
-		foreach($this->ids() as $id => $name){
-			$this->weights[$key] = $key;
-			$key++;
-		}
-		
-		$this->weights[$key] = $key;
+		// weights
+		$this->weights = Rule::getWeights();
 		
 		parent::init();
 	}
@@ -90,64 +84,85 @@ class Rule extends \yii\db\ActiveRecord
         return new RuleQuery(get_called_class());
     }
 		
-		/**
-		 * Auto add date time to created_at and updated_at
-		 */
-		public function behaviors()
-		{
-			return [
-					// This set the create_at and updated_at by create, and 
-					// update_at by update, with the date time / timestamp
-					[
-						'class' => TimestampBehavior::className(),
-						'createdAtAttribute' => 'created_at',
-						'updatedAtAttribute' => 'updated_at',
-						'value' => new Expression('NOW()'),
-					],
-			 ];
-		}
-		
-		public static function execute($id){
-			
-			Yii::info('id: ' . $id, 'Rule');
-			echo('$id: ' . $id) . '<br/>' . PHP_EOL;
-			$model = Rule::findOne($id);
-			
-			$condition = RuleCondition::execute($id);
-			Yii::info('$condition: ' . json_encode($condition), 'Rule');
-			echo('$condition: ' . json_encode($condition)) . '<br/>' . PHP_EOL;
-			
-			if(!$condition){
-				//exit();
-				return false;
-			}
-			
-			$action = RuleAction::execute($id);
-			Yii::info('$action: ' . json_encode($action), 'Rule');
-			echo('$action: ' . json_encode($action)) . '<br/>' . PHP_EOL;
-			
-			if(!$action){
-				//exit();
-				return false;
-			}
-			
-			//exit();
-			return true;
-		}
-		
-		public static function cronjob($id){
-			return Rule::execute($id);
-		}
-		
-		/*public static function getAllIdName(){
-			return ArrayHelper::map(Rule::find()->asArray()->all(), 'id', 'name');
-		}*/
-        
-        public static function ids(){
-            $ids = Rule::find()           
-                ->asArray()
-                ->all();
-
-            return ArrayHelper::map($ids, 'id', 'name');
+    /**
+     * Auto add date time to created_at and updated_at
+     */
+    public function behaviors()
+    {
+        return [
+            // This set the create_at and updated_at by create, and 
+            // update_at by update, with the date time / timestamp
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => new Expression('NOW()'),
+            ],
+         ];
+    }
+    
+    public static function getWeights(){
+        // create weights
+        $key = 0;
+        $weights = [];
+        foreach(Rule::modelIds() as $id => $name){
+            $weights[$key] = $key;
+            $key++;
         }
+        
+        $weights = [];
+        for($i=0; $i <= 10; $i++){ // plus one for sorting
+            $weights[$i] = $i;
+        }
+        
+        return $weights;
+    }
+		
+    public static function execute($id){
+
+        Yii::info('id: ' . $id, 'Rule');
+        echo('$id: ' . $id) . '<br/>' . PHP_EOL;
+        $model = Rule::findOne($id);
+
+        $condition = RuleCondition::execute($id);
+        Yii::info('$condition: ' . json_encode($condition), 'Rule');
+        echo('$condition: ' . json_encode($condition)) . '<br/>' . PHP_EOL;
+
+        if(!$condition){
+            //exit();
+            return false;
+        }
+
+        $action = RuleAction::execute($id);
+        Yii::info('$action: ' . json_encode($action), 'Rule');
+        echo('$action: ' . json_encode($action)) . '<br/>' . PHP_EOL;
+
+        if(!$action){
+            //exit();
+            return false;
+        }
+
+        //exit();
+        return true;
+    }
+
+    public static function cronjob($id){
+        return Rule::execute($id);
+    }
+
+    /*public static function getAllIdName(){
+        return ArrayHelper::map(Rule::find()->asArray()->all(), 'id', 'name');
+    }*/
+
+    public static function modelIds(){
+        $ids = Rule::find()           
+            ->asArray()
+            ->all();
+
+        return ArrayHelper::map($ids, 'id', 'name');
+    }
+
+    public static function modelFields($id){
+        return [];
+    }
 }

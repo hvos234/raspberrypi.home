@@ -38,31 +38,23 @@ class RuleAction extends \yii\db\ActiveRecord
 	public function init() {
             // actions
             $this->actions = RuleAction::getActionModels();
-
-            // translate
-            foreach ($this->actions as $actions => $name){
-                $this->actions[$actions] = Yii::t('app', $name);
-            }
-
             $this->action = current($this->actions);
-            $this->action_values = RuleAction::getModelIds($this->action);
             
+            $this->action_values = RuleAction::getModelIds($this->action);
             $this->action_value = current($this->action_values);
+            
             $this->action_sub_values = RuleAction::getModelFields($this->action, $this->action_value);
-
+            $this->action_sub_value = current($this->action_sub_values);
+            
             // values
             $this->values = RuleAction::getValueModels();
-
-            // translate
-            foreach ($this->values as $values => $name){
-                $this->values[$values] = Yii::t('app', $name);
-            }
-
             $this->value = current($this->values);
-            $this->value_values = RuleAction::getModelIds($this->value);
             
+            $this->value_values = RuleAction::getModelIds($this->value);
             $this->value_value = current($this->value_values);
+            
             $this->value_sub_values = RuleAction::getModelFields($this->value, $this->value_value);
+            $this->value_sub_value = current($this->value_sub_values);
             
             // weight
             $this->weights = RuleAction::getWeights($this->rule_id);
@@ -88,7 +80,7 @@ class RuleAction extends \yii\db\ActiveRecord
             [['rule_id', 'weight'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
-            [['action_value', 'value_value'], 'string', 'max' => 255]
+            [['action_value', 'action_sub_value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'string', 'max' => 255]
         ];
     }
 
@@ -101,8 +93,11 @@ class RuleAction extends \yii\db\ActiveRecord
             'id' => Yii::t('app', 'Id'),
             'action' => Yii::t('app', 'Action'),
             'action_value' => Yii::t('app', 'Action Value'),
+            'action_sub_value' => Yii::t('app', 'Sub Action Value'),
             'value' => Yii::t('app', 'Value'),
             'value_value' => Yii::t('app', 'Value Value'),
+            'value_sub_value' => Yii::t('app', 'Sub Value Value'),
+            'value_sub_value2' => Yii::t('app', 'Second Sub Value Value'),
             'rule_id' => Yii::t('app', 'Id Rule'),
             'weight' => Yii::t('app', 'Weight'),
             'created_at' => Yii::t('app', 'Created At'),
@@ -175,6 +170,7 @@ class RuleAction extends \yii\db\ActiveRecord
             //'taskdefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
+            'Thermostat' => 'Thermostat',
             'Rule' => 'Rule',
         ];
     }
@@ -184,10 +180,11 @@ class RuleAction extends \yii\db\ActiveRecord
             //'taskdefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
+            'Thermostat' => 'Thermostat',
             'Rule' => 'Rule',
-            'Rulevalue' => 'Value',
-            'Ruleextra' => 'Extra',
-            'Ruledate' => 'Date'
+            'RuleValue' => 'Value',
+            'RuleExtra' => 'Extra',
+            'RuleDate' => 'Date'
         ];
     }
     

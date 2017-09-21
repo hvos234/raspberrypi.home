@@ -95,12 +95,12 @@ class RuleController extends Controller
 				for($i=0; $i <= 9; $i++){
 					$modelsRuleCondition[$i] = new RuleCondition();
 					// if it is not the first one, there must be always one condition
-					/*if(0 < $i){
+					if(0 < $i){
 						$modelsRuleCondition[$i]->value_value = Yii::t('app', '- None -');
 						$modelsRuleCondition[$i]->weight = $i;
 						$modelsRuleCondition[$i]->number = $i + 1;
 						$modelsRuleCondition[$i]->number_parent = 0;
-					}*/
+					}
 				}
 				
 				// create 5 RuleAction models
@@ -108,10 +108,10 @@ class RuleController extends Controller
 				for($i=0; $i <= 4; $i++){
 					$modelsRuleAction[$i] = new RuleAction();
 					// if it is not the first one, there must be always one condition
-					/*if(0 < $i){
+					if(0 < $i){
 						$modelsRuleAction[$i]->value_value = Yii::t('app', '- None -');
 						$modelsRuleAction[$i]->weight = $i;
-					}*/
+					}
 				}
 				
 				if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
