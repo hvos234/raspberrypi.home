@@ -30,6 +30,8 @@ use yii\helpers\ArrayHelper;
  */
 class RuleCondition extends \yii\db\ActiveRecord
 {
+    public $active;
+    
 	public $conditions = [];
 	public $condition_values = [];
 	public $condition_sub_values = [];
@@ -44,6 +46,8 @@ class RuleCondition extends \yii\db\ActiveRecord
 	public $numbers_parent = [];
 	
 	public function init() {
+        $this->active = false;
+        
             $this->rule_id = 0;
         
             // conditions

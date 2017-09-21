@@ -26,26 +26,26 @@ class RuleConditionController extends Controller
                     'delete' => ['post'],
                 ],
             ],
-						// this will allow authenticated users to access the create update and delete
-						// and deny all other users from accessing these three actions.
-						'access' => [
-							'class' => AccessControl::className(),
-							//'only' => ['create', 'update', 'delete'],
-							'rules' => [
-									// deny all POST requests
-									/*[
-											'allow' => false,
-											'verbs' => ['POST'],
-									],*/
-									// allow authenticated users
-									[
-											'allow' => true,
-											'roles' => ['@'],
-									],
-									// everything else is denied
-							],
-						],
-					];
+            // this will allow authenticated users to access the create update and delete
+            // and deny all other users from accessing these three actions.
+            'access' => [
+                'class' => AccessControl::className(),
+                //'only' => ['create', 'update', 'delete'],
+                'rules' => [
+                    // deny all POST requests
+                    /*[
+                            'allow' => false,
+                            'verbs' => ['POST'],
+                    ],*/
+                    // allow authenticated users
+                    [
+                            'allow' => true,
+                            'roles' => ['@'],
+                    ],
+                    // everything else is denied
+                ],
+            ],
+        ];
     }
 
     /**

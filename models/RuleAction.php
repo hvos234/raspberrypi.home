@@ -27,15 +27,21 @@ use yii\helpers\ArrayHelper;
  */
 class RuleAction extends \yii\db\ActiveRecord
 {
+    public $active;
+    
 	public $actions = [];
 	public $action_values = [];
 	public $action_sub_values = [];
+    
 	public $values = [];
 	public $value_values = [];
 	public $value_sub_values = [];
+    
 	public $weights = [];
 	
 	public function init() {
+        $this->active = false;
+        
             // actions
             $this->actions = RuleAction::getActionModels();
             $this->action = current($this->actions);
