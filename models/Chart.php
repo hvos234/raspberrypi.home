@@ -54,17 +54,17 @@ class Chart extends \yii\db\ActiveRecord
     public function init() {        
         $this->models = Chart::getModels();
         
-        $this->primary_model = current($this->models);
+        $this->primary_model = key($this->models);
         
         $this->primary_model_ids = Chart::getModelIds($this->primary_model);
-        $this->primary_model_id = current($this->primary_model_ids);
+        $this->primary_model_id = key($this->primary_model_ids);
         $this->primary_names = Chart::getNames($this->primary_model, $this->primary_model_id);
         
         // secondary
-        $this->secondary_model = current($this->models);
+        $this->secondary_model = key($this->models);
         
         $this->secondary_model_ids = Chart::getModelIds($this->secondary_model);
-        $this->secondary_model_id = current($this->secondary_model_ids);
+        $this->secondary_model_id = key($this->secondary_model_ids);
         $this->secondary_names = Chart::getNames($this->secondary_model, $this->secondary_model_id);
         
         $this->selections = Chart::getSelections();

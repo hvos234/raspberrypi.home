@@ -52,13 +52,13 @@ class RuleCondition extends \yii\db\ActiveRecord
         
             // conditions
             $this->conditions = RuleCondition::getConditionModels(); 
-            $this->condition = current($this->conditions);
+            $this->condition = key($this->conditions);
             
             $this->condition_values = RuleCondition::getModelIds($this->condition);
-            $this->condition_value = current($this->condition_values);
-            
+            $this->condition_value = key($this->condition_values);
+                        
             $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_value);
-            $this->condition_sub_value = current($this->condition_sub_values);
+            $this->condition_sub_value = key($this->condition_sub_values);
         		
             // equations
             $this->equations = RuleCondition::getEquations();
@@ -75,13 +75,13 @@ class RuleCondition extends \yii\db\ActiveRecord
 		
             // values
             $this->values = RuleCondition::getValueModels();
-            $this->value = current($this->values);
+            $this->value = key($this->values);
             
             $this->value_values = RuleCondition::getModelIds($this->value);
-            $this->value_value = current($this->value_values);
+            $this->value_value = key($this->value_values);
             
             $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_value);
-            $this->value_sub_value = current($this->value_sub_values);
+            $this->value_sub_value = key($this->value_sub_values);
 
             // weight
             $this->weights = RuleCondition::getWeights($this->rule_id);
@@ -183,7 +183,11 @@ class RuleCondition extends \yii\db\ActiveRecord
     public static function getModelIds($model){
         $model_ids = ['none' => Yii::t('app', '- None -')];
     
-        if(class_exists('app\models\\' . $model)){
+        /*if(class_exists('app\models\\' . $model)){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
+        }*/
+        
+        if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
         }
     
@@ -193,10 +197,18 @@ class RuleCondition extends \yii\db\ActiveRecord
     public static function getModelFields($model, $model_id){
         $fields = ['none' => Yii::t('app', '- None -')];
     
-        if(class_exists('app\models\\' . $model)){
+        //var_dump($model);
+        //var_dump($model_id);
+        
+        /*if(class_exists('app\models\\' . $model)){
             $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
-        }
+        }*/
     
+        if(method_exists('app\models\\' . $model, 'modelFields')){
+            //$fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
+            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
+        }
+        
         return $fields; 
     }
     
@@ -328,9 +340,12 @@ class RuleCondition extends \yii\db\ActiveRecord
             Yii::info('$modelRuleCondition->id: ' . $modelRuleCondition->id, 'RuleCondition');
             Yii::info('$modelRuleCondition->condition: ' . $modelRuleCondition->condition, 'RuleCondition');
             Yii::info('$modelRuleCondition->condition_value: ' . $modelRuleCondition->condition_value, 'RuleCondition');
+            Yii::info('$modelRuleCondition->condition_sub_value: ' . $modelRuleCondition->condition_sub_value, 'RuleCondition');
             Yii::info('$modelRuleCondition->equation: ' . $modelRuleCondition->equation, 'RuleCondition');
             Yii::info('$modelRuleCondition->value: ' . $modelRuleCondition->value, 'RuleCondition');
             Yii::info('$modelRuleCondition->value_value: ' . $modelRuleCondition->value_value, 'RuleCondition');
+            Yii::info('$modelRuleCondition->value_sub_value: ' . $modelRuleCondition->value_sub_value, 'RuleCondition');
+            Yii::info('$modelRuleCondition->value_sub_value2: ' . $modelRuleCondition->value_sub_value2, 'RuleCondition');
             Yii::info('$modelRuleCondition->number: ' . $modelRuleCondition->number, 'RuleCondition');
             Yii::info('$modelRuleCondition->number_parent: ' . $modelRuleCondition->number_parent, 'RuleCondition');
 
@@ -338,28 +353,45 @@ class RuleCondition extends \yii\db\ActiveRecord
             echo('$modelRuleCondition->id: ' . $modelRuleCondition->id) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->condition: ' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->condition_value: ' . $modelRuleCondition->condition_value) . '<br/>' . PHP_EOL;
+            echo('$modelRuleCondition->condition_sub_value: ' . $modelRuleCondition->condition_sub_value) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->equation: ' . $modelRuleCondition->equation) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->value: ' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->value_value: ' . $modelRuleCondition->value_value) . '<br/>' . PHP_EOL;
+            echo('$modelRuleCondition->value_sub_value: ' . $modelRuleCondition->value_sub_value) . '<br/>' . PHP_EOL;
+            echo('$modelRuleCondition->value_sub_value2: ' . $modelRuleCondition->value_sub_value2) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->number: ' . $modelRuleCondition->number) . '<br/>' . PHP_EOL;
             echo('$modelRuleCondition->number_parent: ' . $modelRuleCondition->number_parent) . '<br/>' . PHP_EOL;
-
-            if(!class_exists('app\models\\' . $modelRuleCondition->condition)){
+            
+            /*if(!class_exists('app\models\\' . $modelRuleCondition->condition)){
                 Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleCondition->condition, 'RuleCondition');
                 echo('!class_exists: ' . 'app\models\\' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
                 return false;
-            }
-
-            if(!class_exists('app\models\\' . $modelRuleCondition->value)){
-                Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value, 'RuleCondition');
-                echo('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
+            }*/
+            
+            // check if the static method ruleCondition exists
+            if(!method_exists('app\models\\' . $modelRuleCondition->condition, 'ruleCondition')){
+                Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleCondition->condition, 'ruleCondition');
+                echo('!method_exists: ' . 'app\models\\' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
                 return false;
             }
 
-            Yii::info('app\models\\' . ucfirst($modelRuleCondition->condition), 'RuleCondition');
+            /*if(!class_exists('app\models\\' . $modelRuleCondition->value)){
+                Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value, 'RuleCondition');
+                echo('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
+                return false;
+            }*/
+            
+            // check if the static method ruleCondition exists
+            if(!method_exists('app\models\\' . $modelRuleCondition->value, 'ruleCondition')){
+                Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleCondition->value, 'ruleCondition');
+                echo('!method_exists: ' . 'app\models\\' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
+                return false;
+            }
+
+            Yii::info('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition');
             echo('app\models\\' . ucfirst($modelRuleCondition->condition)) . '<br/>' . PHP_EOL;
 
-            $conditions = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), $modelRuleCondition->condition_value);
+            $conditions = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), ['value' => $modelRuleCondition->condition_value, 'sub_value' => $modelRuleCondition->condition_sub_value]);
             Yii::info('$conditions: ' . json_encode($conditions), 'RuleCondition');
             echo('$conditions: ' . json_encode($conditions)) . '<br/>' . PHP_EOL;
 
@@ -370,7 +402,7 @@ class RuleCondition extends \yii\db\ActiveRecord
             Yii::info('app\models\\' . ucfirst($modelRuleCondition->value), 'RuleCondition');
             echo('app\models\\' . ucfirst($modelRuleCondition->value)) . '<br/>' . PHP_EOL;
 
-            $conditions_values = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), $modelRuleCondition->value_value);
+            $conditions_values = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), ['value' => $modelRuleCondition->value_value, 'sub_value' => $modelRuleCondition->value_sub_value, '_sub_value2' => $modelRuleCondition->value_sub_value2]);
             Yii::info('$conditions_values: ' . json_encode($conditions_values), 'RuleCondition');
             echo('$conditions_values: ' . json_encode($conditions_values)) . '<br/>' . PHP_EOL;
 

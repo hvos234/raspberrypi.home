@@ -56,17 +56,17 @@ class Thermostat extends \yii\db\ActiveRecord
     public function init() {
         $this->models = Thermostat::getModels();
         
-        $this->on_model = current($this->models);
+        $this->on_model = key($this->models);
         $this->on_model_ids = Thermostat::getModelIds($this->on_model);
-        $this->on_model_id = current($this->on_model_ids);
+        $this->on_model_id = key($this->on_model_ids);
         
-        $this->off_model = current($this->models);
+        $this->off_model = key($this->models);
         $this->off_model_ids = Thermostat::getModelIds($this->off_model);
-        $this->off_model_id = current($this->off_model_ids);
+        $this->off_model_id = key($this->off_model_ids);
         
-        $this->temperature_model = current($this->models);
+        $this->temperature_model = key($this->models);
         $this->temperature_model_ids = Thermostat::getModelIds($this->temperature_model);
-        $this->temperature_model_id = current($this->temperature_model_ids);
+        $this->temperature_model_id = key($this->temperature_model_ids);
         
         $this->weights = Thermostat::getWeights();
         
@@ -176,21 +176,31 @@ class Thermostat extends \yii\db\ActiveRecord
     public static function getModelIds($model){
         $model_ids = ['none' => Yii::t('app', '- None -')];
     
-        if(class_exists('app\models\\' . $model)){
+        /*if(class_exists('app\models\\' . $model)){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
+        }*/
+        
+        // check if the static method modelIds exists
+        if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
         }
-    
+        
         return $model_ids; 
     }
     
     /*public static function getModelFields($model){
         $model_ids = ['none' => Yii::t('app', '- None -')];
     
-        if(class_exists('app\models\\' . $model)){
+        /*if(class_exists('app\models\\' . $model)){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
-        }
+        }*/
     
-        return $model_ids; 
+        // check if the static method modelFields exists
+        /*if(method_exists('app\models\\' . $model, 'modelFields')){
+            $model_ids += call_user_func(array('app\models\\' . $model, 'modelFields'));	
+        }*/
+    
+        /*return $model_ids; 
     }*/
     
     public static function getWeights(){
@@ -216,8 +226,14 @@ class Thermostat extends \yii\db\ActiveRecord
     
     public static function executeModel($model, $model_id) {
         $data = [];
-        if(class_exists('app\models\\' . $model)){
+        
+        /*if(class_exists('app\models\\' . $model)){
             $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);      
+        }*/
+        
+        // check if the static method modelFields exists
+        if(method_exists('app\models\\' . $model, 'thermostatExecute')){
+            $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);	
         }
         
         return $data;

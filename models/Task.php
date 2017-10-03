@@ -291,6 +291,11 @@ class Task extends \yii\db\ActiveRecord
             
             return $id;
         }
+        
+    // Joining with Relations
+    public function getAction(){
+        return $this->hasOne(Action::className(), ['id' => 'action_id'])->select(['data_structure'] );
+    }
     
     // default rule functions
     public static function ruleCondition($id){
@@ -315,9 +320,29 @@ class Task extends \yii\db\ActiveRecord
         return ArrayHelper::map($ids, 'id', 'name');
     }
     
-    public static function modelFields($id){
+    public static function modelFields($id){        
+        $id = (int) $id; // $id is a string, so convert it to a int, the value "none" becomes 0
+                
+        if(!empty($id)){ // the value "none" is 0, so check if it is not empty
+            $fields = Task::find()
+                ->where(['id' => $id])
+                ->with('action')
+                ->asArray()
+                ->one();
+            
+            foreach($fields['action'])
+             
+             return [];
+        }
+        
+       
+        
         return [];
     }
+    
+    /*public function getOrderItems(){
+        return $this->hasMany(OrderItem::className(), ['order_id' => 'id']);
+    }*/
     
     public static function getModelIds(){
         $model_ids = Task::find()           

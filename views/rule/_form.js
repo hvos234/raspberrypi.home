@@ -124,6 +124,8 @@ function RuleConditionActionGetFields(model_selector, model_id_selector, field_s
     var model_id = $(model_id_selector).val();
     $(field_selector).empty(); // empty the select box
     
+    console.log('model_id: ' + model_id);
+    
     $.ajax({
         // you can not use AjaxDeviceAction as action name, like in
         // the controller, they must be lowercase and with lines
