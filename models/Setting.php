@@ -174,11 +174,7 @@ class Setting extends \yii\db\ActiveRecord
 		public static function getAll(){
 			return Setting::find()->asArray()->all();
 		}
-		
-		/*public static function getAllIdName(){
-			return ArrayHelper::map(Setting::find()->asArray()->all(), 'id', 'name');
-		}*/
-                
+		                
         // default model functions
         public static function modelIds(){
             $ids = Setting::find()
@@ -190,6 +186,18 @@ class Setting extends \yii\db\ActiveRecord
         }
         
         public static function modelFields($id){
+            $id = (int) $id; // $id is a string, so convert it to a int, the value "none" becomes 0
+                
+            if(!empty($id)){ // the value "none" is 0, so check if it is not empty
+                $fields = Setting::find()
+                    ->select('data')
+                    ->where(['id' => $id])
+                    ->asArray()
+                    ->one();
+
+                return HelperData::dataExplode($fields['data']);
+            }
+
             return [];
         }
 		
@@ -225,26 +233,13 @@ class Setting extends \yii\db\ActiveRecord
 			return $return;
 		}
 		
-		/*public static function getOneByName($name){
-			return Setting::find()->select('data')->where(['name' => $name])->asArray()->one();
-		}*/
-		
-		/*public static function rule($id){
-			return Condition::execute($id);
-		}*/
-
-		public static function ruleCondition($id){
+		public static function ruleCondition($id, $field = '', $field2 = ''){
 			$model = Setting::findOne($id);
-			Yii::info('$model->data: ' . json_encode($model->data), 'Setting');
-			echo('$model->data: ' . json_encode($model->data)) . '<br/>' . PHP_EOL;
-			
-			return HelperData::dataExplode($model->data);
+            $datas = HelperData::dataExplode($model->data);
+            return $datas[$field];
 		}
 
-		public static function ruleAction($id, $data){
-			Yii::info('$id: ' . $id, 'rule');
-			Yii::info('$data: ' . $data, 'rule');
-			
+		public static function ruleAction($id, $data){			
 			$model = Setting::findOne($id);
 			$model->data = (string)$data;
 			

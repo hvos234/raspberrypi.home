@@ -112,7 +112,34 @@ class RuleCondition extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
             [['condition', 'value'], 'string', 'max' => 128],
             [['condition_value', 'condition_sub_value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'string', 'max' => 255],
-            [['equation'], 'string', 'max' => 4]
+            [['equation'], 'string', 'max' => 4],
+            [['condition_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
+            ['condition_sub_value', 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
+                return in_array($model->condition, ['task', 'setting', 'thermostat']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $(attribute.\$form).attr('index');
+                var models = ['task', 'setting', 'thermostat'];
+                return models.indexOf($('select[name=\"RuleCondition[' + index + '][condition]\"]').val());
+            }"],
+            ['value_sub_value', 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
+                return in_array($model->condition, ['task', 'setting', 'thermostat']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $(attribute.\$form).attr('index');
+                var models = ['task', 'setting', 'thermostat'];
+                return models.indexOf($('select[name=\"RuleCondition[' + index + '][value]\"]').val());
+            }"],
+            ['value_sub_value2', 'compare', 'compareValue' => '', 'operator' => '!=', 'when' => function($model) {
+                return ('RuleValue' == $model->value and 'value' == $model->value_value) ? true : false;
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $(attribute.\$form).attr('index');
+                var value = $('select[name=\"RuleCondition[' + index + '][value]\"]').val();
+                var value_value = $('select[name=\"RuleCondition[' + index + '][value_value]\"]').val();
+                if('RuleValue' == value && 'value' == value_value){
+                return true;
+                }else {
+                return false;
+                }
+            }"],
         ];
     }
 
@@ -182,10 +209,6 @@ class RuleCondition extends \yii\db\ActiveRecord
     
     public static function getModelIds($model){
         $model_ids = ['none' => Yii::t('app', '- None -')];
-    
-        /*if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
-        }*/
         
         if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
@@ -196,16 +219,8 @@ class RuleCondition extends \yii\db\ActiveRecord
     
     public static function getModelFields($model, $model_id){
         $fields = ['none' => Yii::t('app', '- None -')];
-    
-        //var_dump($model);
-        //var_dump($model_id);
         
-        /*if(class_exists('app\models\\' . $model)){
-            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
-        }*/
-    
         if(method_exists('app\models\\' . $model, 'modelFields')){
-            //$fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
             $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
         }
         
@@ -214,7 +229,6 @@ class RuleCondition extends \yii\db\ActiveRecord
     
     public static function getConditionModels(){
         return [
-            //'taskdefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
@@ -225,7 +239,6 @@ class RuleCondition extends \yii\db\ActiveRecord
     
     public static function getValueModels(){
         return [
-            //'taskdefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
@@ -303,13 +316,8 @@ class RuleCondition extends \yii\db\ActiveRecord
     }
 		
     public static function execute($rule_id){
-        Yii::info('$rule_id: ' . $rule_id, 'RuleCondition');
-        echo('$rule_id: ' . $rule_id) . '<br/><br/>' . PHP_EOL;
-
         // Rule Condition
-        Yii::info('condition', 'RuleCondition');
         $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $rule_id]);
-
         return RuleCondition::condition($modelsRuleCondition);
     }
 		
@@ -327,145 +335,54 @@ class RuleCondition extends \yii\db\ActiveRecord
             return NULL;
         }
 
-        Yii::info('$number_parent_exists: ' . json_encode($number_parent_exists), 'RuleCondition'); // json_encode prints true or false
-        echo('$number_parent_exists: ' . json_encode($number_parent_exists)) . '<br/>' . PHP_EOL;
-
         // condition
         // all conditions must be true
         foreach($modelsRuleCondition as $modelRuleCondition){
             if($number_parent != $modelRuleCondition->number_parent){
                 continue;
             }
-
-            Yii::info('$modelRuleCondition->id: ' . $modelRuleCondition->id, 'RuleCondition');
-            Yii::info('$modelRuleCondition->condition: ' . $modelRuleCondition->condition, 'RuleCondition');
-            Yii::info('$modelRuleCondition->condition_value: ' . $modelRuleCondition->condition_value, 'RuleCondition');
-            Yii::info('$modelRuleCondition->condition_sub_value: ' . $modelRuleCondition->condition_sub_value, 'RuleCondition');
-            Yii::info('$modelRuleCondition->equation: ' . $modelRuleCondition->equation, 'RuleCondition');
-            Yii::info('$modelRuleCondition->value: ' . $modelRuleCondition->value, 'RuleCondition');
-            Yii::info('$modelRuleCondition->value_value: ' . $modelRuleCondition->value_value, 'RuleCondition');
-            Yii::info('$modelRuleCondition->value_sub_value: ' . $modelRuleCondition->value_sub_value, 'RuleCondition');
-            Yii::info('$modelRuleCondition->value_sub_value2: ' . $modelRuleCondition->value_sub_value2, 'RuleCondition');
-            Yii::info('$modelRuleCondition->number: ' . $modelRuleCondition->number, 'RuleCondition');
-            Yii::info('$modelRuleCondition->number_parent: ' . $modelRuleCondition->number_parent, 'RuleCondition');
-
-            echo '<br/><br/>' . PHP_EOL;
-            echo('$modelRuleCondition->id: ' . $modelRuleCondition->id) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->condition: ' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->condition_value: ' . $modelRuleCondition->condition_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->condition_sub_value: ' . $modelRuleCondition->condition_sub_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->equation: ' . $modelRuleCondition->equation) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->value: ' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->value_value: ' . $modelRuleCondition->value_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->value_sub_value: ' . $modelRuleCondition->value_sub_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->value_sub_value2: ' . $modelRuleCondition->value_sub_value2) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->number: ' . $modelRuleCondition->number) . '<br/>' . PHP_EOL;
-            echo('$modelRuleCondition->number_parent: ' . $modelRuleCondition->number_parent) . '<br/>' . PHP_EOL;
             
-            /*if(!class_exists('app\models\\' . $modelRuleCondition->condition)){
-                Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleCondition->condition, 'RuleCondition');
-                echo('!class_exists: ' . 'app\models\\' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
-                return false;
-            }*/
-            
+            // condition
             // check if the static method ruleCondition exists
             if(!method_exists('app\models\\' . $modelRuleCondition->condition, 'ruleCondition')){
-                Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleCondition->condition, 'ruleCondition');
-                echo('!method_exists: ' . 'app\models\\' . $modelRuleCondition->condition) . '<br/>' . PHP_EOL;
                 return false;
-            }
-
-            /*if(!class_exists('app\models\\' . $modelRuleCondition->value)){
-                Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value, 'RuleCondition');
-                echo('!class_exists: ' . 'app\models\\' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
-                return false;
-            }*/
+            }            
+            $condition = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), ['value' => $modelRuleCondition->condition_value, 'sub_value' => $modelRuleCondition->condition_sub_value]);
             
+            // condiction value
             // check if the static method ruleCondition exists
             if(!method_exists('app\models\\' . $modelRuleCondition->value, 'ruleCondition')){
-                Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleCondition->value, 'ruleCondition');
-                echo('!method_exists: ' . 'app\models\\' . $modelRuleCondition->value) . '<br/>' . PHP_EOL;
                 return false;
             }
-
-            Yii::info('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition');
-            echo('app\models\\' . ucfirst($modelRuleCondition->condition)) . '<br/>' . PHP_EOL;
-
-            $conditions = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), ['value' => $modelRuleCondition->condition_value, 'sub_value' => $modelRuleCondition->condition_sub_value]);
-            Yii::info('$conditions: ' . json_encode($conditions), 'RuleCondition');
-            echo('$conditions: ' . json_encode($conditions)) . '<br/>' . PHP_EOL;
-
-            if(!$conditions){
-                return false;
-            }
-
-            Yii::info('app\models\\' . ucfirst($modelRuleCondition->value), 'RuleCondition');
-            echo('app\models\\' . ucfirst($modelRuleCondition->value)) . '<br/>' . PHP_EOL;
-
-            $conditions_values = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), ['value' => $modelRuleCondition->value_value, 'sub_value' => $modelRuleCondition->value_sub_value, '_sub_value2' => $modelRuleCondition->value_sub_value2]);
-            Yii::info('$conditions_values: ' . json_encode($conditions_values), 'RuleCondition');
-            echo('$conditions_values: ' . json_encode($conditions_values)) . '<br/>' . PHP_EOL;
-
-            if(!$conditions_values){
-                return false;
-            }
-
-            echo('$conditions: <pre>');
-            print_r($conditions);
-            echo('</pre>');
-
-            echo('$conditions_values: <pre>');
-            print_r($conditions_values);
-            echo('</pre>');
-
-            // the condition must match one of the condition values
-            $match = false;
-
-            foreach($conditions as $condition){
-                Yii::info('$condition: ' . $condition, 'RuleCondition');
-                echo('$condition: ' . $condition) . '<br/>' . PHP_EOL;
-
-                foreach($conditions_values as $value){
-                    Yii::info('$value: ' . $value, 'RuleCondition');
-                    echo('$value: ' . $value) . '<br/>' . PHP_EOL;
-
-                    $equal = RuleCondition::equation($condition, $value, $modelRuleCondition->equation);
-                    Yii::info('$equal: ' . json_encode($equal), 'RuleCondition'); // json_encode prints true or false	
-                    echo('$equal: ' . json_encode($equal)) . '<br/>' . PHP_EOL;
-
-                    $equal_type = RuleCondition::equationType($modelRuleCondition->equation);
-                    Yii::info('$equal_type: ' . json_encode($equal_type), 'RuleCondition');
-                    echo('$equal_type: ' . json_encode($equal_type)) . '<br/>' . PHP_EOL;
-
-                    /*if($equal){
-                        $match = true; 
-                    }*/
-
-                    $equal_child = NULL;
-                    if($equal == $equal_type){							
-                        $equal_child = RuleCondition::condition($modelsRuleCondition, $modelRuleCondition->number);
-                        Yii::info('$equal_child: ' . json_encode($equal_child), 'RuleCondition');
-                        echo('$equal_child: ' . json_encode($equal_child)) . '<br/>' . PHP_EOL;
-
-                        if(!is_null($equal_child)){
-                            if($equal == $equal_child){
-                                $match = true;
-                            }
-                        }else {
-                            if($equal){
-                                $match = true; 
-                            }
-                        }
-                    }else {
-                        if($equal){
-                            $match = true; 
-                        }
+            $condition_value = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), ['value' => $modelRuleCondition->value_value, 'sub_value' => $modelRuleCondition->value_sub_value, 'sub_value2' => $modelRuleCondition->value_sub_value2]);
+            
+            
+            
+            // the condition must match the condition value
+            $equal = RuleCondition::equation($condition, $condition_value, $modelRuleCondition->equation);
+            $equal_type = RuleCondition::equationType($modelRuleCondition->equation);
+            
+            /*
+             * NOT CORRECT YET !!!!!
+             */
+            
+            $equal_child = NULL;
+            if($equal == $equal_type){							
+                $equal_child = RuleCondition::condition($modelsRuleCondition, $modelRuleCondition->number);
+                
+                if(!is_null($equal_child)){
+                    if($equal != $equal_child){
+                        return false;
+                    }
+                }else {
+                    if(!$equal){
+                        return false; 
                     }
                 }
-            }
-
-            if(!$match){
-                return false;
+            }else {
+                if(!$equal){
+                    return false; 
+                }
             }
         }
 

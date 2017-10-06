@@ -239,9 +239,9 @@ class Thermostat extends \yii\db\ActiveRecord
         return $data;
     }
     
-    public static function ruleCondition($id, $field){
+    public static function ruleCondition($id, $field = '', $field2 = ''){
         $model = Thermostat::findOne($id);
-        return HelperData::dataExplode($model->{$field});
+        return $model->{$field};
     }
 
     public static function ruleAction($id, $field, $value){
@@ -249,7 +249,7 @@ class Thermostat extends \yii\db\ActiveRecord
         $model->{$field} = (string)$value;
 
         if (!$model->save()){ 
-            //print_r($model->errors);
+            print_r($model->errors);
             return false;
         }
         return true;

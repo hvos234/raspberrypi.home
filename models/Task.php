@@ -249,16 +249,7 @@ class Task extends \yii\db\ActiveRecord
             
 			return $model->id;
 		}
-        
-        /*public static function getModelIds(){
-            return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'name');
-        }*/
-        
-        
-		/*public static function getAllIdName(){
-			return ArrayHelper::map(Task::find()->asArray()->all(), 'id', 'name');
-		}*/
-		
+        		
 		public static function getAllEncoded(){
 			$return = [];
 			
@@ -294,20 +285,21 @@ class Task extends \yii\db\ActiveRecord
         
     // Joining with Relations
     public function getAction(){
-        return $this->hasOne(Action::className(), ['id' => 'action_id'])->select(['data_structure'] );
+        return $this->hasOne(Action::className(), ['id' => 'action_id']);
     }
     
     // default rule functions
-    public static function ruleCondition($id){
-        return Task::ruleExecute($id);
+    public static function ruleCondition($id, $field = '', $field2 = ''){
+        return Task::ruleExecute($id, $field);
     }
 
-    public static function ruleAction($id){
-        return Task::ruleExecute($id);
+    public static function ruleAction($id, $field = '', $field2 = ''){
+        return Task::ruleExecute($id, $field);
     }
 
-    public static function ruleExecute($id){
-        return Task::execute($id);
+    public static function ruleExecute($id, $field){
+        $datas = Task::execute($id);
+        return $datas[$field];
     }
     
     // default model functions
@@ -325,17 +317,14 @@ class Task extends \yii\db\ActiveRecord
                 
         if(!empty($id)){ // the value "none" is 0, so check if it is not empty
             $fields = Task::find()
-                ->where(['id' => $id])
-                ->with('action')
+                ->select(['action_id', 'data_structure'])
+                ->where(['task.id' => $id])
+                ->joinWith('action')
                 ->asArray()
                 ->one();
             
-            foreach($fields['action'])
-             
-             return [];
+            return HelperData::dataExplode($fields['data_structure']);
         }
-        
-       
         
         return [];
     }

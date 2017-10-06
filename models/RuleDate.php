@@ -105,7 +105,7 @@ class RuleDate extends Model {
 		return date($model->id);
 	}
 	
-	public static function ruleCondition($id){
+	public static function ruleCondition($id, $field = '', $field2 = ''){
 		return RuleDate::ruleExecute($id);
 	}
 	

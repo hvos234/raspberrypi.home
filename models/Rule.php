@@ -119,40 +119,39 @@ class Rule extends \yii\db\ActiveRecord
     }
 		
     public static function execute($id){
-
-        Yii::info('id: ' . $id, 'Rule');
-        echo('$id: ' . $id) . '<br/>' . PHP_EOL;
         $model = Rule::findOne($id);
 
         $condition = RuleCondition::execute($id);
-        Yii::info('$condition: ' . json_encode($condition), 'Rule');
-        echo('$condition: ' . json_encode($condition)) . '<br/>' . PHP_EOL;
 
         if(!$condition){
-            //exit();
             return false;
         }
 
         $action = RuleAction::execute($id);
-        Yii::info('$action: ' . json_encode($action), 'Rule');
-        echo('$action: ' . json_encode($action)) . '<br/>' . PHP_EOL;
 
         if(!$action){
-            //exit();
             return false;
         }
-
-        //exit();
+        
         return true;
     }
 
     public static function cronjob($id){
         return Rule::execute($id);
     }
+    
+    // default rule functions
+    public static function ruleCondition($id, $field = '', $field2 = ''){
+        return Rule::ruleExecute($id);
+    }
 
-    /*public static function getAllIdName(){
-        return ArrayHelper::map(Rule::find()->asArray()->all(), 'id', 'name');
-    }*/
+    public static function ruleAction($id){
+        return Rule::ruleExecute($id);
+    }
+    
+    public static function ruleExecute($id){
+        return Rule::execute($id);
+    }
 
     public static function modelIds(){
         $ids = Rule::find()           

@@ -165,7 +165,7 @@ class RuleAction extends \yii\db\ActiveRecord
         $fields = ['none' => Yii::t('app', '- None -')];
     
         if(class_exists('app\models\\' . $model)){
-            //$fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
+            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
         }
     
         return $fields; 
@@ -173,7 +173,6 @@ class RuleAction extends \yii\db\ActiveRecord
     
     public static function getActionModels(){
         return [
-            //'TaskDefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
@@ -183,11 +182,9 @@ class RuleAction extends \yii\db\ActiveRecord
     
     public static function getValueModels(){
         return [
-            //'TaskDefined' => 'TaskDefined',
             'Task' => 'Task',
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
-            //'Rule' => 'Rule',
             'RuleValue' => 'Value',
             'RuleExtra' => 'Extra',
             'RuleDate' => 'Date'
@@ -212,10 +209,6 @@ class RuleAction extends \yii\db\ActiveRecord
     }   
 		
     public static function execute($rule_id){
-        Yii::info('$rule_id: ' . $rule_id, 'RuleAction');
-        echo('$rule_id: ' . $rule_id) . '<br/><br/>' . PHP_EOL;
-
-        Yii::info('action', 'rule');
         $modelsRuleAction = RuleAction::findAll(['rule_id' => $rule_id]);
 
         return RuleAction::action($modelsRuleAction);
@@ -223,84 +216,32 @@ class RuleAction extends \yii\db\ActiveRecord
 		
     public static function action($modelsRuleAction){
         foreach($modelsRuleAction as $modelRuleAction){
-            Yii::info('$modelRuleAction->id: ' . $modelRuleAction->id, 'RuleAction');
-            Yii::info('$modelRuleAction->action: ' . $modelRuleAction->action, 'RuleAction');
-            Yii::info('$modelRuleAction->action_value: ' . $modelRuleAction->action_value, 'RuleAction');
-            Yii::info('$modelRuleAction->action_sub_value: ' . $modelRuleAction->action_sub_value, 'RuleAction');
-            Yii::info('$modelRuleAction->value: ' . $modelRuleAction->value, 'RuleAction');
-            Yii::info('$modelRuleAction->value_value: ' . $modelRuleAction->value_value, 'RuleAction');		
-            Yii::info('$modelRuleAction->value_sub_value: ' . $modelRuleAction->value_sub_value, 'RuleAction');		
-            Yii::info('$modelRuleAction->value_sub_value2: ' . $modelRuleAction->value_sub_value2, 'RuleAction');		
-
-            echo '<br/><br/>' . PHP_EOL;
-            echo('$modelRuleAction->id: ' . $modelRuleAction->id) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->action: ' . $modelRuleAction->action) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->action_value: ' . $modelRuleAction->action_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->action_sub_value: ' . $modelRuleAction->action_sub_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->value: ' . $modelRuleAction->value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->value_value: ' . $modelRuleAction->value_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->value_sub_value: ' . $modelRuleAction->value_sub_value) . '<br/>' . PHP_EOL;
-            echo('$modelRuleAction->value_sub_value2: ' . $modelRuleAction->value_sub_value2) . '<br/>' . PHP_EOL;
-
-            /*if(!class_exists('app\models\\' . $modelRuleAction->action)){
-                Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleAction->action, 'RuleAction');
-                echo('!class_exists: ' . 'app\models\\' . $modelRuleAction->action) . '<br/>' . PHP_EOL;
-                return false;
-            }*/
-            
             // check if the static method ruleAction exists
             if(!method_exists('app\models\\' . $modelRuleAction->action, 'ruleAction')){
-                Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleAction->action, 'ruleAction');
-                echo('!method_exists: ' . 'app\models\\' . $modelRuleAction->action) . '<br/>' . PHP_EOL;
                 return false;
             }
 
             // only retrieve a value if the action is setting
             $value = '';
-            if('Setting' == $modelRuleAction->action or 'Thermostat' == $modelRuleAction->action){
-                /*if(!class_exists('app\models\\' . $modelRuleAction->value)){
-                    Yii::info('!class_exists: ' . 'app\models\\' . $modelRuleAction->value, 'RuleAction');
-                    echo('!class_exists: ' . 'app\models\\' . $modelRuleAction->value) . '<br/>' . PHP_EOL;
-                    return false;
-                }*/
-                
+            if('Setting' == $modelRuleAction->action or 'Thermostat' == $modelRuleAction->action){                
                 // check if the static method ruleAction exists
                 if(!method_exists('app\models\\' . $modelRuleAction->value, 'ruleCondition')){
-                    Yii::info('!method_exists: ' . 'app\models\\' . $modelRuleAction->value, 'ruleCondition');
-                    echo('!method_exists: ' . 'app\models\\' . $modelRuleAction->value) . '<br/>' . PHP_EOL;
                     return false;
                 }
 
                 // get the value
-                Yii::info('app\models\\' . ucfirst($modelRuleAction->value), 'ruleCondition');
-                echo('app\models\\' . ucfirst($modelRuleAction->value)) . '<br/>' . PHP_EOL;
-
                 $values = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->value), 'ruleCondition'), ['value' => $modelRuleAction->value_value, 'sub_value' => $modelRuleAction->value_sub_value, 'sub_value2' => $modelRuleAction->value_sub_value2]);
-                Yii::info('$values: ' . json_encode($values), 'RuleAction');
-                echo('$values: ' . json_encode($values)) . '<br/>' . PHP_EOL;
-
                 $value = HelperData::dataImplode($values);
-                Yii::info('$value: ' . $value, 'RuleAction');
-                echo('$value: ' . $value) . '<br/>' . PHP_EOL;
             }
 
             // use the value
-            Yii::info('app\models\\' . ucfirst($modelRuleAction->action), 'RuleAction');
-            echo('app\models\\' . ucfirst($modelRuleAction->action)) . '<br/>' . PHP_EOL;
-
             $actions = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->action), 'ruleAction'), ['value' => $modelRuleAction->action_value, 'sub_value' => $modelRuleAction->action_sub_value, 'sub_value2' => $modelRuleAction->action_sub_value2, 'data' => $value]);
-            Yii::info('$actions: ' . json_encode($actions), 'rule');
-            echo('$actions: ' . json_encode($actions)) . '<br/>' . PHP_EOL;
-
+            
             if(!$actions){
-                Yii::info('action: ' . json_encode(false), 'ruleAction');
-                echo('action: ' . json_encode(false)) . '<br/>' . PHP_EOL;
                 return false;
             }
         }
-
-        Yii::info('action: ' . json_encode(true), 'ruleAction');
-        echo('action: ' . json_encode(true)) . '<br/>' . PHP_EOL;
+        
         return true;
     }
 }
