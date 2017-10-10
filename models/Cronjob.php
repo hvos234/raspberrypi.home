@@ -119,10 +119,10 @@ class Cronjob extends \yii\db\ActiveRecord
 	
 		public function init() {
 			// add all tasks
-			$this->job_ids['task'] = Task::getAllIdName();
+			$this->job_ids['task'] = Task::modelIds();
 			
 			// add all rules
-			$this->job_ids['rule'] = Rule::getAllIdName();
+			$this->job_ids['rule'] = Rule::modelIds();
 			
 			// translate all
 			foreach ($this->job_ids as $job => $jobs){

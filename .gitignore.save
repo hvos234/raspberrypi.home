@@ -1,0 +1,48 @@
+# phpstorm project files
+.idea
+
+# netbeans project files
+nbproject
+
+# zend studio for eclipse project files
+.buildpath
+.project
+.settings
+
+# windows thumbnail cache
+Thumbs.db
+
+# composer vendor dir
+/vendor/behat/*
+/vendor/bin/*
+/vendor/bower/*
+/vendor/cebe/*
+/vendor/codeception/*
+/vendor/composer/*
+/vendor/doctrine/*
+/vendor/ezyang/*
+/vendor/fzaninotto/*
+/vendor/guzzlehttp/*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*
+/vendor//*/vendor//*
+
+# composer itself is not needed
+composer.phar
+
+# Mac DS_Store Files
+.DS_Store
+
+# phpunit itself is not needed
+phpunit.phar
+# local phpunit config
+/phpunit.xml
+
+tests/_output/*
+tests/_support/_generated

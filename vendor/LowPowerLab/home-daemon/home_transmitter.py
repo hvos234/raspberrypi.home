@@ -6,9 +6,9 @@ import sys, signal, argparse, time
 # add arguments for the command line partameters
 parser = argparse.ArgumentParser()
 #parser.add_argument('-ts', '--task', help="give the task id", dest='ts', default='123')
-parser.add_argument('-fr', '--from', help="give the device id from witch it will send", dest='fr', default='1')
-parser.add_argument('-to', '--to', help="give the device id witch it will send to", dest='to', default='1')
-parser.add_argument('-ac', '--action', help="give the action id", dest='ac', default='3')
+parser.add_argument('-fr', '--from', help="give the device id from witch it will send", dest='fr', default='0')
+parser.add_argument('-to', '--to', help="give the device id witch it will send to", dest='to', default='0')
+parser.add_argument('-ac', '--action', help="give the action id", dest='ac', default='0')
 parser.add_argument('-msg', '--message', help="give data to send with it", dest='msg', default='None')
 
 args = parser.parse_args()
