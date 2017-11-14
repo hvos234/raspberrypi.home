@@ -170,6 +170,26 @@ class RuleController extends Controller
         // set all active
         foreach ($modelsRuleCondition as $key => $modelRuleCondition){
             $modelsRuleCondition[$key]->active = 1;
+            
+            // conditions
+            //$this->conditions = RuleCondition::getConditionModels();
+            //$this->condition = key($this->conditions);
+            
+            $modelsRuleCondition[$key]->condition_values = RuleCondition::getModelIds($modelRuleCondition->condition);
+            //$this->condition_value = key($this->condition_values);
+            
+            $modelsRuleCondition[$key]->condition_sub_values = RuleCondition::getModelFields($modelRuleCondition->condition, $modelRuleCondition->condition_value);
+            //$this->condition_sub_value = key($this->condition_sub_values);	
+		
+            // values
+            //$this->values = RuleCondition::getValueModels();
+            //$this->value = key($this->values);
+            
+            $modelsRuleCondition[$key]->value_values = RuleCondition::getModelIds($modelRuleCondition->value);
+            //$this->value_value = key($this->value_values);
+            
+            $modelsRuleCondition[$key]->value_sub_values = RuleCondition::getModelFields($modelRuleCondition->value, $modelRuleCondition->value_value);
+            //$this->value_sub_value = key($this->value_sub_values);
         }
         
         for($i=count($modelsRuleCondition); $i <= 9; $i++){
@@ -186,6 +206,26 @@ class RuleController extends Controller
         // set all active
         foreach ($modelsRuleAction as $key => $modelRuleAction){
             $modelsRuleAction[$key]->active = 1;
+            
+            // actions
+            //$this->actions = RuleAction::getActionModels();
+            //$this->action = key($this->actions);
+            
+            $modelsRuleAction[$key]->action_values = RuleAction::getModelIds($modelRuleAction->action);
+            //$this->action_value = key($this->action_values);
+            
+            $modelsRuleAction[$key]->action_sub_values = RuleAction::getModelFields($modelRuleAction->action, $modelRuleAction->action_value);
+            //$this->action_sub_value = key($this->action_sub_values);
+            
+            // values
+            //$this->values = RuleAction::getValueModels();
+            //$this->value = key($this->values);
+            
+            $modelsRuleAction[$key]->value_values = RuleAction::getModelIds($modelRuleAction->value);
+            //$this->value_value = key($this->value_values);
+            
+            $modelsRuleAction[$key]->value_sub_values = RuleAction::getModelFields($modelRuleAction->value, $modelRuleAction->value_value);
+            //$this->value_sub_value = key($this->value_sub_values);
         }
         
         for($i=count($modelsRuleAction); $i <= 4; $i++){

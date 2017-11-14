@@ -52,19 +52,13 @@ class RuleCondition extends \yii\db\ActiveRecord
         
             // conditions
             $this->conditions = RuleCondition::getConditionModels();
-            if(!isset($this->condition) or !$this->condition or empty($this->condition)){
-                $this->condition = key($this->conditions);
-            }
+            $this->condition = key($this->conditions);
             
             $this->condition_values = RuleCondition::getModelIds($this->condition);
-            if(!isset($this->condition_value) or !$this->condition_value or empty($this->condition_value)){
-                $this->condition_value = key($this->condition_values);
-            }
+            $this->condition_value = key($this->condition_values);
             
             $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_value);
-            if(!isset($this->condition_sub_value) or !$this->condition_sub_value or empty($this->condition_sub_value)){
-                $this->condition_sub_value = key($this->condition_sub_values);
-            }
+            $this->condition_sub_value = key($this->condition_sub_values);
         		
             // equations
             $this->equations = RuleCondition::getEquations();
@@ -81,19 +75,13 @@ class RuleCondition extends \yii\db\ActiveRecord
 		
             // values
             $this->values = RuleCondition::getValueModels();
-            if(!$this->value or empty($this->value)){
-                $this->value = key($this->values);
-            }
+            $this->value = key($this->values);
             
             $this->value_values = RuleCondition::getModelIds($this->value);
-            if(!$this->value_value or empty($this->value_value)){
-                $this->value_value = key($this->value_values);
-            }
+            $this->value_value = key($this->value_values);
             
             $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_value);
-            if(!$this->value_sub_value or empty($this->value_sub_value)){
-                $this->value_sub_value = key($this->value_sub_values);
-            }
+            $this->value_sub_value = key($this->value_sub_values);
             
             // weight
             $this->weights = RuleCondition::getWeights($this->rule_id);
