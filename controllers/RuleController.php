@@ -90,78 +90,69 @@ class RuleController extends Controller
     {
         $model = new Rule();
 				
-				// create 10 RuleCondition models
-				$modelsRuleCondition[] = new RuleCondition();
-				for($i=0; $i <= 9; $i++){
-					$modelsRuleCondition[$i] = new RuleCondition();
-                    $modelsRuleCondition[$i]->active = 1;
-                    
-					// if it is not the first one, there must be always one condition
-					if(0 < $i){
-						//$modelsRuleCondition[$i]->value_value = Yii::t('app', '- None -');
-                        $modelsRuleCondition[$i]->active = 0;
-						$modelsRuleCondition[$i]->weight = $i;
-						$modelsRuleCondition[$i]->number = $i + 1;
-						$modelsRuleCondition[$i]->number_parent = 0;
-					}
-				}
+        // create 10 RuleCondition models
+        $modelsRuleCondition[] = new RuleCondition();
+        for($i=0; $i <= 9; $i++){
+            $modelsRuleCondition[$i] = new RuleCondition();
+            $modelsRuleCondition[$i]->rule_id = 0;
+            $modelsRuleCondition[$i]->active = 0;
+            $modelsRuleCondition[$i]->weight = $i;
+        }
 				
-				// create 5 RuleAction models
-				$modelsRuleAction[] = new RuleAction();
-				for($i=0; $i <= 4; $i++){
-					$modelsRuleAction[$i] = new RuleAction();
-                    $modelsRuleCondition[$i]->active = 1;
-                    
-					// if it is not the first one, there must be always one condition
-					if(0 < $i){
-						//$modelsRuleAction[$i]->value_value = Yii::t('app', '- None -');
-                        $modelsRuleCondition[$i]->active = 0;
-						$modelsRuleAction[$i]->weight = $i;
-					}
-				}
+        // create 5 RuleAction models
+        $modelsRuleAction[] = new RuleAction();
+        for($i=0; $i <= 4; $i++){
+            $modelsRuleAction[$i] = new RuleAction();
+            $modelsRuleAction[$i]->rule_id = 0;
+            $modelsRuleAction[$i]->active = 0;
+            $modelsRuleAction[$i]->weight = $i;
+        }
+        
+        // there is always one action
+        $modelsRuleAction[0]->active = 1;
 				
-				if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
+        if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
 
-					// set rule_id temporary on 0, for validation
-					foreach($modelsRuleCondition as $key => $modelRuleCondition){
-						$modelRuleCondition->rule_id = 0;
-						$modelsRuleCondition[$key] = $modelRuleCondition;
-					}
-					// set rule_id temporary on 0, for validation
-					foreach($modelsRuleAction as $key => $modelRuleAction){
-						$modelRuleAction->rule_id = 0;
-						$modelsRuleAction[$key] = $modelRuleAction;
-					}					
-					
-					if($model->validate() && RuleCondition::validateMultiple($modelsRuleCondition) && RuleAction::validateMultiple($modelsRuleAction)){
-						$model->save(false);
-						// change the rule_id, and save
-						foreach($modelsRuleCondition as $modelRuleCondition){
-							if($modelRuleCondition->active){
-								$modelRuleCondition->rule_id = $model->id;
-								$modelRuleCondition->save(false);
-							}
-						}
-						// change the rule_id, and save
-						foreach($modelsRuleAction as $modelRuleAction){
-							//echo('$modelRuleAction: ') . '<br/>' . PHP_EOL;
-							//var_dump($modelRuleAction);
-							if($modelRuleAction->active){
-								$modelRuleAction->rule_id = $model->id;
-								$modelRuleAction->save(false);
-							}
-						}
-						
-						//exit();
+            // set rule_id temporary on 0, for validation
+            foreach($modelsRuleCondition as $key => $modelRuleCondition){
+                $modelRuleCondition->rule_id = 0;
+                $modelsRuleCondition[$key] = $modelRuleCondition;
+            }
+            // set rule_id temporary on 0, for validation
+            foreach($modelsRuleAction as $key => $modelRuleAction){
+                $modelRuleAction->rule_id = 0;
+                $modelsRuleAction[$key] = $modelRuleAction;
+            }					
 
-						return $this->redirect(['view', 'id' => $model->id]);
-					}
-				}
-				return $this->render('create', [
-						'model' => $model,
-						'modelsRuleCondition' => $modelsRuleCondition,
-						'modelsRuleAction' => $modelsRuleAction,
-				]);
+            if($model->validate() && RuleCondition::validateMultiple($modelsRuleCondition) && RuleAction::validateMultiple($modelsRuleAction)){
+                $model->save(false);
+                // change the rule_id, and save
+                foreach($modelsRuleCondition as $modelRuleCondition){
+                    if($modelRuleCondition->active){
+                        $modelRuleCondition->rule_id = $model->id;
+                        $modelRuleCondition->save(false);
+                    }
+                }
+                // change the rule_id, and save
+                foreach($modelsRuleAction as $modelRuleAction){
+                    //echo('$modelRuleAction: ') . '<br/>' . PHP_EOL;
+                    //var_dump($modelRuleAction);
+                    if($modelRuleAction->active){
+                        $modelRuleAction->rule_id = $model->id;
+                        $modelRuleAction->save(false);
+                    }
+                }
+
+                //exit();
+
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        return $this->render('create', [
+            'model' => $model,
+            'modelsRuleCondition' => $modelsRuleCondition,
+            'modelsRuleAction' => $modelsRuleAction,
+        ]);
     }
 
     /**
@@ -175,32 +166,34 @@ class RuleController extends Controller
         $model = $this->findModel($id);
         
         $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $id]);
-        //$modelsRuleCondition = RuleCondition::find()->where(['rule_id' => $id])->asArray()->all();
-        //echo('count: ' . count($modelsRuleCondition)) . '<br/>' . PHP_EOL;
+        
+        // set all active
+        foreach ($modelsRuleCondition as $key => $modelRuleCondition){
+            $modelsRuleCondition[$key]->active = 1;
+        }
+        
         for($i=count($modelsRuleCondition); $i <= 9; $i++){
-            //echo('$i: ' . $i) . '<br/>' . PHP_EOL;
             $modelsRuleCondition[$i] = new RuleCondition();
             $modelsRuleCondition[$i]->active = 0;
             $modelsRuleCondition[$i]->rule_id = $id;
-            //$modelsRuleCondition[$i]->value_value = Yii::t('app', '- None -');
             $modelsRuleCondition[$i]->weight = $i;
             $modelsRuleCondition[$i]->number = $i + 1;
             $modelsRuleCondition[$i]->number_parent = 0;
         }
 
         $modelsRuleAction = RuleAction::findAll(['rule_id' => $id]);
-        //echo('count: ' . count($modelsRuleAction)) . '<br/>' . PHP_EOL;
+        
+        // set all active
+        foreach ($modelsRuleAction as $key => $modelRuleAction){
+            $modelsRuleAction[$key]->active = 1;
+        }
+        
         for($i=count($modelsRuleAction); $i <= 4; $i++){
             $modelsRuleAction[$i] = new RuleAction();
             $modelsRuleAction[$i]->active = 0;
             $modelsRuleAction[$i]->rule_id = $id;
-            //$modelsRuleAction[$i]->value_value = Yii::t('app', '- None -');
             $modelsRuleAction[$i]->weight = $i;
         }
-				
-        //var_dump($modelsRuleCondition);
-        //var_dump($modelsRuleAction);
-        //exit();
 				
         if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
             if($model->validate() && RuleCondition::validateMultiple($modelsRuleCondition) && RuleAction::validateMultiple($modelsRuleAction)){
@@ -243,17 +236,29 @@ class RuleController extends Controller
      */
     public function actionDelete($id)
     {
+        $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $id]);
+        
+        foreach($modelsRuleCondition as $modelRuleCondition){
+            $modelRuleCondition->delete();
+        }
+        
+        $modelsRuleAction = RuleAction::findAll(['rule_id' => $id]);
+        
+        foreach($modelsRuleAction as $modelRuleAction){
+            $modelRuleAction->delete();
+        }
+        
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
-		public function actionExecute($id){
-			$model = new Rule();
-			$model->execute($id);
-			
-			return $this->redirect(['rule/index']);
-		}
+    public function actionExecute($id){
+            $model = new Rule();
+            $model->execute($id);
+
+            return $this->redirect(['rule/index']);
+    }
 		
     /**
      * Finds the Rule model based on its primary key value.

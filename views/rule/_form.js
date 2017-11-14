@@ -261,7 +261,7 @@ function RuleActionSetValueSubValues(index){
 }
 
 // add remove
-function RuleConditionActionShowHideButtonAddRemove(form_selector, button_add_selector, button_remove_selector){
+function RuleActionShowHideButton(form_selector, button_add_selector, button_remove_selector){
     var count_conditaion_action = $(form_selector).find('ul li').length;
     var count_conditaion_action_hidden = $(form_selector).find('ul li:hidden').length;
     var count_conditaion_action_visible = $(form_selector).find('ul li:visible').length;
@@ -286,7 +286,32 @@ function RuleConditionActionShowHideButtonAddRemove(form_selector, button_add_se
     }
 }
 
-function RuleConditionActionAdd(form_selector){
+function RuleConditionShowHideButton(form_selector, button_add_selector, button_remove_selector){
+    var count_conditaion_action = $(form_selector).find('ul li').length;
+    var count_conditaion_action_hidden = $(form_selector).find('ul li:hidden').length;
+    var count_conditaion_action_visible = $(form_selector).find('ul li:visible').length;
+    
+    if(0 == count_conditaion_action_visible){
+        $(button_add_selector).show();
+        $(button_add_selector).css('display', 'inline-block'); // buttons next to each other
+        $(button_remove_selector).hide();
+    }
+    
+    if(1 <= count_conditaion_action_visible){
+        $(button_add_selector).show();
+        $(button_add_selector).css('display', 'inline-block'); // buttons next to each other
+        $(button_remove_selector).show();
+        $(button_remove_selector).css('display', 'inline-block'); // buttons next to each other
+    }
+    
+    if(count_conditaion_action <= count_conditaion_action_visible){
+        $(button_add_selector).hide();
+        $(button_remove_selector).show();
+        $(button_remove_selector).css('display', 'inline-block'); // buttons next to each other
+    }
+}
+
+function RuleConditionActionAdd(form_selector){    
     $(form_selector).find('ul li:hidden:first').show(function(event) {
         /*
         // sortable
@@ -307,7 +332,7 @@ function RuleConditionActionAdd(form_selector){
     });
 }
 
-function RuleConditionActionRemove(form_selector){
+function RuleConditionActionRemove(form_selector){    
     $(form_selector).find('ul li:visible:last').hide(function(event) {
         /*
         // sortable
@@ -329,17 +354,31 @@ function RuleConditionShowHideButtonAddRemove(){
     var button_add_selector = $('.rule-condition_add');
     var button_remove_selector = $('.rule-condition_remove');
     
-    RuleConditionActionShowHideButtonAddRemove(form_selector, button_add_selector, button_remove_selector);
+    RuleConditionShowHideButton(form_selector, button_add_selector, button_remove_selector);
 }
 
 function RuleConditionAdd(){
     var form_selector = $('.rule-condition-form');
+    var index = $(form_selector).find('ul li:hidden:first').attr('index');
+    
     RuleConditionActionAdd(form_selector);
+    RuleConditionActivate(index);
 }
 
 function RuleConditionRemove(){
     var form_selector = $('.rule-condition-form');
+    var index = $(form_selector).find('ul li:visible:last').attr('index');
+    
     RuleConditionActionRemove(form_selector);
+    RuleConditionDeactivate(index);
+}
+
+function RuleConditionActivate(index){
+    $('.rule-condition-active[index="' + index + '"]').val(1);
+}
+
+function RuleConditionDeactivate(index){
+    $('.rule-condition-active[index="' + index + '"]').val(0);
 }
 
 // Rule Action
@@ -348,15 +387,29 @@ function RuleActionShowHideButtonAddRemove(){
     var button_add_selector = $('.rule-action_add');
     var button_remove_selector = $('.rule-action_remove');
     
-    RuleConditionActionShowHideButtonAddRemove(form_selector, button_add_selector, button_remove_selector);
+    RuleActionShowHideButton(form_selector, button_add_selector, button_remove_selector);
 }
 
 function RuleActionAdd(){
     var form_selector = $('.rule-action-form');
+    var index = $(form_selector).find('ul li:hidden:first').attr('index');
+    
     RuleConditionActionAdd(form_selector);
+    RuleActionActivate(index);
 }
 
 function RuleActionRemove(){
     var form_selector = $('.rule-action-form');
+    var index = $(form_selector).find('ul li:visible:last').attr('index');
+    
     RuleConditionActionRemove(form_selector);
+    RuleActionDeactivate(index);
+}
+
+function RuleActionActivate(index){
+    $('.rule-action-active[index="' + index + '"]').val(1);
+}
+
+function RuleActionDeactivate(index){
+    $('.rule-action-active[index="' + index + '"]').val(0);
 }

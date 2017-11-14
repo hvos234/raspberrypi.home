@@ -27,7 +27,7 @@ use yii\helpers\ArrayHelper;
  */
 class RuleAction extends \yii\db\ActiveRecord
 {
-    public $active;
+        public $active;
     
 	public $actions = [];
 	public $action_values = [];
@@ -40,7 +40,7 @@ class RuleAction extends \yii\db\ActiveRecord
 	public $weights = [];
 	
 	public function init() {
-        $this->active = false;
+            //$this->active = 0;
         
             // actions
             $this->actions = RuleAction::getActionModels();
@@ -84,9 +84,9 @@ class RuleAction extends \yii\db\ActiveRecord
         return [
             [['action', 'action_value', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
             [['rule_id', 'weight'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['active', 'action_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
-            [['action_value', 'action_sub_value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'string', 'max' => 255]
+            [['action_value', 'value_value'], 'string', 'max' => 255]
         ];
     }
 

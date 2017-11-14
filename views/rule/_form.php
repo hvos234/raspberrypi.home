@@ -6,11 +6,18 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model app\models\Rule */
 /* @var $form yii\widgets\ActiveForm */
+
+/*$_model = new \app\models\RuleCondition();
+
+$_model = \app\models\RuleCondition::findOne(1);
+//var_dump($_model);*/
 ?>
 
 <div class="rule-form">
 
     <?php $form = ActiveForm::begin(); ?>
+    
+    <?php //$form = ActiveForm::begin(['enableClientValidation'=>false]); ?>
     
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
@@ -25,10 +32,12 @@ use yii\widgets\ActiveForm;
             <?php
             foreach($modelsRuleCondition as $index => $modelRuleCondition){
             ?>
-            <li class="rule-condition" style="display:<?= (($modelRuleCondition->rule_id == 0 && $index != 0) ? 'none' : 'block') ?>;" index="<?= $index; ?>">
+            <li class="rule-condition" style="display:<?= (($modelRuleCondition->active == 0) ? 'none' : 'block') ?>;" index="<?= $index; ?>">
                 <h3 class="rule-condition-header" index="<?= $index; ?>"><span class="text"><?= Yii::t('app', 'Condition'); ?></span></h3>
 
                 <?= $form->field($modelRuleCondition, '[' . $index . ']rule_id', ['inputOptions' => ['class' => 'form-control rule-condition-rule_id', 'index' => $index]])->hiddenInput()->label(false); ?>
+                
+                <?= $form->field($modelRuleCondition, '[' . $index . ']active', ['inputOptions' => ['class' => 'form-control rule-condition-active', 'index' => $index]])->hiddenInput()->label(false); ?>
 
                 <table>
                     <tr>
@@ -118,11 +127,13 @@ use yii\widgets\ActiveForm;
             <?php
             foreach($modelsRuleAction as $index => $modelRuleAction){
             ?>
-            <li class="rule-action" style="display:<?= (($modelRuleAction->rule_id == 0 && $index != 0) ? 'none' : 'block') ?>;" index="<?= $index; ?>">
+            <li class="rule-action" style="display:<?= (($modelRuleAction->active == 0 && $index != 0) ? 'none' : 'block') ?>;" index="<?= $index; ?>">
                 <h3 class="rule-action-header" index="<?= $index; ?>"><span class="text"><?= Yii::t('app', 'Action'); ?></span></h3>
 
                 <?= $form->field($modelRuleAction, '[' . $index . ']rule_id', ['inputOptions' => ['class' => 'form-control rule-action-rule_id', 'index' => $index]])->hiddenInput()->label(false); ?>
-
+                
+                <?= $form->field($modelRuleAction, '[' . $index . ']active', ['inputOptions' => ['class' => 'form-control rule-action-active', 'index' => $index]])->hiddenInput()->label(false); ?>
+                
                 <table>
                     <tr>
                         <tr>
