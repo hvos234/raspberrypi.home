@@ -84,12 +84,11 @@ class RuleExtra extends Model {
         $iamathome = false;
         foreach ($ip_addressen as $ip_adres){
             /*
+             * sudo visudo
+             * ##add www-data ALL=(ALL) NOPASSWD: ALL
+             * # Allow www-data run only ping
              * %www-data ALL=(ALL) NOPASSWD: /bin/ping
              */
-            // sudo visudo
-            // ##add www-data ALL=(ALL) NOPASSWD: ALL
-            // # Allow www-data run only ping
-            // %www-data ALL=(ALL) NOPASSWD: /bin/ping
             $command = 'sudo ping  ' . $ip_adres . ' -c 2'; // -c 2 (two time on linux machine
             
             exec(escapeshellcmd($command), $output, $return_var);

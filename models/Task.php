@@ -128,12 +128,13 @@ class Task extends \yii\db\ActiveRecord
 			$modelSetting = Setting::find()->select('data')->where(['name' => 'path_script_task'])->one();
 			
 			for($try = 1; $try <= $retry; $try++){
-				// sudo visudo
-				// ##add www-data ALL=(ALL) NOPASSWD: ALL
-                // # Allow www-data run only python
-                // %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
-
-				$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
+                            /*
+                             * sudo visudo
+                             * ##add www-data ALL=(ALL) NOPASSWD: ALL
+                             * # Allow www-data run only python
+                             * %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
+                             */
+                            $command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
 				
 				exec(escapeshellcmd($command), $output, $return_var);
 				
