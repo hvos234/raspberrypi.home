@@ -233,20 +233,29 @@ class Setting extends \yii\db\ActiveRecord
 			return $return;
 		}
 		
-		public static function ruleCondition($id, $field = '', $field2 = ''){
-			$model = Setting::findOne($id);
-            $datas = HelperData::dataExplode($model->data);
-            return $datas[$field];
+		public static function ruleCondition($params){
+                    $model = Setting::findOne($params['value']);
+                    $datas = HelperData::dataExplode($model->data);
+                    return $datas[$field];
 		}
 
-		public static function ruleAction($id, $data){			
-			$model = Setting::findOne($id);
-			$model->data = (string)$data;
-			
-			if (!$model->save()){ 
-				print_r($model->errors);
-				return false;
-			}
-			return true;
+		public static function ruleAction($params){			
+                    $model = Setting::findOne($params['value']);
+                    $datas = HelperData::dataExplode($model->data);
+                    
+                    // if there is a sub_value, replace the the value of the existing data with sub_value as key
+                    if('' != $params['sub_value']){
+                        $datas[$params['sub_value']] = (string)$params['data'];
+                    }else {
+                        $datas[key($datas)] = (string)$params['data'];
+                    }
+                    
+                    $model->data = HelperData::dataImplode($datas);
+                    
+                    if (!$model->save()){ 
+                        print_r($model->errors);
+                        return false;
+                    }
+                    return true;
 		}
 }

@@ -158,6 +158,9 @@ class RuleCondition extends \yii\db\ActiveRecord
             [['condition', 'value'], 'string', 'max' => 128],
             [['condition_value', 'value_value'], 'string', 'max' => 255],
             [['equation'], 'string', 'max' => 4],
+            [['condition_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
+                return $model->active == '1';
+            }],
         ];
     }    
 
@@ -337,6 +340,12 @@ class RuleCondition extends \yii\db\ActiveRecord
     public static function execute($rule_id){
         // Rule Condition
         $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $rule_id]);
+        
+        // if there is none
+        if(empty($modelsRuleCondition)){
+            return true;
+        }
+        
         return RuleCondition::condition($modelsRuleCondition);
     }
 		

@@ -65,8 +65,17 @@ class HelperData extends Model {
 		}
 		
 		$return = [];
-		$array = explode(',', $string);
-		
+                $array = [];
+                
+                /*// if there is no comma (,) then return as array
+                if(false === strpos($string, ',')){
+                    $array[0] = $string;
+                }else {
+                    $array = explode(',', $string);
+                }*/
+                
+                $array = explode(',', $string);
+                
 		/*Yii::info('dataExplodeKey $array: ' . json_encode($array), 'RuleExtra');
 		echo('dataExplodeKey $array: ' . json_encode($array)) . '<br/>' . PHP_EOL;
 		var_dump($array);

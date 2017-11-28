@@ -203,6 +203,7 @@ function RuleConditionSetValueSubValues(index){
         
     }else {
         //$('.rule-condition-value_sub_value[index="' + index + '"]').show();
+        $('.rule-condition-value_sub_value2[index="' + index + '"]').val('');        
         $('.rule-condition-value_sub_value2[index="' + index + '"]').hide();        
     }
     
@@ -253,6 +254,7 @@ function RuleActionSetValueSubValues(index){
         
     }else {
         //$('.rule-action-value_sub_value[index="' + index + '"]').show();
+        $('.rule-action-value_sub_value2[index="' + index + '"]').val('');        
         $('.rule-action-value_sub_value2[index="' + index + '"]').hide();        
     }
     

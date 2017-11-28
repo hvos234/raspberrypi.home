@@ -117,11 +117,33 @@ class RuleController extends Controller
             foreach($modelsRuleCondition as $key => $modelRuleCondition){
                 $modelRuleCondition->rule_id = 0;
                 $modelsRuleCondition[$key] = $modelRuleCondition;
+                
+                // empty everything if the value is none
+                if('none' == $modelRuleCondition->condition_sub_value){
+                    $modelsRuleCondition[$key]->condition_sub_value = '';
+                }
+                if('none' == $modelRuleCondition->value_sub_value){
+                    $modelsRuleCondition[$key]->value_sub_value = '';
+                }
+                if('none' == $modelRuleCondition->value_sub_value2){
+                    $modelsRuleCondition[$key]->value_sub_value2 = '';
+                }
             }
             // set rule_id temporary on 0, for validation
             foreach($modelsRuleAction as $key => $modelRuleAction){
                 $modelRuleAction->rule_id = 0;
                 $modelsRuleAction[$key] = $modelRuleAction;
+                
+                // empty everything if the value is none
+                if('none' == $modelRuleAction->action_sub_value){
+                    $modelRuleAction->action_sub_value = '';
+                }
+                if('none' == $modelRuleAction->value_sub_value){
+                    $modelRuleAction->value_sub_value = '';
+                }
+                if('none' == $modelRuleAction->value_sub_value2){
+                    $modelRuleAction->value_sub_value2 = '';
+                }
             }					
 
             if($model->validate() && RuleCondition::validateMultiple($modelsRuleCondition) && RuleAction::validateMultiple($modelsRuleAction)){
@@ -236,6 +258,33 @@ class RuleController extends Controller
         }
 				
         if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
+            
+            foreach($modelsRuleCondition as $key => $modelRuleCondition){                
+                // empty everything if the value is none
+                if('none' == $modelRuleCondition->condition_sub_value){
+                    $modelsRuleCondition[$key]->condition_sub_value = '';
+                }
+                if('none' == $modelRuleCondition->value_sub_value){
+                    $modelsRuleCondition[$key]->value_sub_value = '';
+                }
+                if('none' == $modelRuleCondition->value_sub_value2){
+                    $modelsRuleCondition[$key]->value_sub_value2 = '';
+                }
+            }
+            
+            foreach($modelsRuleAction as $key => $modelRuleAction){
+                // empty everything if the value is none
+                if('none' == $modelRuleAction->action_sub_value){
+                    $modelsRuleAction[$key]->action_sub_value = '';
+                }
+                if('none' == $modelRuleAction->value_sub_value){
+                    $modelsRuleAction[$key]->value_sub_value = '';
+                }
+                if('none' == $modelRuleAction->value_sub_value2){
+                    $modelsRuleAction[$key]->value_sub_value2 = '';
+                }
+            }	
+            
             if($model->validate() && RuleCondition::validateMultiple($modelsRuleCondition) && RuleAction::validateMultiple($modelsRuleAction)){
                 $model->save(false);
                 // change the rule_id, and save

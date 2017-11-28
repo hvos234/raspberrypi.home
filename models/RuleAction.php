@@ -86,7 +86,10 @@ class RuleAction extends \yii\db\ActiveRecord
             [['rule_id', 'weight'], 'integer'],
             [['active', 'action_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
-            [['action_value', 'value_value'], 'string', 'max' => 255]
+            [['action_value', 'value_value'], 'string', 'max' => 255],
+            [['action_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
+                return $model->active == '1';
+            }],
         ];
     }
 
@@ -213,29 +216,55 @@ class RuleAction extends \yii\db\ActiveRecord
 
         return RuleAction::action($modelsRuleAction);
     }
+    
+    /*'id' => Yii::t('app', 'Id'),
+            'action' => Yii::t('app', 'Action'),
+            'action_value' => Yii::t('app', 'Action Value'),
+            'action_sub_value' => Yii::t('app', 'Sub Action Value'),
+            'value' => Yii::t('app', 'Value'),
+            'value_value' => Yii::t('app', 'Value Value'),
+            'value_sub_value' => Yii::t('app', 'Sub Value Value'),
+            'value_sub_value2' => Yii::t('app', 'Second Sub Value Value'),
+            'rule_id' => Yii::t('app', 'Id Rule'),
+            'weight' => Yii::t('app', 'Weight'),
+            'created_at' => Yii::t('app', 'Created At'),
+            'updated_at' => Yii::t('app', 'Updated At'),*/
 		
     public static function action($modelsRuleAction){
         foreach($modelsRuleAction as $modelRuleAction){
-            // check if the static method ruleAction exists
-            if(!method_exists('app\models\\' . $modelRuleAction->action, 'ruleAction')){
-                return false;
-            }
-
-            // only retrieve a value if the action is setting
+            // first get the value from the ruleCondition with the value, value_value, value_sub_value and the value_sub_value2
+            // then use that value with the action
+            $value = '';
+            
+            // only get the value if the action is Setting or Thermostat, we need a value to changes send with the action, by the rest we don't
             $value = '';
             if('Setting' == $modelRuleAction->action or 'Thermostat' == $modelRuleAction->action){                
-                // check if the static method ruleAction exists
+                // check if the static method ruleCondition exists
                 if(!method_exists('app\models\\' . $modelRuleAction->value, 'ruleCondition')){
-                    return false;
+                    die('app\models\ruleCondition, action');
                 }
 
                 // get the value
                 $values = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->value), 'ruleCondition'), ['value' => $modelRuleAction->value_value, 'sub_value' => $modelRuleAction->value_sub_value, 'sub_value2' => $modelRuleAction->value_sub_value2]);
-                $value = HelperData::dataImplode($values);
+                
+                if('' != $modelRuleAction->value_sub_value2){
+                    $value = $values[$modelRuleAction->value_sub_value2];
+                    
+                }elseif('' != $modelRuleAction->value_sub_value){
+                    $value = $values[$modelRuleAction->value_sub_value];
+                    
+                }else {
+                    $value = current($values);
+                }
             }
-
-            // use the value
-            $actions = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->action), 'ruleAction'), ['value' => $modelRuleAction->action_value, 'sub_value' => $modelRuleAction->action_sub_value, 'sub_value2' => $modelRuleAction->action_sub_value2, 'data' => $value]);
+            
+            // check if the static method ruleAction exists
+            if(!method_exists('app\models\\' . $modelRuleAction->action, 'ruleCondition')){
+                die('app\models\RuleAction, action');
+            }
+                
+            // send the value if exists with the action
+            $actions = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->action), 'ruleAction'), ['value' => $modelRuleAction->action_value, 'sub_value' => $modelRuleAction->action_sub_value, 'data' => $value]);
             
             if(!$actions){
                 return false;

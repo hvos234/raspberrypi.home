@@ -15,9 +15,9 @@ $_model = \app\models\RuleCondition::findOne(1);
 
 <div class="rule-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php //$form = ActiveForm::begin(); ?>
     
-    <?php //$form = ActiveForm::begin(['enableClientValidation'=>false]); ?>
+    <?php $form = ActiveForm::begin(['enableClientValidation'=>false]); ?>
     
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
@@ -53,7 +53,7 @@ $_model = \app\models\RuleCondition::findOne(1);
                             <?= $form->field($modelRuleCondition, "[$index]condition_value", ['inputOptions' => ['class' => 'form-control rule-condition-condition_value', 'index' => $index]])->dropDownList($modelRuleCondition->condition_values)->label(false) ?>
                         </td>
                         <td>
-                            <?= $form->field($modelRuleCondition, "[$index]condition_sub_value", ['inputOptions' => ['class' => 'form-control rule-condition-condition_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->condition_sub_value == 'none') ? 'block' : 'none')]])->dropDownList($modelRuleCondition->condition_sub_values)->label(false) ?>
+                            <?= $form->field($modelRuleCondition, "[$index]condition_sub_value", ['inputOptions' => ['class' => 'form-control rule-condition-condition_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->condition_sub_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleCondition->condition_sub_values)->label(false) ?>
                         </td>
                     </tr>
                     <tr>
@@ -79,8 +79,8 @@ $_model = \app\models\RuleCondition::findOne(1);
                             <?= $form->field($modelRuleCondition, "[$index]value_value", ['inputOptions' => ['class' => 'form-control rule-condition-value_value', 'index' => $index]])->dropDownList($modelRuleCondition->value_values)->label(false) ?>
                         </td>
                         <td>
-                            <?= $form->field($modelRuleCondition, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control rule-condition-value_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->value_sub_value == 'none') ? 'block' : 'none')]])->dropDownList($modelRuleCondition->value_sub_values)->label(false) ?>
-                            <?= $form->field($modelRuleCondition, "[$index]value_sub_value2", ['inputOptions' => ['class' => 'form-control rule-condition-value_sub_value2', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->value_sub_value2 == ' ') ? 'block' : 'none')]])->textInput(['maxlength' => true])->label(false) ?>
+                            <?= $form->field($modelRuleCondition, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control rule-condition-value_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->value_sub_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleCondition->value_sub_values)->label(false) ?>
+                            <?= $form->field($modelRuleCondition, "[$index]value_sub_value2", ['inputOptions' => ['class' => 'form-control rule-condition-value_sub_value2', 'index' => $index, 'style' => 'display: ' . (($modelRuleCondition->value_sub_value2 != '') ? 'block' : 'none')]])->textInput(['maxlength' => true])->label(false) ?>
                         </td>
                     </tr>
                     <tr>
@@ -148,7 +148,7 @@ $_model = \app\models\RuleCondition::findOne(1);
                             <?= $form->field($modelRuleAction, "[$index]action_value", ['inputOptions' => ['class' => 'form-control rule-action-action_value', 'index' => $index]])->dropDownList($modelRuleAction->action_values)->label(false) ?>
                         </td>
                         <td>
-                            <?= $form->field($modelRuleAction, "[$index]action_sub_value", ['inputOptions' => ['class' => 'form-control rule-action-action_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->action_sub_value == 'none') ? 'block' : 'none')]])->dropDownList($modelRuleAction->action_sub_values)->label(false) ?>
+                            <?= $form->field($modelRuleAction, "[$index]action_sub_value", ['inputOptions' => ['class' => 'form-control rule-action-action_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->action_sub_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleAction->action_sub_values)->label(false) ?>
                         </td>
                     </tr>
                     <tr>
@@ -164,8 +164,8 @@ $_model = \app\models\RuleCondition::findOne(1);
                             <?= $form->field($modelRuleAction, "[$index]value_value", ['inputOptions' => ['class' => 'form-control rule-action-value_value', 'index' => $index]])->dropDownList($modelRuleAction->value_values)->label(false) ?>
                         </td>
                         <td>
-                            <?= $form->field($modelRuleAction, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control rule-action-value_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_sub_value == 'none') ? 'block' : 'none')]])->dropDownList($modelRuleAction->value_sub_values)->label(false) ?>
-                            <?= $form->field($modelRuleAction, "[$index]value_sub_value2", ['inputOptions' => ['class' => 'form-control rule-action-value_sub_value2', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_sub_value2 == ' ') ? 'block' : 'none')]])->textInput(['maxlength' => true])->label(false) ?>
+                            <?= $form->field($modelRuleAction, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control rule-action-value_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_sub_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleAction->value_sub_values)->label(false) ?>
+                            <?= $form->field($modelRuleAction, "[$index]value_sub_value2", ['inputOptions' => ['class' => 'form-control rule-action-value_sub_value2', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_sub_value2 != '') ? 'block' : 'none')]])->textInput(['maxlength' => true])->label(false) ?>
                         </td>
                     </tr>
                     <tr>
