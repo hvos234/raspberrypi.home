@@ -258,4 +258,10 @@ class Setting extends \yii\db\ActiveRecord
                     }
                     return true;
 		}
+                
+                public static function voiceAction($params){
+                    $model = Setting::findOne($params['id']);
+                    $datas = HelperData::dataExplode($model->data);
+                    return $datas[$params['field']];
+                }
 }
