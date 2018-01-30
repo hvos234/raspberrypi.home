@@ -36,14 +36,14 @@ class Voice extends \yii\db\ActiveRecord
     public $weights = [];
     
     public function init() {
-        $this->action_models = Voice::getActionModels();
+        /*$this->action_models = Voice::getActionModels();
         $this->action_model = key($this->action_models);
 
         $this->action_model_ids = Voice::getModelIds($this->action_model);
         $this->action_model_id = key($this->action_model_ids);
 
         $this->action_model_fields = Voice::getModelFields($this->action_model, $this->action_model_id);
-        $this->action_model_field = key($this->action_model_fields);
+        $this->action_model_field = key($this->action_model_fields);*/
         
         $this->weights = Voice::getWeights();
         

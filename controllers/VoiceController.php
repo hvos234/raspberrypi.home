@@ -68,6 +68,8 @@ class VoiceController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
+            $model = $this->getLists($model);
+            
             return $this->render('create', [
                 'model' => $model,
             ]);
@@ -87,6 +89,8 @@ class VoiceController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
+            $model = $this->getLists($model);
+            
             return $this->render('update', [
                 'model' => $model,
             ]);
@@ -120,6 +124,25 @@ class VoiceController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function getLists($model){
+        $model->action_models = Voice::getActionModels();
+        if(!isset($model->action_model) or empty($model->action_model)){
+            $model->action_model = key($model->action_models);
+        }
+        
+        $model->action_model_ids = Voice::getModelIds($model->action_model);
+        if(!isset($model->action_model_id) or empty($model->action_model_id)){
+            $model->action_model_id = key($model->action_model_ids);
+        }
+        
+        $model->action_model_fields = Voice::getModelFields($model->action_model, $model->action_model_id);
+        if(!isset($model->action_model_field) or empty($model->action_model_field)){
+            $model->action_model_field = key($model->action_model_fields);
+        }
+        
+        return $model;
     }
     
     public function actionAjaxGetModels(){
