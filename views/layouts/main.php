@@ -58,6 +58,7 @@ AppAsset::register($this);
                 ['label' => Yii::t('app', 'Rules Conditions'), 'url' => ['/rule-condition/index']],
                 ['label' => Yii::t('app', 'Rules Actions'), 'url' => ['/rule-action/index']],
                 ['label' => Yii::t('app', 'CronJobs'), 'url' => ['/cronjob/index']],
+                ['label' => Yii::t('app', 'Voice'), 'url' => ['/voice/index']],
                 ['label' => Yii::t('app', 'Settings'), 'url' => ['/setting/index']],
                 ['label' => Yii::t('app', 'Data'), 'url' => ['/data/index']],
                 ['label' => Yii::t('app', 'Log'), 'url' => ['/log/index']],
