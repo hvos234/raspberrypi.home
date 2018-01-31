@@ -48,7 +48,7 @@ _home_serial = home_serial()
 _home_serial.connect(3)
 time.sleep(1) # wait to device is started up
 
-timeout = 5 # seconds
+timeout = 10 # seconds
 timeout_start = time.time()
 
 # mysql

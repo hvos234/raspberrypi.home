@@ -21,13 +21,14 @@ char humdity[7];
 #define PROMISCUOUSMODE  false //set to 'true' to sniff all packets on the same network
 #define ACK         true
 #define ACK_RETRIES 2
-#define ACK_WAIT    510 // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
-#define TIMEOUT     1530 // wait for respones
+#define ACK_WAIT    3000 // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
+#define TIMEOUT     6000 // wait for respones
 
 byte sendSize=0;
 boolean requestACK = false;
 
 #include <RFM69.h>
+#include <SPIFlash.h>
 #include <SPI.h>
 #include <HomeRFM69.h>
 
@@ -78,7 +79,7 @@ int thermostatStatus = 0;
 int thermostatStatusPrevious = 0;
 
 // fail safe, turn the thermostate every houre of, no matter what
-long thermostatFailSafePeriod = (1000 * 60 * 60); //transmit a packet to gateway so often (in ms) (every 1 hour)
+long thermostatFailSafePeriod = (1000L * 60 * 60); //transmit a packet to gateway so often (in ms) (every 1 hour) // the L is for warning: integer overflow in expression ,see https://github.com/arduino/Arduino/issues/3590
 unsigned long thermostatFailSafeCurrentPeriod = 0;
 unsigned long thermostatFailSafePreviousPeriod = 0;
 
@@ -121,7 +122,7 @@ void setup() {
   
   // Light
   pinMode(LIGHTPIN, OUTPUT); // sets the digital pin as output, in output mode it can send voltage, in input mode only receives it
-  digitalWrite(LIGHTPIN, LOW); // turn thermostate off
+  digitalWrite(LIGHTPIN, HIGH); // turn thermostate off // this relay the LOW and HIGH are reverst, HIGH is off
   
   // if analog input pin 0 is unconnected, random analog
   // noise will cause the call to randomSeed() to generate
@@ -147,6 +148,8 @@ void loop() {
     
     if(!homerfm69.sscanfData(data)){
       sprintf(message, "err:rfm69,%d", homerfm69.getErrorId());
+      Serial.print("sscanfData failt: ");
+      Serial.println(homerfm69.getAction());
     }else {
       
       if(ACTIONTHERMOON != homerfm69.getAction() && ACTIONTHERMOOFF != homerfm69.getAction() && ACTIONTHERMOSTATSWITCH != homerfm69.getAction() && ACTIONTHERMOSTAT != homerfm69.getAction() && ACTIONLIGHTON != homerfm69.getAction() && ACTIONLIGHTOFF != homerfm69.getAction() && ACTIONLIGHTSTATSWITCH != homerfm69.getAction()){
@@ -238,22 +241,22 @@ void loop() {
       
       // light
       if(ACTIONLIGHTON == homerfm69.getAction()){
-        digitalWrite(LIGHTPIN, HIGH);
+        digitalWrite(LIGHTPIN, LOW); // LOW and HIGH are reverts, LOW is on
         sprintf(message, "on:%d", 1);
       }
       
       if(ACTIONLIGHTOFF == homerfm69.getAction()){
-        digitalWrite(LIGHTPIN, LOW);
+        digitalWrite(LIGHTPIN, HIGH);  // LOW and HIGH are reverts, HIGH is off
         sprintf(message, "off:%d", 0);
       }
       
       if(ACTIONLIGHTSTATSWITCH == homerfm69.getAction()){
         lightStatusSwitch = digitalRead(LIGHTPIN); 
         
-        if(0 == lightStatusSwitch){
-          sprintf(message, "ls:%d", 1); // is on
-        }else {
+        if(0 == lightStatusSwitch){ // LOW and HIGH are reverts, 0 off, 1 is on
           sprintf(message, "ls:%d", 0); // is off
+        }else {
+          sprintf(message, "ls:%d", 1); // is on
         }        
       }
     }
@@ -364,7 +367,7 @@ void loop() {
     }
   }
   
-  // fail safe, turn thermostate of every hour
+  // fail safe, turn thermostate off every hour
   unsigned long thermostatFailSafeCurrentPeriod = millis();
   if (thermostatFailSafeCurrentPeriod - thermostatFailSafePreviousPeriod >= thermostatFailSafePeriod || thermostatFailSafeCurrentPeriod < thermostatFailSafePreviousPeriod) {
     thermostatFailSafePreviousPeriod = thermostatFailSafeCurrentPeriod;

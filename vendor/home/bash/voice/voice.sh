@@ -15,6 +15,8 @@ function voice {
 
     # record only when there is sound, and cuts out the silence and no gaps and no long silences
     cmd+=" silence 1 0.1 5% 1 1.0 5%"
+    # https://aws.amazon.com/blogs/machine-learning/build-a-voice-kit-with-amazon-lex-and-a-raspberry-pi/
+    # silence 1 0 1% 4 0.3t 2% 
 
     eval $cmd
 
