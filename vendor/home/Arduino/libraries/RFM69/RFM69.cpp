@@ -1,8 +1,7 @@
 // **********************************************************************************
 // Driver definition for HopeRF RFM69W/RFM69HW/RFM69CW/RFM69HCW, Semtech SX1231/1231H
 // **********************************************************************************
-// Copyright Felix Rusu (2014), felix@lowpowerlab.com
-// http://lowpowerlab.com/
+// Copyright Felix Rusu 2016, http://www.LowPowerLab.com/contact
 // **********************************************************************************
 // License
 // **********************************************************************************
@@ -17,10 +16,6 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A   
 // PARTICULAR PURPOSE. See the GNU General Public        
 // License for more details.                              
-//                                                        
-// You should have received a copy of the GNU General    
-// Public License along with this program.
-// If not, see <http://www.gnu.org/licenses/>.
 //                                                        
 // Licence can be viewed at                               
 // http://www.gnu.org/licenses/gpl-3.0.txt
@@ -41,6 +36,7 @@ volatile uint8_t RFM69::PAYLOADLEN;
 volatile uint8_t RFM69::ACK_REQUESTED;
 volatile uint8_t RFM69::ACK_RECEIVED; // should be polled immediately after sending a packet with ACK request
 volatile int16_t RFM69::RSSI;          // most accurate RSSI during reception (closest to the reception)
+volatile bool RFM69::_inISR;
 RFM69* RFM69::selfPointer;
 
 bool RFM69::initialize(uint8_t freqBand, uint8_t nodeID, uint8_t networkID)
@@ -109,6 +105,7 @@ bool RFM69::initialize(uint8_t freqBand, uint8_t nodeID, uint8_t networkID)
   while (((readReg(REG_IRQFLAGS1) & RF_IRQFLAGS1_MODEREADY) == 0x00) && millis()-start < timeout); // wait for ModeReady
   if (millis()-start >= timeout)
     return false;
+  _inISR = false;
   attachInterrupt(_interruptNum, RFM69::isr0, RISING);
 
   selfPointer = this;
@@ -229,10 +226,10 @@ void RFM69::send(uint8_t toAddress, const void* buffer, uint8_t bufferSize, bool
 // The reason for the semi-automaton is that the lib is interrupt driven and
 // requires user action to read the received data and decide what to do with it
 // replies usually take only 5..8ms at 50kbps@915MHz
-bool RFM69::sendWithRetry(uint8_t toAddress, const void* buffer, uint8_t bufferSize, uint8_t retries, unsigned long retryWaitTime) {     
+bool RFM69::sendWithRetry(uint8_t toAddress, const void* buffer, uint8_t bufferSize, uint8_t retries, uint8_t retryWaitTime) {
   uint32_t sentTime;
   for (uint8_t i = 0; i <= retries; i++)
-  {  
+  {
     send(toAddress, buffer, bufferSize, true);
     sentTime = millis();
     while (millis() - sentTime < retryWaitTime)
@@ -353,7 +350,7 @@ void RFM69::interruptHandler() {
 }
 
 // internal function
-void RFM69::isr0() { selfPointer->interruptHandler(); }
+void RFM69::isr0() { _inISR = true; selfPointer->interruptHandler(); _inISR = false; }
 
 // internal function
 void RFM69::receiveBegin() {
@@ -448,7 +445,11 @@ void RFM69::select() {
   // set RFM69 SPI settings
   SPI.setDataMode(SPI_MODE0);
   SPI.setBitOrder(MSBFIRST);
+#ifdef __arm__
+	SPI.setClockDivider(SPI_CLOCK_DIV16);
+#else
   SPI.setClockDivider(SPI_CLOCK_DIV4); // decided to slow down from DIV2 after SPI stalling in some instances, especially visible on mega1284p when RFM69 and FLASH chip both present
+#endif
   digitalWrite(_slaveSelectPin, LOW);
 }
 
@@ -460,7 +461,7 @@ void RFM69::unselect() {
   SPCR = _SPCR;
   SPSR = _SPSR;
 #endif
-  interrupts();
+  maybeInterrupts();
 }
 
 // true  = disable filtering to capture all frames on network
@@ -775,6 +776,32 @@ void RFM69::readAllRegs()
   unselect();
 }
 
+void RFM69::readAllRegsCompact() {
+  // Print the header row and first register entry
+  Serial.println();Serial.print("     ");
+  for ( uint8_t reg = 0x00; reg<0x10; reg++ ) {
+    Serial.print(reg, HEX);
+    Serial.print("  ");
+  }
+  Serial.println();
+  Serial.print("00: -- ");
+
+  // Loop over the registers from 0x01 to 0x7F and print their values
+  for ( uint8_t reg = 0x01; reg<0x80; reg++ ) {
+    if ( reg % 16 == 0 ) {    // Print the header column entries
+      Serial.println();
+      Serial.print( reg, HEX );
+      Serial.print(": ");
+    }
+
+    // Print the actual register values
+    uint8_t ret = readReg( reg );
+    if ( ret < 0x10 ) Serial.print("0");  // Handle values less than 10
+    Serial.print( ret, HEX);
+    Serial.print(" ");
+  }
+}
+
 uint8_t RFM69::readTemperature(uint8_t calFactor) // returns centigrade
 {
   setMode(RF69_MODE_STANDBY);
@@ -787,4 +814,10 @@ void RFM69::rcCalibration()
 {
   writeReg(REG_OSC1, RF_OSC1_RCCAL_START);
   while ((readReg(REG_OSC1) & RF_OSC1_RCCAL_DONE) == 0x00);
+}
+
+inline void RFM69::maybeInterrupts()
+{
+  // Only reenable interrupts if we're not being called from the ISR
+  if (!_inISR) interrupts();
 }

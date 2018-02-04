@@ -1,0 +1,11 @@
+[Unit]
+Description=Home service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /var/www/html/home/vendor/LowPowerLab/home-service/home_receiver.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

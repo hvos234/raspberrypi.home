@@ -1,10 +1,11 @@
 // **********************************************************************************************************
-// MightyHat gateway base unit sketch that works with MightyHat with onboard RFM69W/RFM69HW
+// MightyHat gateway base unit sketch that works with MightyHat equipped with RFM69W/RFM69HW/RFM69CW/RFM69HCW
 // This will relay all RF data over serial to the host computer (RaspberryPi, PC etc) and vice versa
 // http://LowPowerLab.com/MightyHat
-// Copyright http://www.LowPowerLab.com (2015)
 // Also see http://LowPowerLab.com/gateway
-//**********************************************************************************
+// **********************************************************************************
+// Copyright Felix Rusu 2016, http://www.LowPowerLab.com/contact
+// **********************************************************************************
 // License
 // **********************************************************************************
 // This program is free software; you can redistribute it 
@@ -18,42 +19,39 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A   
 // PARTICULAR PURPOSE. See the GNU General Public        
 // License for more details.                              
-//                                                        
-// You should have received a copy of the GNU General    
-// Public License along with this program.
-// If not, see <http://www.gnu.org/licenses/>.
-//                                                        
+//                                                   
 // Licence can be viewed at                               
 // http://www.gnu.org/licenses/gpl-3.0.txt
 //
 // Please maintain this license information along with authorship
 // and copyright notices in any redistribution of this code
 // **********************************************************************************
-
-#include <RFM69.h>         //get it here: http://github.com/lowpowerlab/rfm69
-#include <RFM69_ATC.h>     //get it here: https://www.github.com/lowpowerlab/rfm69
-#include <SPIFlash.h>      //get it here: http://github.com/lowpowerlab/spiflash
-#include <WirelessHEX69.h> //get it here: https://github.com/LowPowerLab/WirelessProgramming
-#include <SPI.h>           //comes with Arduino IDE (www.arduino.cc)
+#define MHAT_VERSION    3  //latest version is R3, change to "2" if you have a MightyHat R2
+// ****************************************************************************************
+#include <RFM69.h>         //get it here: https://github.com/lowpowerlab/rfm69
+#include <RFM69_ATC.h>     //get it here: https://github.com/lowpowerlab/RFM69
+#include <RFM69_OTA.h>     //get it here: https://github.com/lowpowerlab/RFM69
+#include <SPIFlash.h>      //get it here: https://github.com/lowpowerlab/spiflash
+#include <SPI.h>           //included with Arduino IDE (www.arduino.cc)
 #include "U8glib.h"        //https://bintray.com/olikraus/u8glib/Arduino
                            //u8g compared to adafruit lib: https://www.youtube.com/watch?v=lkWZuAnHa2Y
                            //draing bitmaps: https://www.coconauts.net/blog/2015/01/19/easy-draw-bitmaps-arduino/
-//*****************************************************************************************************************************
-// ADJUST THE SETTINGS BELOW DEPENDING ON YOUR HARDWARE/SCENARIO !
-//*****************************************************************************************************************************
+//****************************************************************************************************************
+//**** IMPORTANT RADIO SETTINGS - YOU MUST CHANGE/CONFIGURE TO MATCH YOUR HARDWARE TRANSCEIVER CONFIGURATION! ****
+//****************************************************************************************************************
 #define NODEID          1  //the gateway has ID=1
 #define NETWORKID     100  //all nodes on the same network can talk to each other
 //#define FREQUENCY     RF69_433MHZ //Match this with the version of your Moteino! (others: RF69_433MHZ, RF69_868MHZ)
 #define FREQUENCY     RF69_915MHZ //Match this with the version of your Moteino! (others: RF69_433MHZ, RF69_868MHZ)
 //#define FREQUENCY_EXACT 917000000 //uncomment and set to a specific frequency in Hz, if commented the center frequency is used
 #define ENCRYPTKEY    "sampleEncryptKey" //has to be same 16 characters/bytes on all nodes, not more not less!
-#define IS_RFM69HW    //uncomment only for RFM69HW! Leave out if you have RFM69W!
+#define IS_RFM69HW_HCW  //uncomment only for RFM69HW/HCW! Leave out if you have RFM69W/CW!
 #define ENABLE_ATC    //comment out this line to disable AUTO TRANSMISSION CONTROL //more here: http://lowpowerlab.com/blog/2015/11/11/rfm69_atc-automatic-transmission-control/
 //#define ENABLE_WIRELESS_PROGRAMMING    //comment out this line to disable Wireless Programming of this gateway node
 #define ENABLE_LCD    //comment this out if you don't have or don't want to use the LCD
 //*****************************************************************************************************************************
 #define ACK_TIME       30  // # of ms to wait for an ack
-#define SERIAL_BAUD 115200
+#define SERIAL_BAUD 19200
 #define DEBUG_EN     //comment out if you don't want any serial verbose output (keep out in real use)
 
 #define BTN_LED_RED     9
@@ -137,8 +135,15 @@ SPIFlash flash(FLASH_CS, 0xEF30); //EF30 for 4mbit Windbond FLASH MEM
 //******************************************** BEGIN LCD STUFF ********************************************************************************
 char lcdbuff[80];
 #ifdef ENABLE_LCD
-#define PIN_LCD_CS    LATCH_VAL //Pin 2 on LCD, lcd CS is shared with Latch value pin since they are both outputs and never HIGH at the same time
-#define PIN_LCD_RST   A1 //Pin 1 on LCD
+
+#if defined(MHAT_VERSION) && (MHAT_VERSION == 3)
+  #define PIN_LCD_CS    A1 //Pin 2 on LCD, lcd CS is shared with Latch value pin since they are both outputs and never HIGH at the same time
+  #define PIN_LCD_RST   U8G_PIN_NONE //this is tied directly to the atmega RST
+#else
+  #define PIN_LCD_CS    LATCH_VAL //Pin 2 on LCD, lcd CS is shared with Latch value pin since they are both outputs and never HIGH at the same time
+  #define PIN_LCD_RST   A1 //Pin 1 on LCD
+#endif
+
 #define PIN_LCD_DC    A0 //Pin 3 on LCD
 #define PIN_LCD_LIGHT 3 //Backlight pin
 #define xbmp_logo_width 30
@@ -666,8 +671,8 @@ void setup() {
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
   radio.encrypt(ENCRYPTKEY);
 
-#ifdef IS_RFM69HW
-  radio.setHighPower(); //only for RFM69HW!
+#ifdef IS_RFM69HW_HCW
+  radio.setHighPower(); //must include this only for RFM69HW/HCW!
 #endif
 
   sprintf(lcdbuff, "Listening @ %dmhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);

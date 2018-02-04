@@ -1,38 +1,72 @@
 // **********************************************************************************************************
-// GarageMote garage door controller base receiver sketch that works with Moteinos equipped with HopeRF RFM69W/RFM69HW
-// Can be adapted to use Moteinos using RFM12B
-// This is the sketch for the base, not the controller itself, and meant as another example on how to use a
-// Moteino as a gateway/base/receiver
-// 2014-07-14 (C) felix@lowpowerlab.com, http://www.LowPowerLab.com
-// **********************************************************************************************************
-// Creative Commons Attrib Share-Alike License
-// You are free to use/extend this code/library but please abide with the CCSA license:
-// http://creativecommons.org/licenses/by-sa/4.0/
+// Moteino gateway/base sketch that works with Moteinos equipped with RFM69W/RFM69HW/RFM69CW/RFM69HCW
+// This sketch uses a 2x20 Newhaven RGB backlight LCD to display incoming messages from end nodes
+// http://www.digikey.com/product-search/en?keywords=NHD-C0220BIZ-FS(RGB)-FBW-3VM
+// This is a basic gateway sketch that receives packets from end node Moteinos, formats them as ASCII strings
+//      with the end node [ID] and passes them to Pi/host computer via serial port
+//     (ex: "messageFromNode" from node 123 gets passed to serial as "[123] messageFromNode")
+// It also listens to serial messages that should be sent to listening end nodes
+//     (ex: "123:messageToNode" sends "messageToNode" to node 123)
+// Make sure to adjust the settings to match your transceiver settings (frequency, HW etc).
 // **********************************************************************************
+// Copyright Felix Rusu 2016, http://www.LowPowerLab.com/contact
+// **********************************************************************************
+// License
+// **********************************************************************************
+// This program is free software; you can redistribute it 
+// and/or modify it under the terms of the GNU General    
+// Public License as published by the Free Software       
+// Foundation; either version 3 of the License, or        
+// (at your option) any later version.                    
+//                                                        
+// This program is distributed in the hope that it will   
+// be useful, but WITHOUT ANY WARRANTY; without even the  
+// implied warranty of MERCHANTABILITY or FITNESS FOR A   
+// PARTICULAR PURPOSE. See the GNU General Public        
+// License for more details.
 
-#include <RFM69.h>         //get it here: http://github.com/lowpowerlab/rfm69
-#include <SPIFlash.h>      //get it here: http://github.com/lowpowerlab/spiflash
-#include <WirelessHEX69.h> //get it here: https://github.com/LowPowerLab/WirelessProgramming
-#include <SPI.h>           //comes with Arduino IDE (www.arduino.cc)
+// Licence can be viewed at                               
+// http://www.gnu.org/licenses/gpl-3.0.txt
+//
+// Please maintain this license information along with authorship
+// and copyright notices in any redistribution of this code
+// **********************************************************************************
+#include <RFM69.h>         //get it here: https://github.com/lowpowerlab/rfm69
+#include <RFM69_ATC.h>     //get it here: https://github.com/lowpowerlab/RFM69
+#include <RFM69_OTA.h>     //get it here: https://github.com/lowpowerlab/RFM69
+#include <SPIFlash.h>      //get it here: https://github.com/lowpowerlab/spiflash
+#include <SPI.h>           //included with Arduino IDE (www.arduino.cc)
+#include <Wire.h>          //included with Arduino IDE (www.arduino.cc)
 #include "ST7036.h"        //get it from here: https://bitbucket.org/fmalpartida/st7036-display-driver/src/
 #include "LCD_C0220BiZ.h"  //get it from here: https://bitbucket.org/fmalpartida/st7036-display-driver/src/
-#include <Wire.h>          //comes with Arduino
 
-//*****************************************************************************************************************************
-// ADJUST THE SETTINGS BELOW DEPENDING ON YOUR HARDWARE/SITUATION!
-//*****************************************************************************************************************************
-#define NODEID          1
-#define NETWORKID     200
+//****************************************************************************************************************
+//**** IMPORTANT RADIO SETTINGS - YOU MUST CHANGE/CONFIGURE TO MATCH YOUR HARDWARE TRANSCEIVER CONFIGURATION! ****
+//****************************************************************************************************************
+#define NODEID          1 //the ID of this node
+#define NETWORKID     200 //the network ID of all nodes this node listens/talks to
 #define FREQUENCY     RF69_915MHZ //Match this with the version of your Moteino! (others: RF69_433MHZ, RF69_868MHZ)
-#define ENCRYPTKEY    "thisIsEncryptKey" //has to be same 16 characters/bytes on all nodes, not more not less!
-#define IS_RFM69HW    //uncomment only for RFM69HW! Leave out if you have RFM69W!
-#define LED             9
-#define FLASH_CS        8
-#define SERIAL_BAUD 115200
-#define SERIAL_EN     //comment out if you don't want any serial verbose output
+#define ENCRYPTKEY    "sampleEncryptKey" //identical 16 characters/bytes on all nodes, not more not less!
+#define IS_RFM69HW_HCW  //uncomment only for RFM69HW/HCW! Leave out if you have RFM69W/CW!
 #define ACK_TIME       30  // # of ms to wait for an ack
-#define BACKLIGHTPIN    5 //3=R,5=G,6=B
 //*****************************************************************************************************************************
+#define ENABLE_ATC    //comment out this line to disable AUTO TRANSMISSION CONTROL
+#define ATC_RSSI      -75  //target RSSI for RFM69_ATC (recommended > -80)
+//*****************************************************************************************************************************
+// Serial baud rate must match your Pi/host computer serial port baud rate!
+#define SERIAL_EN     //comment out if you don't want any serial verbose output
+#define SERIAL_BAUD  19200
+//*****************************************************************************************************************************
+
+#define BACKLIGHTPIN    5 //3=R,5=G,6=B
+
+#ifdef __AVR_ATmega1284P__
+  #define LED           15 // Moteino MEGAs have LEDs on D15
+  #define FLASH_SS      23 // and FLASH SS on D23
+#else
+  #define LED           9 // Moteinos have LEDs on D9
+  #define FLASH_SS      8 // and FLASH SS on D8
+#endif
 
 #ifdef SERIAL_EN
   #define DEBUG(input)   {Serial.print(input); delay(1);}
@@ -42,8 +76,13 @@
   #define DEBUGln(input);
 #endif
 
-RFM69 radio;
-SPIFlash flash(FLASH_CS, 0xEF30); //EF40 for 16mbit windbond chip
+#ifdef ENABLE_ATC
+  RFM69_ATC radio;
+#else
+  RFM69 radio;
+#endif
+
+SPIFlash flash(FLASH_SS, 0xEF30); //EF40 for 16mbit windbond chip
 
 //initialize LCD
 ST7036 lcd = ST7036(2, 20, 0x78, BACKLIGHTPIN); //row count, column count, I2C addr, pin for backlight PWM
@@ -54,19 +93,28 @@ void setup() {
   Serial.begin(SERIAL_BAUD);
   delay(10);
   radio.initialize(FREQUENCY,NODEID,NETWORKID);
-#ifdef IS_RFM69HW
-  radio.setHighPower(); //uncomment only for RFM69HW!
+#ifdef IS_RFM69HW_HCW
+  radio.setHighPower(); //must include this only for RFM69HW/HCW!
 #endif
   radio.encrypt(ENCRYPTKEY);
+
+#ifdef ENABLE_ATC
+  radio.enableAutoPower(ATC_RSSI);
+#endif
+  
   char buff[50];
-  sprintf(buff, "\nListening @ %dmhz...", FREQUENCY==RF69_433MHZ ? 433 : FREQUENCY==RF69_868MHZ ? 868 : 915);
+  sprintf(buff, "\nTransmitting at %d Mhz...", radio.getFrequency()/1000000);
+  
   DEBUGln(buff);
+
   if (flash.initialize())
   {
     DEBUGln("SPI Flash Init OK!");
   }
   else
-    DEBUGln("SPI Flash Init FAIL! (is chip present?)");
+  {
+    DEBUGln("SPI FlashMEM not found (is chip onboard?)");
+  }
     
   lcd.init();
   lcd.setContrast(10);
@@ -85,6 +133,7 @@ char LO[20];
 char BAT[20];
 char temp[25];
 String inputstr;
+
 void loop() {
   inputLen = readSerialLine(input, 10, 64, 10); //readSerialLine(char* input, char endOfLineChar=10, byte maxLength=64, uint16_t timeout=10);
   inputstr = String(input);
@@ -168,19 +217,3 @@ void Blink(byte PIN, int DELAY_MS)
   delay(DELAY_MS);
   digitalWrite(PIN,LOW);
 }
-
-//readSerialLine already defined in WirelessHEX69
-// reads a line feed (\n) terminated line from the serial stream
-// returns # of bytes read, up to 255
-// timeout in ms, will timeout and return after so long
-//byte readSerialLine(char* input, char endOfLineChar=10, byte maxLength=64, uint16_t timeout=10);
-//byte readSerialLine(char* input, char endOfLineChar, byte maxLength, uint16_t timeout)
-//{
-//  byte inputLen = 0;
-//  Serial.setTimeout(timeout);
-//  inputLen = Serial.readBytesUntil(endOfLineChar, input, maxLength);
-//  input[inputLen]=0;//null-terminate it
-//  Serial.setTimeout(0);
-//  //Serial.println();
-//  return inputLen;
-//}

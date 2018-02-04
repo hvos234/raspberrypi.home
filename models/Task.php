@@ -97,36 +97,88 @@ class Task extends \yii\db\ActiveRecord
     }*/
 		
 		public static function execute($id){
-			$model = Task::findOne($id);
+                    $model = Task::findOne($id);
 			
-			$data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
-            $data = str_replace(':', '::', $data);
-            $datas = HelperData::dataExplode($data);
+                    $data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
+                    $data = str_replace(':', '::', $data);
+                    $datas = HelperData::dataExplode($data);
+
+                    foreach ($datas as $name => $value){
+                        $modelLog = new Log();
+                        $modelLog->model = 'task';
+                        $modelLog->model_id = $id;
+                        $modelLog->name = $name;
+                        $modelLog->value = $value;
+                        if(!$modelLog->save()){
+                            return false;
+                        }
+                    }
             
-            foreach ($datas as $name => $value){
-                $modelLog = new Log();
-                $modelLog->model = 'task';
-                $modelLog->model_id = $id;
-                $modelLog->name = $name;
-                $modelLog->value = $value;
-                if(!$modelLog->save()){
-                    return false;
-                }
-            }
+                    // check for a error in the data
+                    foreach (['error:', 'err:'] as $needle){
+                            if(false !== strpos($data, $needle)){
+                                    return false;
+                            }
+                    }	
             
-            // check for a error in the data
-			foreach (['error:', 'err:'] as $needle){
-				if(false !== strpos($data, $needle)){
-					return false;
-				}
-			}	
-            
-            return $datas;
+                    return $datas;
 		}
+                
+                public static function startService(){
+                    $command = "sudo /bin/systemctl start HomeTaskReceiver.service";
+                    exec(escapeshellcmd($command), $output, $return_var);
+
+                    if(0 != $return_var){
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                public static function stopService(){
+                    $command = "sudo /bin/systemctl stop HomeTaskReceiver.service";
+                    exec(escapeshellcmd($command), $output, $return_var);
+
+                    if(0 != $return_var){
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                public static function startReceiver(){
+                    $command = "sudo /bin/bash " . Yii::getAlias('@vendor/home/bash/TaskRecevier.sh') . ' &';
+                    exec(escapeshellcmd($command), $output, $return_var);
+
+                    if(0 != $return_var){
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                public static function stopReceiver(){
+                    //kill -9 `pgrep -f cps_build``
+                    //kill -9 `pgrep -f 'TaskRecevier.sh'`
+                    #$command = "sudo /bin/kill -9 `pgrep -f 'TaskReceiver.sh'`";
+                    #exec($command, $output, $return_var);
+                    //$command = 'sudo /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
+                    $command = 'sudo ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
+                    exec(escapeshellcmd($command), $output, $return_var);
+                    
+                    if(0 != $return_var){
+                        return false;
+                    }
+                    
+                    return true;
+                }
 		
-		public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3){
-			$modelSetting = Setting::find()->select('data')->where(['name' => 'path_script_task'])->one();
-			
+		public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4){
+                        // stop task receiver service
+                        if(!Task::stopReceiver()){
+                            return 'err:receiver stop';
+                        }
+                        
 			for($try = 1; $try <= $retry; $try++){
                             /*
                              * sudo visudo
@@ -134,92 +186,110 @@ class Task extends \yii\db\ActiveRecord
                              * # Allow www-data run only python
                              * %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
                              */
-                            $command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
+                            //$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
+                            
+                            //$command = 'timeout ' . $timeout . ' /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskTransmitter.sh') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+                            //$command = '/bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskTransmitter.sh') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+                            $command = 'sudo timeout ' . $timeout . ' /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskTransmitter.sh') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+                            var_dump($command);
+                            exec(escapeshellcmd($command), $output, $return_var);
+                            var_dump($output);
+                            var_dump($return_var);
+                            
+                            $return = Task::sscanfOutput($output);
+                            var_dump($return);
+                            exit();
 				
-				exec(escapeshellcmd($command), $output, $return_var);
-				
-				if(0 != $return_var){
-					if($try < $retry){
-						sleep($delay);
-						continue;
-						
-					}else {
-						return 'err:failed exec';
-					}
-				}
-				
-				$return = Task::sscanfOutput($output);
-				
-				if(!$return){
-					if($try < $retry){
-						sleep($delay);
-						continue;
-						
-					}else {
-						return 'err:no output';
-					}
-				}
+                            if(0 != $return_var){
+                                if($try < $retry){
+                                    sleep($delay);
+                                    continue;
 
-				// from and to are exchanged
-				$from = 0;
-				$to = 0;
-				$action = 0;
-				$message = '';
-				list($from, $to, $action, $message) = $return;
+                                }else {
+                                    Task::startReceiver();
+                                    return 'err:failed exec';
+                                }
+                            }
 
-				if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
-					return $message;
-					
-				}else {
-					// there is output but not for this task-transmitter
-					Task::receiver($output);
-					$try--;
-				}
-				
-				if($try >= $retry){
-					return 'err:failed trying';
-				}else {
-					sleep($delay);
-				}
+                            $return = Task::sscanfOutput($output);
+                            exit();
+
+                            if(!$return){
+                                if($try < $retry){
+                                    sleep($delay);
+                                    continue;
+
+                                }else {
+                                    Task::startReceiver();
+                                    return 'err:no output';
+                                }
+                            }
+
+                            // from and to are exchanged
+                            $from = 0;
+                            $to = 0;
+                            $action = 0;
+                            $message = '';
+                            list($from, $to, $action, $message) = $return;
+
+                            if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
+                                Task::startReceiver();
+                                return $message;
+                            
+                            }else {
+                                // there is output but not for this task-transmitter
+                                Task::receiver($output);
+                                $try--;
+                            }
+
+                            if($try >= $retry){
+                                Task::startReceiver();
+                                return 'err:failed trying';
+                            }else {
+                                sleep($delay);
+                            }
 			}
-			
-			return 'err:failed return';
+                        
+                    Task::startReceiver();
+                    return 'err:failed return';
 		}
 				
 		public static function receiver($output){
-			$return = Task::sscanfOutput($output);
+                    $return = Task::sscanfOutput($output);
 			
-			if($return){
-				$from = 0;
-				$to = 0;
-				$action = 0;
-				$message = '';
-				list($from, $to, $action, $message) = $return;
+                    if($return){
+                        $from = 0;
+                        $to = 0;
+                        $action = 0;
+                        $message = '';
+                        list($from, $to, $action, $message) = $return;
                 
-                $data = str_replace(':', '::', $message);
-                $datas = HelperData::dataExplode($data);
-                
-                $id = Task::getOneByFromDeviceIdToDeviceIdActionIdOrCreateOne($from, $to, $action);
-                
-                foreach ($datas as $name => $value){
-                    $modelLog = new Log();
-                    $modelLog->model = 'task';
-                    $modelLog->model_id = $id;
-                    $modelLog->name = $name;
-                    $modelLog->value = $value;
-                    if(!$modelLog->save()){
-                        return false;
-                    }
-                }
+                        $data = str_replace(':', '::', $message);
+                        $datas = HelperData::dataExplode($data);
 
-				return 1;
-			}
+                        $id = Task::getOneByFromDeviceIdToDeviceIdActionIdOrCreateOne($from, $to, $action);
+
+                        foreach ($datas as $name => $value){
+                            $modelLog = new Log();
+                            $modelLog->model = 'task';
+                            $modelLog->model_id = $id;
+                            $modelLog->name = $name;
+                            $modelLog->value = $value;
+                            if(!$modelLog->save()){
+                                return false;
+                            }
+                        }
+
+                        return 1;
+                    }
             
-			return 0;
+                    return 0;
 		}
 		
 		public static function sscanfOutput($output){
 			foreach($output as $line){
+                                $line = str_replace('"', '', $line);
+                            
 				$from = 0;
 				$to = 0;
 				$action = 0;
@@ -227,7 +297,7 @@ class Task extends \yii\db\ActiveRecord
 				sscanf($line, '^fr:%d;to:%d;ac:%d;msg:%[^$]s', $from, $to, $action, $message);
 				
 				if(!empty($from) and !empty($to) and !empty($action) and !empty($message)){
-					return array($from, $to, $action, $message);
+                                    return array($from, $to, $action, $message);
 				}
 			}
 			return false;

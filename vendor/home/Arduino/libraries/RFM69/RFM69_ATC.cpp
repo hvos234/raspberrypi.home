@@ -19,10 +19,6 @@
 // PARTICULAR PURPOSE. See the GNU General Public        
 // License for more details.                              
 //                                                        
-// You should have received a copy of the GNU General    
-// Public License along with this program.
-// If not, see <http://www.gnu.org/licenses/>.
-//                                                        
 // Licence can be viewed at                               
 // http://www.gnu.org/licenses/gpl-3.0.txt
 //
@@ -154,6 +150,27 @@ void RFM69_ATC::interruptHook(uint8_t CTLbyte) {
       }
     }
   }
+}
+
+//=============================================================================
+//  sendWithRetry() - overrides the base to allow increasing power when repeated ACK requests fail
+//=============================================================================
+bool RFM69_ATC::sendWithRetry(uint8_t toAddress, const void* buffer, uint8_t bufferSize, uint8_t retries, uint8_t retryWaitTime) {
+  uint32_t sentTime;
+  for (uint8_t i = 0; i <= retries; i++)
+  {
+    send(toAddress, buffer, bufferSize, true);
+    sentTime = millis();
+    while (millis() - sentTime < retryWaitTime)
+    {
+      if (ACKReceived(toAddress))
+      {
+        return true;
+      }
+    }
+  }
+  if (_transmitLevel < 31) _transmitLevel++;
+  return false;
 }
 
 //=============================================================================

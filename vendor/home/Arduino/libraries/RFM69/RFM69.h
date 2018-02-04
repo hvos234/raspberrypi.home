@@ -1,8 +1,7 @@
 // **********************************************************************************
 // Driver definition for HopeRF RFM69W/RFM69HW/RFM69CW/RFM69HCW, Semtech SX1231/1231H
 // **********************************************************************************
-// Copyright Felix Rusu (2014), felix@lowpowerlab.com
-// http://lowpowerlab.com/
+// Copyright Felix Rusu 2016, http://www.LowPowerLab.com/contact
 // **********************************************************************************
 // License
 // **********************************************************************************
@@ -17,10 +16,6 @@
 // implied warranty of MERCHANTABILITY or FITNESS FOR A   
 // PARTICULAR PURPOSE. See the GNU General Public        
 // License for more details.                              
-//                                                        
-// You should have received a copy of the GNU General    
-// Public License along with this program.
-// If not, see <http://www.gnu.org/licenses/>.
 //                                                        
 // Licence can be viewed at                               
 // http://www.gnu.org/licenses/gpl-3.0.txt
@@ -45,6 +40,9 @@
 #elif defined(__AVR_ATmega32U4__)
   #define RF69_IRQ_PIN          3
   #define RF69_IRQ_NUM          0
+#elif defined(__arm__)//Use pin 10 or any pin you want
+  #define RF69_IRQ_PIN          PA3
+  #define RF69_IRQ_NUM          3
 #else 
   #define RF69_IRQ_PIN          2
   #define RF69_IRQ_NUM          0  
@@ -102,7 +100,7 @@ class RFM69 {
     void setNetwork(uint8_t networkID);
     bool canSend();
     virtual void send(uint8_t toAddress, const void* buffer, uint8_t bufferSize, bool requestACK=false);
-    virtual bool sendWithRetry(uint8_t toAddress, const void* buffer, uint8_t bufferSize, uint8_t retries=2, unsigned long retryWaitTime=40); // 40ms roundtrip req for 61byte packets
+    virtual bool sendWithRetry(uint8_t toAddress, const void* buffer, uint8_t bufferSize, uint8_t retries=2, uint8_t retryWaitTime=40); // 40ms roundtrip req for 61byte packets
     virtual bool receiveDone();
     bool ACKReceived(uint8_t fromNodeID);
     bool ACKRequested();
@@ -123,11 +121,13 @@ class RFM69 {
     uint8_t readReg(uint8_t addr);
     void writeReg(uint8_t addr, uint8_t val);
     void readAllRegs();
+    void readAllRegsCompact();
 
   protected:
     static void isr0();
     void virtual interruptHandler();
     virtual void interruptHook(uint8_t CTLbyte) {};
+    static volatile bool _inISR;
     virtual void sendFrame(uint8_t toAddress, const void* buffer, uint8_t size, bool requestACK=false, bool sendACK=false);
 
     static RFM69* selfPointer;
@@ -148,6 +148,7 @@ class RFM69 {
     virtual void setHighPowerRegs(bool onOff);
     virtual void select();
     virtual void unselect();
+    inline void maybeInterrupts();
 };
 
 #endif

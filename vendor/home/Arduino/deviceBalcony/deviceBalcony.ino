@@ -21,7 +21,7 @@ char humdity[7];
 #define PROMISCUOUSMODE  false //set to 'true' to sniff all packets on the same network
 #define ACK         true
 #define ACK_RETRIES 2
-#define ACK_WAIT    3000 // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
+#define ACK_WAIT    3000 // this does not work // default is 40 ms at 4800 bits/s, now 160 ms at 1200 bits/s (160 is to low for a long distance, 510 for 10 meters)
 #define TIMEOUT     6000 // wait for respones
 
 byte sendSize=0;

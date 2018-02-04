@@ -22,13 +22,13 @@ bool HomeRFM69::initialize(uint8_t freqBand, int nodeID, int networkID, const ch
     //radio->setHighPower(); //uncomment only for RFM69HW!
 
     // this change the bitrate from 4800 to 1200, and Frequenty level to max
-    _radio->writeReg(0x03,0x68);      //RegBitrateMsb 1200 bitrate
-    _radio->writeReg(0x04,0x2B);      //RegBitrateLsb 1200 bitrate
-    _radio->writeReg(0x05,0x00);      //RegFdevMsb     2000 
-    _radio->writeReg(0x06,0x52);      //RegFdevLsb     2000
-    // low bitrate and you keep the low freq and db, the devices must be next to each other or they can not communicate with each other
-    //_radio->writeReg(0x19,0x40|0x10|0x05);      //RegRxBw  DccFreq:010, RxBw_Mant:24, RxBw_Exp:5 
-    //_radio->writeReg(0x18,0x00|0x00|0x01);      //RegLna  LnaZin:50ohm, LowPower:Off, CurrentGain:MAX
+    ////_radio->writeReg(0x03,0x68);      //RegBitrateMsb 1200 bitrate
+    ///_radio->writeReg(0x04,0x2B);      //RegBitrateLsb 1200 bitrate
+    ////_radio->writeReg(0x05,0x00);      //RegFdevMsb     2000 
+    ////_radio->writeReg(0x06,0x52);      //RegFdevLsb     2000
+    // low bitrate and you keep the low freq and db, the devices must not be next to each other or they can not communicate with each other
+    ////_radio->writeReg(0x19,0x40|0x10|0x05);      //RegRxBw  DccFreq:010, RxBw_Mant:24, RxBw_Exp:5 
+    ////_radio->writeReg(0x18,0x00|0x00|0x01);      //RegLna  LnaZin:50ohm, LowPower:Off, CurrentGain:MAX
 
     _radio->encrypt(key);
     _radio->promiscuous(promiscuousMode); 

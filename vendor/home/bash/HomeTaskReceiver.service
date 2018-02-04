@@ -1,0 +1,13 @@
+# see http://www.diegoacuna.me/how-to-run-a-script-as-a-service-in-raspberry-pi-raspbian-jessie/
+
+[Unit]
+Description=Home Task Receiver Service
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/var/www/html/home/vendor/home/bash/TaskRecevier.sh
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
