@@ -69,6 +69,8 @@ class VoiceController extends Controller
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             $model = $this->getLists($model);
+            $model->weights[count($model->weights)] = count($model->weights);            
+            $model->weight = count($model->weights) - 1;
             
             return $this->render('create', [
                 'model' => $model,
@@ -128,19 +130,21 @@ class VoiceController extends Controller
     
     public function getLists($model){
         $model->action_models = Voice::getActionModels();
-        if(!isset($model->action_model) or empty($model->action_model)){
+        if((!isset($model->action_model) or empty($model->action_model)) and 0 !== $model->action_model){
             $model->action_model = key($model->action_models);
         }
         
         $model->action_model_ids = Voice::getModelIds($model->action_model);
-        if(!isset($model->action_model_id) or empty($model->action_model_id)){
+        if((!isset($model->action_model_id) or empty($model->action_model_id)) and 0 !== $model->action_model_id){
             $model->action_model_id = key($model->action_model_ids);
         }
         
         $model->action_model_fields = Voice::getModelFields($model->action_model, $model->action_model_id);
-        if(!isset($model->action_model_field) or empty($model->action_model_field)){
+        if((!isset($model->action_model_field) or empty($model->action_model_field)) and 0 !== $model->action_model_field){
             $model->action_model_field = key($model->action_model_fields);
         }
+        
+        $model->weights = Voice::getWeights();
         
         return $model;
     }

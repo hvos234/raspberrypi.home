@@ -106,14 +106,14 @@ function RuleConditionActionGetIds(model_selector, model_id_selector){
                 
             }else {
                 $.each(data, function(model_id, name) {
-                    if('none' == model_id){
+                    if('' == model_id){
                         $(model_id_selector).prepend($("<option></option>").attr("value", model_id).text(name)); // prepend put the none key to top
                     }else {
                         $(model_id_selector).append($("<option></option>").attr("value", model_id).text(name));
                     }
                 });
                 
-                $(model_id_selector).find('option[value="none"]').attr('selected','selected'); // select the none option
+                $(model_id_selector).find('option[value=""]').attr('selected','selected'); // select the none option
             }
         }
     });
@@ -140,14 +140,14 @@ function RuleConditionActionGetFields(model_selector, model_id_selector, field_s
                 
             }else {
                 $.each(data, function(field, name) {
-                    if('none' == field){
+                    if('' == field){
                         $(field_selector).prepend($("<option></option>").attr("value", field).text(name)); // prepend put the none key to top
                     }else {
                         $(field_selector).append($("<option></option>").attr("value", field).text(name));
                     }
                 });
                 
-                $(field_selector).find('option[value="none"]').attr('selected','selected'); // select the none option
+                $(field_selector).find('option[value=""]').attr('selected','selected'); // select the none option
                 
                 // if there is only none hide field else show field
                 if(1 == $(field_selector).find('option').length){
@@ -207,7 +207,7 @@ function RuleConditionSetValueSubValues(index){
         $('.rule-condition-value_sub_value2[index="' + index + '"]').hide();        
     }
     
-    $('select[name="RuleCondition[' + index + '][value_sub_value]"]').val('none');
+    $('select[name="RuleCondition[' + index + '][value_sub_value]"]').val('');
     $('select[name="RuleCondition[' + index + '][value_sub_value2]"]').val('');
 }
 
@@ -258,7 +258,7 @@ function RuleActionSetValueSubValues(index){
         $('.rule-action-value_sub_value2[index="' + index + '"]').hide();        
     }
     
-    $('select[name="RuleAction[' + index + '][value_sub_value]"]').val('none');
+    $('select[name="RuleAction[' + index + '][value_sub_value]"]').val('');
     $('select[name="RuleAction[' + index + '][value_sub_value2]"]').val('');
 }
 

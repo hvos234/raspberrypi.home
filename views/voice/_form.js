@@ -1,7 +1,15 @@
 $(document).ready(function(){
+    // if there is only none hide field else show field
+    if(1 == $('.action_model_field').find('option').length){
+        $('.action_model_field').hide();
+    }else {
+        $('.action_model_field').show();
+    }
+    
     // Action
     $('.action_model').bind('change', function(event) {
         ActionModelSetModelIds();
+        ActionModelSetFields();
     });
     
     $('.action_model_id').bind('change', function(event) {
@@ -33,7 +41,7 @@ function ActionModelSetModelIds(){
                     }
                 });
                 
-                $('.action_model_id').find('option[value="none"]').attr('selected','selected'); // select the none option
+                $('.action_model_id').find('option[value=""]').attr('selected','selected'); // select the none option
             }
         }
     });
@@ -67,7 +75,7 @@ function ActionModelSetFields(){
                     }
                 });
                 
-                $('.action_model_field').find('option[value="none"]').attr('selected','selected'); // select the none option
+                $('.action_model_field').find('option[value=""]').attr('selected','selected'); // select the none option
                 
                 // if there is only none hide field else show field
                 if(1 == $('.action_model_field').find('option').length){

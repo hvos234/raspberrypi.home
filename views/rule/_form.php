@@ -15,9 +15,9 @@ $_model = \app\models\RuleCondition::findOne(1);
 
 <div class="rule-form">
 
-    <?php //$form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(); ?>
     
-    <?php $form = ActiveForm::begin(['enableClientValidation'=>false]); ?>
+    <?php //$form = ActiveForm::begin(['enableClientValidation'=>false]); // disable client valdation ?>
     
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 

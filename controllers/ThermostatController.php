@@ -47,27 +47,14 @@ class ThermostatController extends Controller
         
         $weight = 0;
         foreach ($models as $index => $model){
-            $models[$index]->on_model_ids = Thermostat::getModelIds($model->on_model);
-            $models[$index]->off_model_ids = Thermostat::getModelIds($model->off_model);
-            $models[$index]->temperature_model_ids = Thermostat::getModelIds($model->temperature_model);
-            
-            $models[$index]->date_time = date('Y-m-d H:i');
-            
-            //$models[$index]->weight = $weight;*/
+            $models[$index] = $this->getLists($model);            
+            $models[$index]->weight = $weight;
             $weight++;
         }
         
         for($i=count($models); $i <= 9; $i++){
             $models[$i] = new Thermostat();
-            
-            $models[$i]->date_time = date('Y-m-d H:i');
-            
-            $models[$i]->temperature_default = 0;
-            $models[$i]->temperature_default_max = 1;
-            $models[$i]->temperature_target = 0;
-            $models[$i]->temperature_target_max = 1;
-            $models[$i]->temperature_current = 0;
-            
+            $models[$i] = $this->getLists($models[$i]);            
             $models[$i]->weight = $weight;
             $weight++;
         }
@@ -153,6 +140,40 @@ class ThermostatController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function getLists($model){        
+        $model->models = Thermostat::getModels();
+        
+        if((!isset($model->on_model) or empty($model->on_model)) and 0 !== $model->on_model){
+            $model->on_model = key($model->models);
+        }
+        $model->on_model_ids = Thermostat::getModelIds($model->on_model);
+        if((!isset($model->on_model_id) or empty($model->on_model_id)) and 0 !== $model->on_model_id){
+            $model->on_model_id = key($model->on_model_ids);
+        }
+        
+        if((!isset($model->off_model) or empty($model->off_model)) and 0 !== $model->off_model){
+            $model->off_model = key($model->models);
+        }
+        $model->off_model_ids = Thermostat::getModelIds($model->off_model);
+        if((!isset($model->off_model_id) or empty($model->off_model_id)) and 0 !== $model->off_model_id){
+            $model->off_model_id = key($model->off_model_ids);
+        }
+        
+        if((!isset($model->temperature_model) or empty($model->temperature_model)) and 0 !== $model->temperature_model){
+            $model->temperature_model = key($model->models);
+        }
+        $model->temperature_model_ids = Thermostat::getModelIds($model->temperature_model);
+        if((!isset($model->temperature_model_id) or empty($model->temperature_model_id)) and 0 !== $model->temperature_model_id){
+            $model->temperature_model_id = key($model->temperature_model_ids);
+        }
+        
+        $model->weights = Thermostat::getWeights();
+        
+        $model->date_time = date('Y-m-d H:i');
+        
+        return $model;
     }
     
     public function actionAjaxGetModels(){

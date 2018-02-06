@@ -31,12 +31,12 @@ class Rule extends \yii\db\ActiveRecord
 	
 	public $weights = [];
 	
-	public function init() {		
+	/*public function init() {		
 		// weights
 		$this->weights = Rule::getWeights();
 		
 		parent::init();
-	}
+	}*/
 		
     /**
      * @inheritdoc
@@ -56,7 +56,9 @@ class Rule extends \yii\db\ActiveRecord
             [['description'], 'string'],
             [['weight'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name'], 'string', 'max' => 255]
+            [['name'], 'string', 'max' => 255],
+            // trim
+            [['name'], 'trim'],
         ];
     }
 
@@ -110,10 +112,10 @@ class Rule extends \yii\db\ActiveRecord
             $key++;
         }
         
-        $weights = [];
+        /*$weights = [];
         for($i=0; $i <= 10; $i++){ // plus one for sorting
             $weights[$i] = $i;
-        }
+        }*/
         
         return $weights;
     }

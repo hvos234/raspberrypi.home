@@ -52,35 +52,14 @@ class Chart extends \yii\db\ActiveRecord
     public $weights = [];    
     
     public function init() {        
-        $this->models = Chart::getModels();
-        
-        $this->primary_model = key($this->models);
-        
-        $this->primary_model_ids = Chart::getModelIds($this->primary_model);
-        $this->primary_model_id = key($this->primary_model_ids);
-        $this->primary_names = Chart::getNames($this->primary_model, $this->primary_model_id);
-        
-        // secondary
-        $this->secondary_model = key($this->models);
-        
-        $this->secondary_model_ids = Chart::getModelIds($this->secondary_model);
-        $this->secondary_model_id = key($this->secondary_model_ids);
-        $this->secondary_names = Chart::getNames($this->secondary_model, $this->secondary_model_id);
-        
-        $this->selections = Chart::getSelections();
-        
-        // rest
-        $this->types = Chart::getTypes();
-        $this->dates = Chart::getDates();
-        $this->intervals = Chart::getIntervals();
-        $this->weights = Chart::getWeights();
-        
-        // default values, do not declare them in the class or moel->load wil keep the default values
+        // default values, do not declare them in the Controller
         $this->primary_selection = 'normal';
         $this->secondary_selection = 'normal';
         $this->date = 'today';
         $this->type = 'line';
         $this->interval = 'every_hour';
+        
+        parent::init();
     }
     
     /**
@@ -98,16 +77,11 @@ class Chart extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'primary_model', 'primary_model_id', 'primary_name', 'primary_selection', 'type', 'date', 'interval'], 'required'],
-            [['primary_model_id', 'weight'], 'integer'],
+            [['primary_model_id', 'secondary_model_id', 'weight'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['primary_model', 'primary_selection', 'secondary_model', 'secondary_selection', 'type', 'date', 'interval'], 'string', 'max' => 128],
             [['name', 'primary_name', 'secondary_name'], 'string', 'max' => 255],
-            /*['created_at_start', 'required', 'when' => function($model) { // http://www.yiiframework.com/doc-2.0/guide-input-validation.html
-                return $model->date == 'choose_start_end';
-            }, 'enableClientValidation' => false], // https://stackoverflow.com/questions/28756397/yii2-conditional-validator-always-returns-required
-            ['created_at_end', 'required', 'when' => function($model) {
-                return $model->date == 'choose_start_end';
-            }, 'enableClientValidation' => false]*/
+            // custom
             ['created_at_start', 'required', 'when' => function($model) { // http://www.yiiframework.com/doc-2.0/guide-input-validation.html
                 return $model->date == 'choose_start_end';
             }, 'whenClient' => "function (attribute, value) {
@@ -120,26 +94,23 @@ class Chart extends \yii\db\ActiveRecord
                 var index = $(attribute.\$form).attr('index');
                 return $('select[name=\"Chart[' + index + '][date]\"]').val() == 'choose_start_end';
             }"],
-            ['primary_model', 'compare', 'compareValue' => 'none', 'operator' => '!='],
-            ['primary_model_id', 'compare', 'compareValue' => 'none', 'operator' => '!='],
-            ['primary_name', 'compare', 'compareValue' => 'none', 'operator' => '!='],
-            ['secondary_model_id', 'integer', 'when' => function($model) {
-                return $model->secondary_model != 'none';
+            ['secondary_model_id', 'required', 'when' => function($model) {
+                return $model->secondary_model != '';
             }, 'whenClient' => "function (attribute, value) {
                 var index = $(attribute.\$form).attr('index');
-                return $('select[name=\"Chart[' + index + '][secondary_model]\"]').val() != 'none';
+                return $('select[name=\"Chart[' + index + '][secondary_model]\"]').val() != '';
             }"],
-            ['secondary_name', 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
-                return $model->secondary_model_id != 'none';
+            ['secondary_name', 'required', 'when' => function($model) {
+                return $model->secondary_model != '';
             }, 'whenClient' => "function (attribute, value) {
                 var index = $(attribute.\$form).attr('index');
-                return $('select[name=\"Chart[' + index + '][secondary_model_id]\"]').val() != 'none';
+                return $('select[name=\"Chart[' + index + '][secondary_model]\"]').val() != '';
             }"],
-                    
-            /*[['primary_selection', 'secondary_selection'], 'default', 'value' => 'normal'],
-            ['date ', 'default', 'value' => 'today'],
-            ['type ', 'default', 'value' => 'line'],
-            ['interval ', 'default', 'value' => 'every_hour'],*/
+                
+            // trim
+            [['name'], 'trim'],
+            // Make sure empty input is stored as null in the database
+            [['primary_model', 'primary_model_id', 'primary_name'], 'default', 'value' => null],
         ];
     }
     
@@ -197,26 +168,26 @@ class Chart extends \yii\db\ActiveRecord
     }
     
     public static function getModels(){
-        /*$models = ['none' => Yii::t('app', '- None -')];
+        /*$models = ['' => Yii::t('app', '- None -')];
         $models += Log::getAllModelsGroupBy();
         $models = HelperData::dataTranslate($models);
         return $models;*/
         
         return [
-            'none' => Yii::t('app', '- None -'),
+            '' => Yii::t('app', '- None -'),
             'task' => Yii::t('app', 'Tasks'),
             'setting' => Yii::t('app', 'Settings'),
         ];
     }
     
     public static function getModelIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
         $model_ids += Log::getAllModelIdsByModel($model);
         return $model_ids; 
     }
     
     public static function getNames($model, $model_id){
-        $names = ['none' => Yii::t('app', '- None -')];
+        $names = ['' => Yii::t('app', '- None -')];
         $names += Log::getAllNamesByModelId($model, $model_id);
         return $names; 
     }
@@ -341,7 +312,7 @@ class Chart extends \yii\db\ActiveRecord
             ]
         ];
         
-        if('none' != $secondary_model){
+        if('' != $secondary_model){
             $yAxis['title']['text'] .= ' / ' . Chart::getChartModelName($secondary_model, $secondary_model_id, $secondary_name);
         }
         
@@ -353,7 +324,7 @@ class Chart extends \yii\db\ActiveRecord
             ]
         ];
         
-        if('none' != $secondary_model){
+        if('' != $secondary_model){
             $series[] = [ // Secondary yAxis
                 //'yAxis' => 1,
                 'name' => Chart::getChartModelName($secondary_model, $secondary_model_id, $secondary_name),
@@ -366,7 +337,7 @@ class Chart extends \yii\db\ActiveRecord
             $series[0]['data'][] = number_format((float)$values[$primary_selection], 2, '.', '');
         }
         
-        if('none' != $secondary_model){
+        if('' != $secondary_model){
             foreach ($secondary_data as $id => $values){
                 $series[1]['data'][] = number_format((float)$values[$secondary_selection], 2, '.', '');
             }

@@ -153,23 +153,23 @@ $(document).ready(function(){
                     $('button.thermostat_delete[index="' + index + '"]').css('display', 'inline-block'); // buttons next to each other
                     
                     // reset form
-                    $('select[name="Thermostat[' + index + '][on_model]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][on_model]"]').val('');
                     
                     $('select[name="Thermostat[' + index + '][on_model_id]"]').empty();
-                    $('select[name="Thermostat[' + index + '][on_model_id]"]').append($("<option></option>").attr("value", 'none').text(tNone));
-                    $('select[name="Thermostat[' + index + '][on_model_id]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][on_model_id]"]').append($("<option></option>").attr("value", '').text(tNone));
+                    $('select[name="Thermostat[' + index + '][on_model_id]"]').val('');
                     
-                    $('select[name="Thermostat[' + index + '][off_model]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][off_model]"]').val('');
                     
                     $('select[name="Thermostat[' + index + '][off_model_id]"]').empty();
-                    $('select[name="Thermostat[' + index + '][off_model_id]"]').append($("<option></option>").attr("value", 'none').text(tNone));
-                    $('select[name="Thermostat[' + index + '][off_model_id]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][off_model_id]"]').append($("<option></option>").attr("value", '').text(tNone));
+                    $('select[name="Thermostat[' + index + '][off_model_id]"]').val('');
                     
-                    $('select[name="Thermostat[' + index + '][temperature_model]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][temperature_model]"]').val('');
                     
                     $('select[name="Thermostat[' + index + '][temperature_model_id]"]').empty();
-                    $('select[name="Thermostat[' + index + '][temperature_model_id]"]').append($("<option></option>").attr("value", 'none').text(tNone));
-                    $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val('none');
+                    $('select[name="Thermostat[' + index + '][temperature_model_id]"]').append($("<option></option>").attr("value", '').text(tNone));
+                    $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val('');
                        
                     $('input[name="Thermostat[' + index + '][temperature_default]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val(0);
@@ -342,14 +342,14 @@ function thermostatSetModelIds(index, on_off_temperature){
                 
             }else {
                 $.each(data, function(model_id, name) {
-                    if('none' == model_id){
+                    if('' == model_id){
                         $(model_id_selector).prepend($("<option></option>").attr("value", model_id).text(name)); // prepend put the none key to top
                     }else {
                         $(model_id_selector).append($("<option></option>").attr("value", model_id).text(name));
                     }
                 });
                 
-                $(model_id_selector).find('option[value="none"]').attr('selected','selected'); // select the none option
+                $(model_id_selector).find('option[value=""]').attr('selected','selected'); // select the none option
             }
         }
     });

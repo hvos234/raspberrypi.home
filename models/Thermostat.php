@@ -52,26 +52,6 @@ class Thermostat extends \yii\db\ActiveRecord
     {
         return '{{%thermostat}}';
     }
-
-    public function init() {
-        $this->models = Thermostat::getModels();
-        
-        $this->on_model = key($this->models);
-        $this->on_model_ids = Thermostat::getModelIds($this->on_model);
-        $this->on_model_id = key($this->on_model_ids);
-        
-        $this->off_model = key($this->models);
-        $this->off_model_ids = Thermostat::getModelIds($this->off_model);
-        $this->off_model_id = key($this->off_model_ids);
-        
-        $this->temperature_model = key($this->models);
-        $this->temperature_model_ids = Thermostat::getModelIds($this->temperature_model);
-        $this->temperature_model_id = key($this->temperature_model_ids);
-        
-        $this->weights = Thermostat::getWeights();
-        
-        $this->date_time = date('Y-m-d H:i');
-    }
     
     /**
      * @inheritdoc
@@ -85,7 +65,9 @@ class Thermostat extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['on_model', 'off_model', 'temperature_model'], 'string', 'max' => 128],
-            [['on_model', 'off_model', 'temperature_model'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
+            //[['on_model', 'off_model', 'temperature_model'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
+            // trim
+            [['name'], 'trim'],
         ];
     }
 
@@ -148,7 +130,7 @@ class Thermostat extends \yii\db\ActiveRecord
     }
     
     public static function modelFields($id){
-        if('none' == $id){
+        if('' == $id){
             return [];
         }
         
@@ -167,14 +149,14 @@ class Thermostat extends \yii\db\ActiveRecord
     
     public static function getModels(){
         return [
-            'none' => Yii::t('app', '- None -'),
+            '' => Yii::t('app', '- None -'),
             'Task' => Yii::t('app', 'Task'),
             //'setting' => Yii::t('app', 'Settings'),
         ];
     }
     
     public static function getModelIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
     
         /*if(class_exists('app\models\\' . $model)){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
@@ -189,7 +171,7 @@ class Thermostat extends \yii\db\ActiveRecord
     }
     
     /*public static function getModelFields($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
     
         /*if(class_exists('app\models\\' . $model)){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	

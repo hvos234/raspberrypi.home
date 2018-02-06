@@ -27,7 +27,7 @@ use yii\helpers\ArrayHelper;
  */
 class RuleAction extends \yii\db\ActiveRecord
 {
-        public $active;
+    public $active;
     
 	public $actions = [];
 	public $action_values = [];
@@ -39,33 +39,12 @@ class RuleAction extends \yii\db\ActiveRecord
     
 	public $weights = [];
 	
-	public function init() {
-            //$this->active = 0;
-        
-            // actions
-            $this->actions = RuleAction::getActionModels();
-            $this->action = key($this->actions);
-            
-            $this->action_values = RuleAction::getModelIds($this->action);
-            $this->action_value = key($this->action_values);
-            
-            $this->action_sub_values = RuleAction::getModelFields($this->action, $this->action_value);
-            $this->action_sub_value = key($this->action_sub_values);
-            
-            // values
-            $this->values = RuleAction::getValueModels();
-            $this->value = key($this->values);
-            
-            $this->value_values = RuleAction::getModelIds($this->value);
-            $this->value_value = key($this->value_values);
-            
-            $this->value_sub_values = RuleAction::getModelFields($this->value, $this->value_value);
-            $this->value_sub_value = key($this->value_sub_values);
-            
-            // weight
-            $this->weights = RuleAction::getWeights($this->rule_id);
-		
-            parent::init();
+	public function init() {        
+        // default values, do not declare them in the Controller
+        $this->rule_id = 0;
+        $this->active = 0;
+
+        parent::init();
 	}
 	
     /**
@@ -87,9 +66,8 @@ class RuleAction extends \yii\db\ActiveRecord
             [['active', 'action_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
             [['action_value', 'value_value'], 'string', 'max' => 255],
-            [['action_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
-                return $model->active == '1';
-            }],
+            // Make sure empty input is stored as null in the database
+            [['action_sub_value', 'value_sub_value', 'value_sub_value2'], 'default', 'value' => null],
         ];
     }
 
@@ -155,7 +133,7 @@ class RuleAction extends \yii\db\ActiveRecord
     }
     
     public static function getModelIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
     
         if(class_exists('app\models\\' . $model)){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
@@ -165,7 +143,7 @@ class RuleAction extends \yii\db\ActiveRecord
     }
     
     public static function getModelFields($model, $model_id){
-        $fields = ['none' => Yii::t('app', '- None -')];
+        $fields = ['' => Yii::t('app', '- None -')];
     
         if(class_exists('app\models\\' . $model)){
             $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);	
@@ -203,9 +181,10 @@ class RuleAction extends \yii\db\ActiveRecord
             $key++;
         }
         
-        $weights = [];
-        for($i=0; $i <= 10; $i++){ // plus one for sorting
-            $weights[$i] = $i;
+        if(empty($weights)){
+            for($i=0; $i <= 10; $i++){ // plus one for sorting
+                $weights[$i] = $i;
+            }
         }
         
         return $weights;

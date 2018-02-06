@@ -35,20 +35,6 @@ class Voice extends \yii\db\ActiveRecord
     
     public $weights = [];
     
-    public function init() {
-        /*$this->action_models = Voice::getActionModels();
-        $this->action_model = key($this->action_models);
-
-        $this->action_model_ids = Voice::getModelIds($this->action_model);
-        $this->action_model_id = key($this->action_model_ids);
-
-        $this->action_model_fields = Voice::getModelFields($this->action_model, $this->action_model_id);
-        $this->action_model_field = key($this->action_model_fields);*/
-        
-        $this->weights = Voice::getWeights();
-        
-    }
-    
     /**
      * @inheritdoc
      */
@@ -56,7 +42,7 @@ class Voice extends \yii\db\ActiveRecord
     {
         return '{{%voice}}';
     }
-
+    
     /**
      * @inheritdoc
      */
@@ -67,9 +53,24 @@ class Voice extends \yii\db\ActiveRecord
             [['description'], 'string'],
             [['action_model_id', 'weight'], 'integer'],
             [['action_model_field', 'created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at'], 'safe'],
             [['name', 'words', 'action_model_field'], 'string', 'max' => 255],
             [['action_model'], 'string', 'max' => 128],
             [['tell'], 'string', 'max' => 99],
+            // custom
+            ['action_model_field', 'required', 'when' => function($model) {
+                return !in_array($model->action_model, ['Rule', 'RuleExtra']);
+            }, 'whenClient' => "function (attribute, value) {
+                var models = ['Rule', 'RuleExtra'];
+                if(-1 == models.indexOf($('#voice-action_model').val())){
+                    return true;
+                }
+                return false;
+            }"],
+            // trim
+            [['name', 'words', 'tell'], 'trim'],
+            // Make sure empty input is stored as null in the database
+            ['action_model_field', 'default', 'value' => null],
         ];
     }
 
@@ -120,7 +121,7 @@ class Voice extends \yii\db\ActiveRecord
     }
     
     public static function getModelIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
         
         if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
@@ -130,7 +131,7 @@ class Voice extends \yii\db\ActiveRecord
     }
     
     public static function getModelFields($model, $model_id){
-        $fields = ['none' => Yii::t('app', '- None -')];
+        $fields = ['' => Yii::t('app', '- None -')];
         
         if(method_exists('app\models\\' . $model, 'modelFields')){
             $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
@@ -157,9 +158,7 @@ class Voice extends \yii\db\ActiveRecord
             $weights[$key] = $key;
             $key++;
         }
-        
-        $weights[$key] = $key;
-        
+            
         return $weights;
     }
     

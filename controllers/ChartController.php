@@ -40,17 +40,14 @@ class ChartController extends Controller
         
         $weight = 0;
         foreach ($models as $index => $model){
-            $models[$index]->primary_model_ids = Chart::getModelIds($model->primary_model);
-            $models[$index]->primary_names = Chart::getNames($model->primary_model, $model->primary_model_id);
-            
-            $models[$index]->secondary_model_ids = Chart::getModelIds($model->secondary_model);
-            $models[$index]->secondary_names = Chart::getNames($model->secondary_model, $model->secondary_model_id);
-            //$models[$index]->weight = $weight;
+            $models[$index] = $this->getLists($model);
+            $models[$index]->weight = $weight;
             $weight++;
         }
         
         for($i=count($models); $i <= 9; $i++){
             $models[$i] = new Chart();
+            $models[$i] = $this->getLists($models[$i]);
             $models[$i]->weight = $weight;
             $weight++;
         }
@@ -136,6 +133,40 @@ class ChartController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+    
+    public function getLists($model){
+        $model->models = Chart::getModels();
+        
+        // primary
+        if((!isset($model->primary_model) or empty($model->primary_model)) and 0 !== $model->primary_model){
+            $model->primary_model = key($model->models);
+        }
+        $model->primary_model_ids = Chart::getModelIds($model->primary_model);
+        if((!isset($model->primary_model_id) or empty($model->primary_model_id)) and 0 !== $model->primary_model_id){
+            $model->primary_model_id = key($model->primary_model_ids);
+        }
+        $model->primary_names = Chart::getNames($model->primary_model, $model->primary_model_id);
+        
+        // secondary
+        if((!isset($model->secondary_model) or empty($model->secondary_model)) and 0 !== $model->secondary_model){
+            $model->secondary_model = key($model->models);
+        }
+        $model->secondary_model_ids = Chart::getModelIds($model->secondary_model);
+        if((!isset($model->secondary_model_id) or empty($model->secondary_model_id)) and 0 !== $model->secondary_model_id){
+            $model->secondary_model_id = key($model->secondary_model_ids);
+        }
+        $model->secondary_names = Chart::getNames($model->secondary_model, $model->secondary_model_id);
+        
+        $model->selections = Chart::getSelections();
+        
+        // rest
+        $model->types = Chart::getTypes();
+        $model->dates = Chart::getDates();
+        $model->intervals = Chart::getIntervals();
+        $model->weights = Chart::getWeights();
+        
+        return $model;
     }
     
     public function actionAjaxGetModels(){

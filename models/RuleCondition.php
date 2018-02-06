@@ -30,7 +30,7 @@ use yii\helpers\ArrayHelper;
  */
 class RuleCondition extends \yii\db\ActiveRecord
 {
-        public $active;
+    public $active;
     
 	public $conditions = [];
 	public $condition_values = [];
@@ -47,48 +47,12 @@ class RuleCondition extends \yii\db\ActiveRecord
 	
 	public function init() {
             //$this->active = 0;
-        
+            
+            // default values, do not declare them in the Controller
             $this->rule_id = 0;
-        
-            // conditions
-            $this->conditions = RuleCondition::getConditionModels();
-            $this->condition = key($this->conditions);
+            $this->active = 0;
             
-            $this->condition_values = RuleCondition::getModelIds($this->condition);
-            $this->condition_value = key($this->condition_values);
-            
-            $this->condition_sub_values = RuleCondition::getModelFields($this->condition, $this->condition_value);
-            $this->condition_sub_value = key($this->condition_sub_values);
-        		
-            // equations
-            $this->equations = RuleCondition::getEquations();
-                
-            // translate all equations
-            foreach ($this->equations as $key => $equation){
-                $this->equations[$key] = Yii::t('app', $equation);
-            }
-
-            // key before value equations
-            foreach ($this->equations as $key => $equation){
-                $this->equations[$key] = $key . ', ' .  $equation;
-            }
-		
-            // values
-            $this->values = RuleCondition::getValueModels();
-            $this->value = key($this->values);
-            
-            $this->value_values = RuleCondition::getModelIds($this->value);
-            $this->value_value = key($this->value_values);
-            
-            $this->value_sub_values = RuleCondition::getModelFields($this->value, $this->value_value);
-            $this->value_sub_value = key($this->value_sub_values);
-            
-            // weight
-            $this->weights = RuleCondition::getWeights($this->rule_id);
-
-            // numbers
-            $this->numbers = RuleCondition::getNumbers($this->rule_id);
-            $this->numbers_parent = RuleCondition::getNumbersParent($this->rule_id);
+            $this->number_parent = 0;
         				
             parent::init();
 	}
@@ -100,67 +64,81 @@ class RuleCondition extends \yii\db\ActiveRecord
     {
         return '{{%rule_condition}}';
     }
-
+    
     /**
      * @inheritdoc
      */
-    /*public function rules()
-    {
-        return [
-            [['condition', 'condition_value', 'equation', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
-            [['rule_id', 'weight', 'number', 'number_parent'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
-            [['condition', 'value'], 'string', 'max' => 128],
-            [['condition_value', 'condition_sub_value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'string', 'max' => 255],
-            [['equation'], 'string', 'max' => 4],
-            [['condition_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
-            ['condition_sub_value', 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
-                return in_array($model->condition, array('Task', 'Setting', 'Thermostat'));
-            }, 'whenClient' => "function (attribute, value) {
-                var index = $(attribute.\$form).attr('index');
-                var models = ['task', 'setting', 'thermostat'];
-                return models.indexOf($('select[name=\"RuleCondition[' + index + '][condition]\"]').val());
-            }"],
-            ['value_sub_value', 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
-                return in_array($model->value, array('Task', 'Setting', 'Thermostat'));
-            }, 'whenClient' => "function (attribute, value) {
-                var index = $(attribute.\$form).attr('index');
-                var models = ['task', 'setting', 'thermostat'];
-                
-                console.log('attribute index: ' + $(attribute).attr('index'));
-                console.log('value: ' + value);
-                console.log('index: ' + index);
-                console.log('models: ' + models);
-                console.log('value: ' + $('select[name=\"RuleCondition[' + index + '][value]\"]').val());
-                return models.indexOf($('select[name=\"RuleCondition[' + index + '][value]\"]').val());
-            }"],
-            ['value_sub_value2', 'compare', 'compareValue' => '', 'operator' => '!=', 'when' => function($model) {
-                return ('RuleValue' == $model->value and 'value' == $model->value_value) ? true : false;
-            }, 'whenClient' => "function (attribute, value) {
-                var index = $(attribute.\$form).attr('index');
-                var value = $('select[name=\"RuleCondition[' + index + '][value]\"]').val();
-                var value_value = $('select[name=\"RuleCondition[' + index + '][value_value]\"]').val();
-                if('RuleValue' == value && 'value' == value_value){
-                return true;
-                }else {
-                return false;
-                }
-            }"],
-        ];
-    }*/
-    
     public function rules()
     {
         return [
-            [['condition', 'condition_value', 'equation', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
+            //[['condition', 'condition_value', 'equation', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
             [['rule_id', 'weight', 'number', 'number_parent'], 'integer'],
-            [['active', 'condition_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
+            //[['active', 'condition_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
             [['condition', 'value'], 'string', 'max' => 128],
             [['condition_value', 'value_value'], 'string', 'max' => 255],
             [['equation'], 'string', 'max' => 4],
-            [['condition_value', 'value_value'], 'compare', 'compareValue' => 'none', 'operator' => '!=', 'when' => function($model) {
-                return $model->active == '1';
-            }],
+            // Make sure empty input is stored as null in the database
+            [['condition_sub_value', 'value_sub_value', 'value_sub_value2'], 'default', 'value' => null],
+            
+            // custom required if condition is not active
+            [['condition', 'condition_value', 'equation', 'value', 'value_value', 'rule_id', 'weight'], 'required', 'when' => function($model) {
+                return $model->active;
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                return (0 == $('input[name=\"RuleCondition[' + index + '][active]\"]').val() ? false : true);
+            }"],
+                    
+            // custom required if field is empty
+            ['condition_sub_value', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                return !in_array($model->condition, ['Rule', 'RuleExtra', 'RuleDate']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleCondition[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                var models = ['Rule', 'RuleExtra', 'RuleDate'];
+                if(-1 == models.indexOf($('select[name=\"RuleCondition[' + index + '][condition]\"]').val())){
+                    return true;
+                }
+                return false;
+            }"],
+            ['value_sub_value', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                return !in_array($model->value, ['Rule', 'RuleValue', 'RuleExtra', 'RuleDate']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleCondition[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                var models = ['Rule', 'RuleValue', 'RuleExtra', 'RuleDate'];
+                if(-1 == models.indexOf($('select[name=\"RuleCondition[' + index + '][value]\"]').val())){
+                    return true;
+                }
+                return false;
+            }"],
+            ['value_sub_value2', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                if('RuleValue' == $model->value and 'value' == $model->value_value){
+                    return true;
+                }
+                return false;
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleCondition[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                if('RuleValue' == $('select[name=\"RuleCondition[' + index + '][value]\"]').val() && 'value' == $('select[name=\"RuleCondition[' + index + '][value_value]\"]').val()){
+                    return true;
+                }
+                return false;
+            }"],
         ];
     }    
 
@@ -229,7 +207,7 @@ class RuleCondition extends \yii\db\ActiveRecord
     }
     
     public static function getModelIds($model){
-        $model_ids = ['none' => Yii::t('app', '- None -')];
+        $model_ids = ['' => Yii::t('app', '- None -')];
         
         if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
@@ -239,7 +217,7 @@ class RuleCondition extends \yii\db\ActiveRecord
     }
     
     public static function getModelFields($model, $model_id){
-        $fields = ['none' => Yii::t('app', '- None -')];
+        $fields = ['' => Yii::t('app', '- None -')];
         
         if(method_exists('app\models\\' . $model, 'modelFields')){
             $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
@@ -295,9 +273,10 @@ class RuleCondition extends \yii\db\ActiveRecord
             $key++;
         }
         
-        $weights = [];
-        for($i=0; $i <= 10; $i++){ // plus one for sorting
-            $weights[$i] = $i;
+        if(empty($weights)){
+            for($i=0; $i <= 10; $i++){ // plus one for sorting
+                $weights[$i] = $i;
+            }
         }
         
         return $weights;
