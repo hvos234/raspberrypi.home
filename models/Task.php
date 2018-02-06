@@ -187,7 +187,7 @@ class Task extends \yii\db\ActiveRecord
 				
             //exec(escapeshellcmd($command), $output, $return_var);
             
-            $command = 'sudo timeout ' . $timeout . ' /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskTransmitter.sh') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+            $command = 'sudo ' . Yii::getAlias('@vendor/home/c/arduino-serial/./arduino-serial -b 9600 -p /dev/ttyUSB0 -q -S') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
             var_dump($command);
             exec(escapeshellcmd($command), $output, $return_var);
             var_dump($output);
