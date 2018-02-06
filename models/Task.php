@@ -123,20 +123,79 @@ class Task extends \yii\db\ActiveRecord
             
             return $datas;
 		}
+                
+    public static function startService(){
+        $command = "sudo /bin/systemctl start HomeTaskReceiver.service";
+        exec(escapeshellcmd($command), $output, $return_var);
+
+        if(0 != $return_var){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function stopService(){
+        $command = "sudo /bin/systemctl stop HomeTaskReceiver.service";
+        exec(escapeshellcmd($command), $output, $return_var);
+
+        if(0 != $return_var){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function startReceiver(){
+        $command = "sudo /bin/bash " . Yii::getAlias('@vendor/home/bash/TaskRecevier.sh') . ' &';
+        exec(escapeshellcmd($command), $output, $return_var);
+
+        if(0 != $return_var){
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function stopReceiver(){
+        //kill -9 `pgrep -f cps_build``
+        //kill -9 `pgrep -f 'TaskRecevier.sh'`
+        #$command = "sudo /bin/kill -9 `pgrep -f 'TaskReceiver.sh'`";
+        #exec($command, $output, $return_var);
+        //$command = 'sudo /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
+        $command = 'sudo ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
+        exec(escapeshellcmd($command), $output, $return_var);
+
+        if(0 != $return_var){
+            return false;
+        }
+
+        return true;
+    }
 		
-		public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3){
-			$modelSetting = Setting::find()->select('data')->where(['name' => 'path_script_task'])->one();
+    public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4){
+        //$modelSetting = Setting::find()->select('data')->where(['name' => 'path_script_task'])->one();
 			
-			for($try = 1; $try <= $retry; $try++){
-                            /*
-                             * sudo visudo
-                             * ##add www-data ALL=(ALL) NOPASSWD: ALL
-                             * # Allow www-data run only python
-                             * %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
-                             */
-                            $command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
+        for($try = 1; $try <= $retry; $try++){
+            /*
+             * sudo visudo
+             * ##add www-data ALL=(ALL) NOPASSWD: ALL
+             * # Allow www-data run only python
+             * %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
+             */
+            //$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
 				
-				exec(escapeshellcmd($command), $output, $return_var);
+            //exec(escapeshellcmd($command), $output, $return_var);
+            
+            $command = 'sudo timeout ' . $timeout . ' /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskTransmitter.sh') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+            var_dump($command);
+            exec(escapeshellcmd($command), $output, $return_var);
+            var_dump($output);
+            var_dump($return_var);
+
+            $return = Task::sscanfOutput($output);
+            var_dump($return);
+            exit();
 				
 				if(0 != $return_var){
 					if($try < $retry){

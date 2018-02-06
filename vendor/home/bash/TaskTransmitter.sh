@@ -9,7 +9,9 @@
 # stty -F /dev/ttyUSB0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts 
 # sudo stty -F /dev/ttyUSB0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts
 # sudo stty -F /dev/ttyUSB0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts -hupcl
-
+# stty -F /dev/ttyUSB0 cs8 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts -hupcl
+# stty -F /dev/ttyUSB0 ispeed 9600 ospeed 9600 -ignpar cs8 -cstopb -echo
+# stty -F /dev/ttyUSB0 cs8 9600 ispeed 9600 ospeed 9600 ignbrk -brkint -icrnl -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts -hupcl -ignpar -cstopb
 #echo -en "^fr:1;to:4;ac:3$" > /dev/ttyUSB0
 echo "$1"
 #trans=$1
@@ -29,11 +31,13 @@ echo "$1"
 #cmd+="  > /dev/ttyUSB0"
 #echo $cmd
 #eval $cmd
+timeout=$((SECONDS+3)) # 4 seconds, $SECONDS variable, which has a count of the time that the script (or shell) has been running for
 
 transmit=$1
 transmit="$1"
 transmit=${1}
-echo -en "$1" > /dev/ttyUSB0
+#echo -en "$1" > /dev/ttyUSB0
+echo -en "^fr:1;to:4;ac:3$" > /dev/ttyUSB0
 
 #while read -r -t 10 line < /dev/ttyUSB0; do
 #while cat -t 10 /dev/ttyUSB0; do
@@ -41,7 +45,9 @@ echo -en "$1" > /dev/ttyUSB0
 #read reply < /dev/ttyUSB0
 #echo "$reply"
 
+#while [ $SECONDS -lt $timeout ]; do
 while true; do
+#while read -r line < /dev/ttyUSB0; do
     #line=tail -f /dev/ttyUSB0
     #line=cat </dev/ttyUSB0
     #line=$(cat </dev/ttyUSB0)
@@ -53,7 +59,7 @@ while true; do
     # $line is the line read, do something with it
     echo $line
     if [[ ${line:0:1} == "^" ]] ; then 
-        #echo $line;
+        echo $line;
         exit 0
     fi
 done
