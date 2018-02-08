@@ -28,6 +28,7 @@ void usage(void)
     "  -q  --quiet                Don't print out as much info\n"
     "  -a  --firstchar            Specify char for start reading\n"
     "  -z  --lastchar             Specify char for end reading\n"
+    "  -k  --kill                 Kills al process\n"
     "\n"
     "Note: Order is important. Set '-b' baudrate before opening port'-p'. \n"
     "      Used to make series of actions: '-d 2000 -s hello -d 100 -r' \n"
@@ -40,6 +41,17 @@ void error(char* msg)
 {
     fprintf(stderr, "%s\n",msg);
     exit(EXIT_FAILURE);
+}
+
+void kill(){
+    // The good thing about pgrep is that it will never report itself as a match. But you don't need to get the pid by pgrep and then kill the corresponding process by kill. Use pkill instead
+    // see, https://superuser.com/questions/409655/excluding-grep-from-process-list Rockallite
+    
+    // SIGKILL vs SIGTERM
+    // https://major.io/2010/03/18/sigterm-vs-sigkill/
+    //pkill -KILL -l 'task'
+    //system("pkill -KILL -f task");
+    //system("kill -KILL | grep -v \"grep task\" | awk \"{ print \$2 }\"");
 }
 
 int main(int argc, char *argv[])
@@ -81,11 +93,15 @@ int main(int argc, char *argv[])
         {"lastchar",   required_argument, 0, 'z'},
         {"timeout",    required_argument, 0, 't'},
         {"quiet",      no_argument,       0, 'q'},
+        {"kill",       no_argument,       0, 'k'},
         {NULL,         0,                 0, 0}
     };
     
+    // kill all other processes
+    //kill();
+    
     while(1) {
-        opt = getopt_long (argc, argv, "hp:b:s:rFn:R:d:qeaz:t:", loptions, &option_index);
+        opt = getopt_long (argc, argv, "hpk:b:s:rFn:R:d:qeaz:t:", loptions, &option_index);
         if (opt==-1) break;
         
         switch (opt) {
@@ -120,6 +136,9 @@ int main(int argc, char *argv[])
                 break;
             case 'h':
                 usage();
+                break;
+            case 'k':
+                kill();
                 break;
             case 'b':
                 baudrate = strtol(optarg,NULL,10);
@@ -184,9 +203,11 @@ int main(int argc, char *argv[])
                 // read endless
                 while(1){
                     memset(buf,0,buf_max);  //
-                    serialport_read_az(fd, buf, buf_max, a, z, 0);
-                    if( !quiet ) printf("read string:");
-                    printf("%s\n", buf);
+                    rc = serialport_read_az(fd, buf, buf_max, a, z, 1800000);
+                    if(rc==0){
+                        if( !quiet ) printf("read string:");
+                        printf("%s\n", buf);
+                    }
                 }
                 break;
             case 'F':
