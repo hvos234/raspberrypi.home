@@ -114,6 +114,13 @@ function RuleConditionActionGetIds(model_selector, model_id_selector){
                 });
                 
                 $(model_id_selector).find('option[value=""]').attr('selected','selected'); // select the none option
+                
+                // if there is only none hide field else show field
+                if(1 == $(model_id_selector).find('option').length){
+                    $(model_id_selector).hide();
+                }else {
+                    $(model_id_selector).show();
+                }
             }
         }
     });
@@ -226,7 +233,19 @@ function RuleActionSetActionSubValues(index){
     var action_value_selector = $('.rule-action-action_value[index="' + index + '"]');
     var action_sub_value_selector = $('.rule-action-action_sub_value[index="' + index + '"]');
     
-    RuleConditionActionGetFields(action_selector, action_value_selector, action_sub_value_selector);
+    if('Task' != $(action_selector).val() && 'Rule' != $(action_selector).val()){
+        RuleConditionActionGetFields(action_selector, action_value_selector, action_sub_value_selector);
+    }else {
+        $(action_sub_value_selector).empty(); // empty the select box
+        $(action_sub_value_selector).prepend($("<option></option>").attr("value", "").text(tNone));
+        $(action_sub_value_selector).find('option[value=""]').attr('selected','selected'); // select the none option
+        // if there is only none hide field else show field
+        if(1 == $(action_sub_value_selector).find('option').length){
+            $(action_sub_value_selector).hide();
+        }else {
+            $(action_sub_value_selector).show();
+        }
+    }
 }
 
 function RuleActionSetValueValues(index){

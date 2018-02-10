@@ -161,7 +161,7 @@ $_model = \app\models\RuleCondition::findOne(1);
                            <?= $form->field($modelRuleAction, "[$index]value", ['inputOptions' => ['class' => 'form-control rule-action-value', 'index' => $index]])->dropDownList($modelRuleAction->values)->label(false) ?>
                         </td>
                         <td>
-                            <?= $form->field($modelRuleAction, "[$index]value_value", ['inputOptions' => ['class' => 'form-control rule-action-value_value', 'index' => $index]])->dropDownList($modelRuleAction->value_values)->label(false) ?>
+                            <?= $form->field($modelRuleAction, "[$index]value_value", ['inputOptions' => ['class' => 'form-control rule-action-value_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleAction->value_values)->label(false) ?>
                         </td>
                         <td>
                             <?= $form->field($modelRuleAction, "[$index]value_sub_value", ['inputOptions' => ['class' => 'form-control rule-action-value_sub_value', 'index' => $index, 'style' => 'display: ' . (($modelRuleAction->value_sub_value != '') ? 'block' : 'none')]])->dropDownList($modelRuleAction->value_sub_values)->label(false) ?>

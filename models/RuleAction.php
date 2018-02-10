@@ -61,13 +61,90 @@ class RuleAction extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['action', 'action_value', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
+            //[['action', 'action_value', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
             [['rule_id', 'weight'], 'integer'],
             [['active', 'action_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
             [['action_value', 'value_value'], 'string', 'max' => 255],
             // Make sure empty input is stored as null in the database
-            [['action_sub_value', 'value_sub_value', 'value_sub_value2'], 'default', 'value' => null],
+            [['action_sub_value', 'value', 'value_value', 'value_sub_value', 'value_sub_value2'], 'default', 'value' => null],
+            
+            // custom required if condition is not active
+            [['action', 'action_value', 'rule_id', 'weight'], 'required', 'when' => function($model) {
+                return $model->active;
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                return (0 == $('input[name=\"RuleAction[' + index + '][active]\"]').val() ? false : true);
+            }"],
+            
+            // custom required if field is empty
+            // action
+            ['action_sub_value', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                return !in_array($model->action, ['Task', 'Rule']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleAction[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                var models = ['Task', 'Rule'];
+                if(-1 == models.indexOf($('select[name=\"RuleAction[' + index + '][action]\"]').val())){
+                    return true;
+                }
+                return false;
+            }"],
+            // value
+            ['value_value', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                return !empty($model->value);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleAction[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                if('' != $('select[name=\"RuleAction[' + index + '][value]\"]').val()){
+                    return true;
+                }
+                return false;
+            }"],
+            ['value_sub_value', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                return !in_array($model->value, ['', 'RuleValue', 'RuleExtra', 'RuleDate']);
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleAction[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                var models = ['', 'RuleValue', 'RuleExtra', 'RuleDate'];
+                if(-1 == models.indexOf($('select[name=\"RuleAction[' + index + '][value]\"]').val())){
+                    return true;
+                }
+                return false;
+            }"],
+            ['value_sub_value2', 'required', 'when' => function($model) {
+                if(!$model->active){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                if('RuleValue' == $model->value and 'value' == $model->value_value){
+                    return true;
+                }
+                return false;
+            }, 'whenClient' => "function (attribute, value) {
+                var index = $('#' + attribute.id).attr('index');
+                if(0 == $('input[name=\"RuleAction[' + index + '][active]\"]').val()){ // if model is not active return false so the rules does not apply
+                    return false;
+                }
+                if('RuleValue' == $('select[name=\"RuleAction[' + index + '][value]\"]').val() && 'value' == $('select[name=\"RuleAction[' + index + '][value_value]\"]').val()){
+                    return true;
+                }
+                return false;
+            }"],
         ];
     }
 
@@ -163,6 +240,7 @@ class RuleAction extends \yii\db\ActiveRecord
     
     public static function getValueModels(){
         return [
+            '' => Yii::t('app', '- None -'),
             'Task' => 'Task',
             'Setting' => 'Setting',
             'Thermostat' => 'Thermostat',
