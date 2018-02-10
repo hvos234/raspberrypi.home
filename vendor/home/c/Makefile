@@ -40,10 +40,10 @@ endif
 CFLAGS += $(INCLUDES) -O -Wall -std=gnu99
 
 
-all: task-arduino-serial 
+all: home-task-arduino-serial 
 
-task-arduino-serial: task.o arduino-serial/arduino-serial-lib.o
-	$(CC) $(CFLAGS) -o task$(EXE_SUFFIX) task.o arduino-serial/arduino-serial-lib.o $(LIBS)
+home-task-arduino-serial: home-task.o arduino-serial/arduino-serial-lib.o
+	$(CC) $(CFLAGS) -o home-task$(EXE_SUFFIX) home-task.o arduino-serial/arduino-serial-lib.o $(LIBS)
 
 arduino-serial: arduino-serial/arduino-serial.o arduino-serial/arduino-serial-lib.o
 	$(CC) $(CFLAGS) -o arduino-serial/arduino-serial$(EXE_SUFFIX) arduino-serial/arduino-serial.o arduino-serial/arduino-serial-lib.o $(LIBS)
@@ -56,7 +56,7 @@ arduino-serial-server: arduino-serial/arduino-serial-lib.o
 
 
 clean:
-	rm -f $(OBJ) task task.exe *.o *.a
+	rm -f $(OBJ) home-task home-task.exe *.o *.a
 	rm -f $(OBJ) arduino-serial/arduino-serial arduino-serial/arduino-serial.exe *.o *.a
 	rm -f $(OBJ) arduino-serial/arduino-serial-server arduino-serial/arduino-serial-server.exe *.o *.a
 	rm -f arduino-serial/mongoose/mongoose.o

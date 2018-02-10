@@ -147,103 +147,98 @@ class Task extends \yii\db\ActiveRecord
     }
 
     public static function startReceiver(){
-        $command = "sudo /bin/bash " . Yii::getAlias('@vendor/home/bash/TaskRecevier.sh') . ' &';
-        exec(escapeshellcmd($command), $output, $return_var);
-
-        if(0 != $return_var){
-            return false;
-        }
+        //  >/dev/null 2>/dev/null & start program in background with no output as return
+        $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -c "/usr/bin/php ' . Yii::getAlias('@app/yii') . ' task-receiver" -r >/dev/null 2>/dev/null &';
+        $output = shell_exec($command);
 
         return true;
     }
 
-    public static function stopReceiver(){
-        //kill -9 `pgrep -f cps_build``
-        //kill -9 `pgrep -f 'TaskRecevier.sh'`
-        #$command = "sudo /bin/kill -9 `pgrep -f 'TaskReceiver.sh'`";
-        #exec($command, $output, $return_var);
-        //$command = 'sudo /bin/bash ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
-        $command = 'sudo ' . Yii::getAlias('@vendor/home/bash/TaskReceiverStop.sh');
-        exec(escapeshellcmd($command), $output, $return_var);
+    public static function stopReceiver(){       
+        // The good thing about pgrep is that it will never report itself as a match. But you don't need to get the pid by pgrep and then kill the corresponding process by kill. Use pkill instead
+        // see, https://superuser.com/questions/409655/excluding-grep-from-process-list Rockallite
 
-        if(0 != $return_var){
+        // SIGKILL vs SIGTERM
+        // https://major.io/2010/03/18/sigterm-vs-sigkill/
+        
+        // see http://www.yolinux.com/TUTORIALS/C++Signals.html
+        
+        // ps aux | grep "home-task"
+        // sudo pkill -KILL "home-task"
+        //$command = 'sudo /usr/bin/pkill -TERM "home-task"';
+        // write a script that kills the user and then give normal_user the right to run that script
+        // see https://stackoverflow.com/questions/18359433/how-to-allow-a-normal-user-to-kill-a-certain-root-application-in-visudo-with-no 4
+        $command = 'sudo /bin/bash /var/www/html/home/vendor/home/c/home-task-kill.sh';
+        exec(escapeshellcmd($command), $output, $return_var);
+        
+        // EXIT STATUS
+        // see https://www.systutorials.com/docs/linux/man/1-pkill/
+        if(0 != $return_var and 1 != $return_var){
             return false;
         }
-
+        
         return true;
     }
 		
-    public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4){
-        //$modelSetting = Setting::find()->select('data')->where(['name' => 'path_script_task'])->one();
-			
-        for($try = 1; $try <= $retry; $try++){
-            /*
-             * sudo visudo
-             * ##add www-data ALL=(ALL) NOPASSWD: ALL
-             * # Allow www-data run only python
-             * %www-data ALL=(ALL) NOPASSWD: /usr/bin/python
-             */
-            //$command = 'sudo ' . $modelSetting->data . ' --fr ' . $from_device_id . ' --to ' . $to_device_id . ' --ac ' . $action_id;
-				
-            //exec(escapeshellcmd($command), $output, $return_var);
+    public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4000){
+        // sudo nano /etc/sudoers
+        // Cmnd_Alias HOMETASK = /var/www/html/home/vendor/home/c/home-task
+        // Cmnd_Alias HOMETASKKILL = /bin/bash /var/www/html/home/vendor/home/c/home-task-kill.sh
+        // %www-data ALL=(ALL) NOPASSWD: HOMETASK
+        // %www-data ALL=(ALL) NOPASSWD: HOMETASKKILL
+        
+        if(!Task::stopReceiver()){
+            return 'err:failed stop';
+        }
+        
+        while (true){ // if the return is not this transmition do it again
             
-            $command = 'sudo ' . Yii::getAlias('@vendor/home/c/arduino-serial/./arduino-serial -b 9600 -p /dev/ttyUSB0 -q -S') . ' "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
-            var_dump($command);
-            exec(escapeshellcmd($command), $output, $return_var);
-            var_dump($output);
-            var_dump($return_var);
-
+            $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -R ' . $retry . ' -t ' . $timeout . ' -s "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+            // use shell_exec istead of exec "Try shell_exec() instead. exec should not invoke ANY shell to execute your program."
+            // see https://stackoverflow.com/questions/1792643/how-do-i-change-the-shell-for-phps-exec
+            $output = shell_exec($command);
+            
+            if(is_null($output)){
+                if(!Task::startReceiver()){
+                    return 'err:failed start';
+                }
+                return 'err:failed exec';
+            }
+            
+            $output = explode(PHP_EOL, $output); // shell_exec returns one string
             $return = Task::sscanfOutput($output);
-            var_dump($return);
-            exit();
-				
-				if(0 != $return_var){
-					if($try < $retry){
-						sleep($delay);
-						continue;
-						
-					}else {
-						return 'err:failed exec';
-					}
-				}
-				
-				$return = Task::sscanfOutput($output);
-				
-				if(!$return){
-					if($try < $retry){
-						sleep($delay);
-						continue;
-						
-					}else {
-						return 'err:no output';
-					}
-				}
+            if(!$return){
+                if(!Task::startReceiver()){
+                    return 'err:failed start';
+                }
+                return 'err:no output';
+            }
 
-				// from and to are exchanged
-				$from = 0;
-				$to = 0;
-				$action = 0;
-				$message = '';
-				list($from, $to, $action, $message) = $return;
+            // from and to are exchanged
+            $from = 0;
+            $to = 0;
+            $action = 0;
+            $message = '';
+            list($from, $to, $action, $message) = $return;
 
-				if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
-					return $message;
-					
-				}else {
-					// there is output but not for this task-transmitter
-					Task::receiver($output);
-					$try--;
-				}
-				
-				if($try >= $retry){
-					return 'err:failed trying';
-				}else {
-					sleep($delay);
-				}
-			}
-			
-			return 'err:failed return';
-		}
+            if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
+                if(!Task::startReceiver()){
+                    return 'err:failed start';
+                }
+                return $message;
+
+            }else {
+                // there is output but not for this task-transmitter
+                Task::receiver($output);
+                continue;
+            }
+        }
+        
+        if(!Task::startReceiver()){
+            return 'err:failed start';
+        }
+        return 'err:failed return';
+    }
 				
 		public static function receiver($output){
 			$return = Task::sscanfOutput($output);
