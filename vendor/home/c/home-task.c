@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
                         strcpy(serialport,optarg);
                         fd = serialport_init(optarg, baudrate, wait);
                         if( fd==-1 ) {
-                            usleep( 1 * 30000 );  // wait 30 msec try again
+                            sleep(30);  // wait 30 seconds try again
                         }else {
                             break;
                         }

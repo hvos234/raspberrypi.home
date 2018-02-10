@@ -46,6 +46,8 @@ class Task extends \yii\db\ActiveRecord
             [['from_device_id', 'to_device_id', 'action_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
+            // trim
+            [['name'], 'trim'],
         ];
     }
 

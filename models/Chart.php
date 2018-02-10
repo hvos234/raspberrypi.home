@@ -106,11 +106,10 @@ class Chart extends \yii\db\ActiveRecord
                 var index = $(attribute.\$form).attr('index');
                 return $('select[name=\"Chart[' + index + '][secondary_model]\"]').val() != '';
             }"],
-                
             // trim
             [['name'], 'trim'],
             // Make sure empty input is stored as null in the database
-            [['primary_model', 'primary_model_id', 'primary_name'], 'default', 'value' => null],
+            [['secondary_model', 'secondary_model_id', 'secondary_name'], 'default', 'value' => null],
         ];
     }
     

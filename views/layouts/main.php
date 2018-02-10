@@ -32,6 +32,10 @@ AppAsset::register($this);
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
+            // Links that point to other domains or that have rel="external", data-ajax="false" or target attributes will not be loaded with Ajax. 
+            // Instead, these links will cause a full page refresh with no animated transition.
+            // see http://view.jquerymobile.com/master/demos/navigation-linking-pages/
+            'data-ajax' => 'false',
         ],
     ]);
     $widget = [

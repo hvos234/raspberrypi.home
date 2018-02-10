@@ -43,7 +43,10 @@ class Setting extends \yii\db\ActiveRecord
             [['description', 'data'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
-						[['name'], 'unique']
+            // unique
+            [['name'], 'unique'],
+            // trim
+            [['name'], 'trim'],
         ];
     }
 

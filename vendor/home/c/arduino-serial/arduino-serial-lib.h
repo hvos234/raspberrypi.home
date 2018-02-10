@@ -10,7 +10,7 @@
 
 #include <stdint.h>   // Standard types 
 
-int serialport_init(const char* serialport, int baud, char* wait);
+int serialport_init(const char* serialport, int baud, char wait);
 int serialport_close(int fd);
 void serialport_signal(int sig);
 int serialport_writebyte( int fd, uint8_t b);

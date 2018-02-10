@@ -48,6 +48,8 @@ class Device extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'], // the create_at and update_at must be safe, there handled in the behaviors() function
             [['name'], 'string', 'max' => 255],
             [['action_ids'], 'safe'], // the action_ids must be save, so the script can save them afterwards
+            // trim
+            [['name'], 'trim'],
         ];
     }
 

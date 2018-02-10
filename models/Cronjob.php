@@ -161,7 +161,9 @@ class Cronjob extends \yii\db\ActiveRecord
             [['job_id', 'weight'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['recurrence_minute', 'recurrence_hour', 'recurrence_day', 'recurrence_week', 'recurrence_month', 'recurrence_year'], 'string', 'max' => 20],
-            [['job'], 'string', 'max' => 32]
+            [['job'], 'string', 'max' => 32],
+            // trim
+            [['name'], 'trim'],
         ];
     }
 

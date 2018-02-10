@@ -39,10 +39,12 @@ class Action extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'data_structure'], 'required'],
-						[['data_structure'], 'string'],
+            [['data_structure'], 'string'],
             [['created_at', 'updated_at'], 'safe'], // the create_at and update_at must be safe, there handled in the behaviors() function
             [['name'], 'string', 'max' => 255],
-						[['device_ids'], 'safe'], // the device_ids must be save, so the script can save them afterwards
+            [['device_ids'], 'safe'], // the device_ids must be save, so the script can save them afterwards
+            // trim
+            [['name'], 'trim'],
         ];
     }
 
