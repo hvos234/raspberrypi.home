@@ -143,12 +143,16 @@ class Rule extends \yii\db\ActiveRecord
     }
     
     // default rule functions
-    public static function ruleCondition($id, $field = '', $field2 = ''){
+    public static function ruleCondition($id, $field = '', $value = ''){
         return Rule::ruleExecute($id);
     }
 
-    public static function ruleAction($id){
-        return Rule::ruleExecute($id);
+    public static function ruleAction($id, $field = '', $data = ''){
+        // check if it is a boolean, the rule can be true or false, for the action it does not matter
+        if(is_bool(Rule::ruleExecute($id))){
+            return true;
+        }
+        return false;
     }
     
     public static function ruleExecute($id){

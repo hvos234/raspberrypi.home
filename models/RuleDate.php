@@ -74,13 +74,13 @@ class RuleDate extends Model {
 	}
 	
 	public static function one($id){
-		$models = RuleDate::all();
-		foreach($models as $model){
-			if($model->id == $id){
-				return $model;
-			}
-		}
-		return false;
+            $models = RuleDate::all();
+            foreach($models as $model){
+                if($model->id == $id){
+                    return $model;
+                }
+            }
+            return false;
 	}
 	
 	/*public static function getAllIdName(){
@@ -97,23 +97,20 @@ class RuleDate extends Model {
     }
 	
 	public static function execute($id){
-		$model = RuleDate::one($id);
-		
-		Yii::info('date($model->id): ' . json_encode(date($model->id)), 'RuleDate');
-		echo('date($model->id): ' . json_encode(date($model->id))) . '<br/>' . PHP_EOL;
-		
-		return date($model->id);
+            $model = RuleDate::one($id);
+            return date($model->id);
 	}
 	
-	public static function ruleCondition($id, $field = '', $field2 = ''){
-		return RuleDate::ruleExecute($id);
+	public static function ruleCondition($id, $field = '', $value = ''){
+            return RuleDate::ruleExecute($id);
 	}
 	
-	public static function ruleAction($id){
-		return RuleDate::ruleExecute($id);
-	}
+	/*public static function ruleAction($id){
+            return RuleDate::ruleExecute($id);
+	}*/
 	
 	public static function ruleExecute($id){
-		return HelperData::dataExplode(RuleDate::execute($id));
+            $datas = HelperData::dataExplode(RuleDate::execute($id));
+            return $datas[0];
 	}
 }

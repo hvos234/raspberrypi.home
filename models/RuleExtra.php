@@ -16,10 +16,10 @@ use yii\helpers\ArrayHelper;
 class RuleExtra extends Model {
 	
 	public static function models(){
-		// the array key must be the same as the id
-		return [ 
-				1 => (object) ['id' => 1, 'name' => 'I am really at home', 'function' => 'IamReallyAthome'],
-			];
+            // the array key must be the same as the id
+            return [ 
+                1 => (object) ['id' => 1, 'name' => 'I am really at home', 'function' => 'IamReallyAthome'],
+            ];
 	}
 	
 	public static function all(){
@@ -42,36 +42,33 @@ class RuleExtra extends Model {
 	}*/
     
 	public static function execute($id){
-		$model = RuleExtra::one($id);
-                
-                // check if the static method ruleCondition exists
-                if(!method_exists('app\models\RuleExtra', $model->function)){
-                    die('app\models\RuleExtra, execute');
-                } 
-                
-                return call_user_func(array('app\models\RuleExtra', $model->function));
-		//return call_user_func('app\models\RuleExtra::' . $model->function); // use app\models\ or else it cannot find class
-	}
-	
-	public static function ruleCondition($params){
-		return RuleExtra::ruleExecute($params);
-	}
-	
-	public static function ruleAction($params){
-		return RuleExtra::ruleExecute($params);
-	}
+            $model = RuleExtra::one($id);
 
-	public static function ruleExecute($params){
-            $return = HelperData::dataExplode(RuleExtra::execute($params['value']));
-            /*echo('ruleExecute $return: ') . PHP_EOL;
-            var_dump($return);*/
-            return $return;
+            // check if the static method ruleCondition exists
+            if(!method_exists('app\models\RuleExtra', $model->function)){
+                die('app\models\RuleExtra, execute');
+            } 
+
+            return call_user_func(array('app\models\RuleExtra', $model->function));
+	}
+	
+	public static function ruleCondition($id, $field = '', $value = ''){
+            return RuleExtra::ruleExecute($id);
+	}
+	
+	/*public static function ruleAction($params){
+            return RuleExtra::ruleExecute($params);
+	}*/
+
+	public static function ruleExecute($id){
+            $datas = HelperData::dataExplode(RuleExtra::execute($id));
+            return $datas[0];
 	}
     
     public static function modelIds(){
-		$ids = RuleExtra::all();
+        $ids = RuleExtra::all();
         return ArrayHelper::map($ids, 'id', 'name');
-	}
+    }
     
     public static function modelFields(){
         return [];

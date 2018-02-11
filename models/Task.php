@@ -346,17 +346,21 @@ class Task extends \yii\db\ActiveRecord
     }
     
     // default rule functions
-    public static function ruleCondition($id, $field = '', $field2 = ''){
-        return Task::ruleExecute($id, $field);
-    }
-
-    public static function ruleAction($id, $field = '', $field2 = ''){
-        return Task::ruleExecute($id, $field);
-    }
-
-    public static function ruleExecute($id, $field){
-        $datas = Task::execute($id);
+    public static function ruleCondition($id, $field = '', $value = ''){
+        $datas = Task::ruleExecute($id);
         return $datas[$field];
+    }
+
+    public static function ruleAction($id, $field = '', $data = ''){
+        $datas = Task::ruleExecute($id);
+        if(empty($datas)){
+            return false;
+        }
+        return true;
+    }
+
+    public static function ruleExecute($id){
+        return Task::execute($id);
     }
     
     // default model functions

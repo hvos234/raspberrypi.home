@@ -29,51 +29,43 @@ class RuleValue extends Model {
 	}
 	
 	public static function one($id){
-		$models = RuleValue::all();
-		
-		foreach($models as $model){
-			if((string)$model->id == $id){
-				return $model;
-			}
-		}
-		return false;
+            $models = RuleValue::all();
+            
+            foreach($models as $model){
+                if((string)$model->id == (string)$id){ // if string == 0, returns true
+                    return $model;
+                }
+            }
+            return false;
 	}
-	
-	/*public static function getAllIdName(){
-		return ArrayHelper::map(RuleValue::all(), 'id', 'name');
-	}*/
 	
 	public static function execute($id){
-		$model = RuleValue::one($id);
-		
-		if(!$model){
-			Yii::info('$id: ' . json_encode($id), 'Rulevalue');
-			echo('$id: ' . $id) . '<br/>' . PHP_EOL;
-			
-			return $id;
-		}
-		
-		Yii::info('$model->value: ' . json_encode($model->value), 'Rulevalue');
-		echo('$model->value: ' . json_encode($model->value)) . '<br/>' . PHP_EOL;
-		
-		return $model->value;
+            $model = RuleValue::one($id);
+            if('value' == $id){
+                return '';
+            }
+            return $model->value;
 	}
 	
-	public static function ruleCondition($id){
+	public static function ruleCondition($id, $field = '', $value = ''){
+            return RuleValue::ruleExecute($id, $field, $value);
+	}
+	
+	/*public static function ruleAction($id){
 		return RuleValue::ruleExecute($id);
-	}
+	}*/
 	
-	public static function ruleAction($id){
-		return RuleValue::ruleExecute($id);
-	}
-	
-	public static function ruleExecute($id){
-		return HelperData::dataExplode(RuleValue::execute($id));		
+	public static function ruleExecute($id, $field, $value){
+            if('value' == $id){
+                return $value;
+            }
+            $datas = HelperData::dataExplode(RuleValue::execute($id));
+            return $datas[0];		
 	}
     
     public static function modelIds(){
-		$ids = RuleValue::all();
-        return ArrayHelper::map($ids, 'id', 'name');
+            $ids = RuleValue::all();
+            return ArrayHelper::map($ids, 'id', 'name');
 	}
     
     public static function modelFields(){

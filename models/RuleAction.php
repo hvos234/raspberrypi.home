@@ -298,32 +298,22 @@ class RuleAction extends \yii\db\ActiveRecord
             if('Setting' == $modelRuleAction->action or 'Thermostat' == $modelRuleAction->action){                
                 // check if the static method ruleCondition exists
                 if(!method_exists('app\models\\' . $modelRuleAction->value, 'ruleCondition')){
-                    die('app\models\ruleCondition, action');
+                    return false;
                 }
 
                 // get the value
-                $values = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->value), 'ruleCondition'), ['value' => $modelRuleAction->value_value, 'sub_value' => $modelRuleAction->value_sub_value, 'sub_value2' => $modelRuleAction->value_sub_value2]);
-                
-                if('' != $modelRuleAction->value_sub_value2){
-                    $value = $values[$modelRuleAction->value_sub_value2];
-                    
-                }elseif('' != $modelRuleAction->value_sub_value){
-                    $value = $values[$modelRuleAction->value_sub_value];
-                    
-                }else {
-                    $value = current($values);
-                }
+                $value = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->value), 'ruleCondition'), $modelRuleAction->value_value, $modelRuleAction->value_sub_value, $modelRuleAction->value_sub_value2);
             }
             
             // check if the static method ruleAction exists
-            if(!method_exists('app\models\\' . $modelRuleAction->action, 'ruleCondition')){
-                die('app\models\RuleAction, action');
+            if(!method_exists('app\models\\' . $modelRuleAction->action, 'ruleAction')){
+                return false;
             }
                 
             // send the value if exists with the action
-            $actions = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->action), 'ruleAction'), ['value' => $modelRuleAction->action_value, 'sub_value' => $modelRuleAction->action_sub_value, 'data' => $value]);
+            $action = call_user_func(array('app\models\\' . ucfirst($modelRuleAction->action), 'ruleAction'), $modelRuleAction->action_value, $modelRuleAction->action_sub_value, $value);
             
-            if(!$actions){
+            if(!$action){
                 return false;
             }
         }

@@ -354,14 +354,14 @@ class RuleCondition extends \yii\db\ActiveRecord
             if(!method_exists('app\models\\' . $modelRuleCondition->condition, 'ruleCondition')){
                 return false;
             }            
-            $condition = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), ['value' => $modelRuleCondition->condition_value, 'sub_value' => $modelRuleCondition->condition_sub_value]);
+            $condition = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), $modelRuleCondition->condition_value, $modelRuleCondition->condition_sub_value);
             
             // condiction value
             // check if the static method ruleCondition exists
             if(!method_exists('app\models\\' . $modelRuleCondition->value, 'ruleCondition')){
                 return false;
             }
-            $condition_value = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), ['value' => $modelRuleCondition->value_value, 'sub_value' => $modelRuleCondition->value_sub_value, 'sub_value2' => $modelRuleCondition->value_sub_value2]);
+            $condition_value = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), $modelRuleCondition->value_value, $modelRuleCondition->value_sub_value, $modelRuleCondition->value_sub_value2);
             
             
             

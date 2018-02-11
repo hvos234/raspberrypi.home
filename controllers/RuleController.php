@@ -265,8 +265,7 @@ class RuleController extends Controller
     }
 
     public function actionExecute($id){
-            $model = new Rule();
-            $model->execute($id);
+            Rule::execute($id);
 
             return $this->redirect(['rule/index']);
     }

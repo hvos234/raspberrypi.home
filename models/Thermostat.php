@@ -209,6 +209,8 @@ class Thermostat extends \yii\db\ActiveRecord
     public static function executeModel($model, $model_id) {
         $data = [];
         
+        var_dump($model);
+        var_dump($model_id);
         /*if(class_exists('app\models\\' . $model)){
             $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);      
         }*/
@@ -218,20 +220,21 @@ class Thermostat extends \yii\db\ActiveRecord
             $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);	
         }
         
+        var_dump($data);
         return $data;
     }
     
-    public static function ruleCondition($id, $field = '', $field2 = ''){
+    public static function ruleCondition($id, $field = '', $value = ''){
         $model = Thermostat::findOne($id);
         return $model->{$field};
     }
 
-    public static function ruleAction($id, $field, $value){
+    public static function ruleAction($id, $field = '', $data = ''){
         $model = Thermostat::findOne($id);
-        $model->{$field} = (string)$value;
+        $model->{$field} = (string)$data;
 
         if (!$model->save()){ 
-            print_r($model->errors);
+            //print_r($model->errors);
             return false;
         }
         return true;
