@@ -87,21 +87,21 @@ class SettingController extends Controller
         $model = new Setting();
 				
         if ($model->load(Yii::$app->request->post())){
-					$model->name = Setting::encodeName($model->name);
-					
-					if($model->validate()){
-						$model->data = HelperData::dataRemoveDoubleReturnsAndTrim($model->data);
-						$model->save(false);
+            $model->name = Setting::encodeName($model->name);
 
-						return $this->redirect(['view', 'id' => $model->id]);
-					}
-				}
-				
-				$model->data = HelperData::dataExplodeReturn($model->data);
+            if($model->validate()){
+                $model->data = HelperData::dataRemoveDoubleReturnsAndTrim($model->data);
+                $model->save(false);
 
-				return $this->render('create', [
-						'model' => $model,
-				]);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+
+        $model->data = HelperData::dataExplodeReturn($model->data);
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
         
     }
 
@@ -115,26 +115,26 @@ class SettingController extends Controller
     {
         $model = $this->findModel($id);
 				
-				$model->name = Setting::encodeName($model->name);
+        $model->name = Setting::encodeName($model->name);
 				
         if ($model->load(Yii::$app->request->post())){
-					$model->name = Setting::encodeName($model->name);
-					
-					if($model->validate()){
-					
-						$model->data = HelperData::dataRemoveDoubleReturnsAndTrim($model->data);
-						$model->save(false);
+            $model->name = Setting::encodeName($model->name);
 
-						//return $this->redirect(['view', 'id' => $model->id]);
-						return $this->redirect(['index']);
-					}
+            if($model->validate()){
+
+                $model->data = HelperData::dataRemoveDoubleReturnsAndTrim($model->data);
+                $model->save(false);
+
+                //return $this->redirect(['view', 'id' => $model->id]);
+                return $this->redirect(['index']);
+            }
         }
 				
-				$model->data = HelperData::dataExplodeReturn($model->data);
+        $model->data = HelperData::dataExplodeReturn($model->data);
 
-				return $this->render('update', [
-						'model' => $model,
-				]);
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**

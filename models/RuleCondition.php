@@ -73,7 +73,8 @@ class RuleCondition extends \yii\db\ActiveRecord
         return [
             //[['condition', 'condition_value', 'equation', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
             [['rule_id', 'weight', 'number', 'number_parent'], 'integer'],
-            //[['active', 'condition_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
+            [['active', 'condition_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
+            //[['active', 'created_at', 'updated_at'], 'safe'],
             [['condition', 'value'], 'string', 'max' => 128],
             [['condition_value', 'value_value'], 'string', 'max' => 255],
             [['equation'], 'string', 'max' => 4],

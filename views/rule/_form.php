@@ -9,40 +9,6 @@ use yii\widgets\ActiveForm;
 
 use app\models\RuleCondition;
 use app\models\RuleAction;
-
-/*
-// value
-$value = 'Setting';
-$value_value= 6;
-$value_sub_value = 't';
-$value_sub_value2 = '';
-// check if the static method ruleCondition exists
-if(!method_exists('app\models\\' . $value, 'ruleCondition')){
-    //die('app\models\ruleCondition, action');
-}
-
-// get the value
-$value = call_user_func(array('app\models\\' . ucfirst($value), 'ruleCondition'), $value_value, $value_sub_value, $value_sub_value2);
-var_dump('value');
-var_dump($value);
-//$value = '31.00';
-*/
-$value = '';
-
-// action
-$action = 'Rule';
-$action_value = 1;
-$action_sub_value = 'temperature_default';
-// check if the static method ruleAction exists
-if(!method_exists('app\models\\' . $action, 'ruleAction')){
-   // die('app\models\RuleAction, action');
-}
-
-// send the value if exists with the action
-$actions = call_user_func(array('app\models\\' . ucfirst($action), 'ruleAction'), $action_value, $action_sub_value, $value);
-var_dump('action');
-var_dump($actions);         
-exit();
 ?>
 
 <div class="rule-form">

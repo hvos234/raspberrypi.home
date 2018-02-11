@@ -94,12 +94,17 @@ class RuleController extends Controller
         // create 10 RuleCondition models
         for($i=0; $i <= 9; $i++){
             $modelsRuleCondition[$i] = new RuleCondition();
+            $modelsRuleCondition[$i] = $this->getListsCondition($modelsRuleCondition[$i]);
+            $modelsRuleCondition[$i]->weight = $i;
+            $modelsRuleCondition[$i]->number = $i + 1;
         }
         
         $modelsRuleAction[] = [];
         // create 10 RuleAction models
         for($i=0; $i <= 4; $i++){
             $modelsRuleAction[$i] = new RuleAction();
+            $modelsRuleAction[$i] = $this->getListsAction($modelsRuleAction[$i]);
+            $modelsRuleAction[$i]->weight = $i;
         }
         				
         if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
@@ -140,7 +145,7 @@ class RuleController extends Controller
         $model->weights[count($model->weights)] = count($model->weights);            
         $model->weight = count($model->weights) - 1;
         
-        // create 10 RuleCondition models
+        /*// create 10 RuleCondition models
         for($i=0; $i <= 9; $i++){
             $modelsRuleCondition[$i] = $this->getListsCondition($modelsRuleCondition[$i]);
             $modelsRuleCondition[$i]->weight = $i;
@@ -150,7 +155,7 @@ class RuleController extends Controller
         for($i=0; $i <= 4; $i++){
             $modelsRuleAction[$i] = $this->getListsAction($modelsRuleAction[$i]);
             $modelsRuleAction[$i]->weight = $i;
-        }
+        }*/
         
         // there is always one action
         $modelsRuleAction[0]->active = 1;
@@ -173,7 +178,27 @@ class RuleController extends Controller
         $model = $this->findModel($id);
         
         $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $id]);
+        $modelsRuleConditionCount = count($modelsRuleCondition);
+        
+        // create in total 10 RuleCondition models
+        for($i=count($modelsRuleCondition); $i <= 9; $i++){
+            $modelsRuleCondition[$i] = new RuleCondition();
+            $modelsRuleCondition[$i] = $this->getListsCondition($modelsRuleCondition[$i]);
+            $modelsRuleCondition[$i]->rule_id = $id;
+            $modelsRuleCondition[$i]->weight = $i;
+            $modelsRuleCondition[$i]->number = $i + 1;
+        }
+        
         $modelsRuleAction = RuleAction::findAll(['rule_id' => $id]);
+        $modelsRuleActionCount = count($modelsRuleAction);
+        
+        // create in total 5 RuleAction models
+        for($i=count($modelsRuleAction); $i <= 4; $i++){
+            $modelsRuleAction[$i] = new RuleAction();
+            $modelsRuleAction[$i] = $this->getListsAction($modelsRuleAction[$i]);
+            $modelsRuleAction[$i]->rule_id = $id;
+            $modelsRuleAction[$i]->weight = $i;
+        }
         	
         if($model->load(Yii::$app->request->post()) && RuleCondition::loadMultiple($modelsRuleCondition, Yii::$app->request->post()) && RuleAction::loadMultiple($modelsRuleAction, Yii::$app->request->post())){
             
@@ -205,32 +230,16 @@ class RuleController extends Controller
         $model = $this->getLists($model);
         $model->weights[count($model->weights)] = count($model->weights);
              
-        foreach ($modelsRuleCondition as $key => $modelRuleCondition){
-            $modelsRuleCondition[$key] = $this->getListsCondition($modelRuleCondition);
-            $modelsRuleCondition[$key]->active = 1;
-        }
-        
-        // create in total 10 RuleCondition models
-        for($i=count($modelsRuleCondition); $i <= 9; $i++){
-            $modelsRuleCondition[$i] = new RuleCondition();
+        for($i=0; $i < $modelsRuleConditionCount; $i++){
             $modelsRuleCondition[$i] = $this->getListsCondition($modelsRuleCondition[$i]);
-            $modelsRuleCondition[$i]->rule_id = $id;
-            $modelsRuleCondition[$i]->weight = $i;
-            $modelsRuleCondition[$i]->number = $i + 1;
+            $modelsRuleCondition[$i]->active = 1;
         }
         
-        foreach ($modelsRuleAction as $key => $modelRuleAction){
-            $modelsRuleAction[$key] = $this->getListsAction($modelRuleAction);
-            $modelsRuleAction[$key]->active = 1;
-        }
-        
-        // create in total 5 RuleAction models
-        for($i=count($modelsRuleAction); $i <= 4; $i++){
-            $modelsRuleAction[$i] = new RuleAction();
+        for($i=0; $i < $modelsRuleActionCount; $i++){
             $modelsRuleAction[$i] = $this->getListsAction($modelsRuleAction[$i]);
-            $modelsRuleAction[$i]->rule_id = $id;
-            $modelsRuleAction[$i]->weight = $i;
+            $modelsRuleAction[$i]->active = 1;
         }
+        
         
         return $this->render('update', [
             'model' => $model,
@@ -295,17 +304,17 @@ class RuleController extends Controller
     public function getListsCondition($model){        
         // conditions
         $model->conditions = RuleCondition::getConditionModels();
-        if((!isset($model->condition) or empty($model->condition)) and 0 !== $model->condition){ // use !==, because NULL is also 0
+        if((!isset($model->condition) or empty($model->condition)) and '0' !== $model->condition){ // use !==, because NULL is also 0
             $model->condition = key($model->conditions);
         }
         
         $model->condition_values = RuleCondition::getModelIds($model->condition);
-        if((!isset($model->condition_value) or empty($model->condition_value)) and 0 !== $model->condition_value){
+        if((!isset($model->condition_value) or empty($model->condition_value)) and '0' !== $model->condition_value){
             $model->condition_value = key($model->condition_values);
         }
 
         $model->condition_sub_values = RuleCondition::getModelFields($model->condition, $model->condition_value);
-        if((!isset($model->condition_sub_value) or empty($model->condition_sub_values)) and 0 !== $model->condition_sub_values){
+        if((!isset($model->condition_sub_value) or empty($model->condition_sub_values)) and '0' !== $model->condition_sub_values){
             $model->condition_sub_value = key($model->condition_sub_values);
         }
 
@@ -324,17 +333,17 @@ class RuleController extends Controller
 
         // values
         $model->values = RuleCondition::getValueModels();
-        if((!isset($model->value) or empty($model->value)) and 0 !== $model->value){
+        if((!isset($model->value) or empty($model->value)) and '0' !== $model->value){
             $model->value = key($model->values);
         }
 
         $model->value_values = RuleCondition::getModelIds($model->value);
-        if((!isset($model->value_value) or empty($model->value_value)) and 0 !== $model->value_value){
+        if((!isset($model->value_value) or empty($model->value_value)) and '0' !== $model->value_value){
             $model->value_value = key($model->value_values);
         }
 
         $model->value_sub_values = RuleCondition::getModelFields($model->value, $model->value_value);
-        if((!isset($model->value_sub_value) or empty($model->value_sub_value)) and 0 !== $model->value_sub_value){
+        if((!isset($model->value_sub_value) or empty($model->value_sub_value)) and '0' !== $model->value_sub_value){
             $model->value_sub_value = key($model->value_sub_values);
         }
 
@@ -351,33 +360,33 @@ class RuleController extends Controller
     public function getListsAction($model){ 
         // actions
         $model->actions = RuleAction::getActionModels();
-        if((!isset($model->action) or empty($model->action)) and 0 !== $model->action){
+        if((!isset($model->action) or empty($model->action)) and '0' !== $model->action){
             $model->action = key($model->actions);
         }
 
         $model->action_values = RuleAction::getModelIds($model->action);
-        if((!isset($model->action_value) or empty($model->action_value)) and 0 !== $model->action_value){
+        if((!isset($model->action_value) or empty($model->action_value)) and '0' !== $model->action_value){
             $model->action_value = key($model->action_values);
         }
 
         $model->action_sub_values = RuleAction::getModelFields($model->action, $model->action_value);
-        if((!isset($model->action_sub_value) or empty($model->action_sub_value)) and 0 !== $model->action_sub_value){
+        if((!isset($model->action_sub_value) or empty($model->action_sub_value)) and '0' !== $model->action_sub_value){
             $model->action_sub_value = key($model->action_sub_values);
         }
 
         // values
         $model->values = RuleAction::getValueModels();
-        if((!isset($model->value) or empty($model->values)) and 0 !== $model->values){
+        if((!isset($model->value) or empty($model->values)) and '0' !== $model->values){
             $model->value = key($model->values);
         }
 
         $model->value_values = RuleAction::getModelIds($model->value);
-        if((!isset($model->value_value) or empty($model->value_value)) and 0 !== $model->value_value){
+        if((!isset($model->value_value) or empty($model->value_value)) and '0' !== $model->value_value){
             $model->value_value = key($model->value_values);
         }
 
         $model->value_sub_values = RuleAction::getModelFields($model->value, $model->value_value);
-        if((!isset($model->value_sub_value) or empty($model->value_sub_value)) and 0 !== $model->value_sub_value){
+        if((!isset($model->value_sub_value) or empty($model->value_sub_value)) and '0' !== $model->value_sub_value){
             $model->value_sub_value = key($model->value_sub_values);
         }
 

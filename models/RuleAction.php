@@ -64,6 +64,7 @@ class RuleAction extends \yii\db\ActiveRecord
             //[['action', 'action_value', 'value', 'value_value', 'rule_id', 'weight'], 'required'],
             [['rule_id', 'weight'], 'integer'],
             [['active', 'action_sub_value', 'value_sub_value', 'value_sub_value2', 'created_at', 'updated_at'], 'safe'],
+            //[['active', 'created_at', 'updated_at'], 'safe'],
             [['action', 'value'], 'string', 'max' => 128],
             [['action_value', 'value_value'], 'string', 'max' => 255],
             // Make sure empty input is stored as null in the database
