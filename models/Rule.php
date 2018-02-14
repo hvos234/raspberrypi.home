@@ -121,6 +121,8 @@ class Rule extends \yii\db\ActiveRecord
     }
 		
     public static function execute($id){
+        //echo('Rule::execute') . '</br>' . PHP_EOL;
+        //echo('$id: ' . $id) . '</br>' . PHP_EOL;
         $model = Rule::findOne($id);
 
         $condition = RuleCondition::execute($id);

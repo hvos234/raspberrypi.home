@@ -318,18 +318,28 @@ class RuleCondition extends \yii\db\ActiveRecord
     }
 		
     public static function execute($rule_id){
+        //echo('RuleCondition::execute') . '</br>' . PHP_EOL;
+        //echo('$rule_id: ' . $rule_id) . '</br>' . PHP_EOL;
         // Rule Condition
         $modelsRuleCondition = RuleCondition::findAll(['rule_id' => $rule_id]);
         
         // if there is none
         if(empty($modelsRuleCondition)){
+            //echo('if(empty($modelsRuleCondition)){') . '</br>' . PHP_EOL;
             return true;
         }
         
-        return RuleCondition::condition($modelsRuleCondition);
+        $return = RuleCondition::condition($modelsRuleCondition);
+        //echo('$return') . '</br>' . PHP_EOL;
+        //var_dump($return) . '</br>' . PHP_EOL;
+        //exit();
+        return $return;
     }
 		
     public static function condition($modelsRuleCondition, $number_parent = 0){
+        //echo('RuleCondition::condition') . '</br>' . PHP_EOL;
+        //echo('$number_parent: ' . $number_parent) . '</br>' . PHP_EOL;
+        
         // check if child exist
         $number_parent_exists = false;
         foreach($modelsRuleCondition as $modelRuleCondition){
@@ -337,7 +347,8 @@ class RuleCondition extends \yii\db\ActiveRecord
                 $number_parent_exists = true;
             }
         }
-
+        //echo('$number_parent_exists: ' . $number_parent_exists) . '</br>' . PHP_EOL;
+        
         // if the child does not exists, retrun NULL
         if(!$number_parent_exists){
             return NULL;
@@ -346,6 +357,7 @@ class RuleCondition extends \yii\db\ActiveRecord
         // condition
         // all conditions must be true
         foreach($modelsRuleCondition as $modelRuleCondition){
+            //echo('$modelRuleCondition->id: ' . $modelRuleCondition->id) . '</br>' . PHP_EOL;
             if($number_parent != $modelRuleCondition->number_parent){
                 continue;
             }
@@ -356,6 +368,8 @@ class RuleCondition extends \yii\db\ActiveRecord
                 return false;
             }            
             $condition = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->condition), 'ruleCondition'), $modelRuleCondition->condition_value, $modelRuleCondition->condition_sub_value);
+            //echo('$condition') . '</br>' . PHP_EOL;
+            //var_dump($condition) . '</br>' . PHP_EOL;
             
             // condiction value
             // check if the static method ruleCondition exists
@@ -363,33 +377,35 @@ class RuleCondition extends \yii\db\ActiveRecord
                 return false;
             }
             $condition_value = call_user_func(array('app\models\\' . ucfirst($modelRuleCondition->value), 'ruleCondition'), $modelRuleCondition->value_value, $modelRuleCondition->value_sub_value, $modelRuleCondition->value_sub_value2);
+            //echo('$condition_value') . '</br>' . PHP_EOL;
+            //var_dump($condition_value) . '</br>' . PHP_EOL; 
             
-            
+            //echo('$modelRuleCondition->equation') . '</br>' . PHP_EOL;
+            //var_dump($modelRuleCondition->equation) . '</br>' . PHP_EOL; 
             
             // the condition must match the condition value
-            $equal = RuleCondition::equation($condition, $condition_value, $modelRuleCondition->equation);
             $equal_type = RuleCondition::equationType($modelRuleCondition->equation);
+            $equal = RuleCondition::equation($condition, $condition_value, $modelRuleCondition->equation, $equal_type);
             
-            /*
-             * NOT CORRECT YET !!!!!
-             */
+            //echo('$equal') . '</br>' . PHP_EOL;
+            //var_dump($equal) . '</br>' . PHP_EOL;
+            //echo('$equal_type') . '</br>' . PHP_EOL;
+            //var_dump($equal_type) . '</br>' . PHP_EOL;
             
-            $equal_child = NULL;
-            if($equal == $equal_type){							
-                $equal_child = RuleCondition::condition($modelsRuleCondition, $modelRuleCondition->number);
+            if(!$equal){
+                ///echo('if(!$equal){') . '</br>' . PHP_EOL;
                 
-                if(!is_null($equal_child)){
-                    if($equal != $equal_child){
+                $equal_child = RuleCondition::condition($modelsRuleCondition, $modelRuleCondition->number);
+                //echo('$equal_child') . '</br>' . PHP_EOL;
+                //var_dump($equal_child) . '</br>' . PHP_EOL;
+                
+                if(is_null($equal_child)){ // if there is no child return false
+                    return false;
+                }else {
+                    if(!$equal_child){
+                        //echo('if(!$equal_child){') . '</br>' . PHP_EOL;
                         return false;
                     }
-                }else {
-                    if(!$equal){
-                        return false; 
-                    }
-                }
-            }else {
-                if(!$equal){
-                    return false; 
                 }
             }
         }
@@ -419,78 +435,108 @@ class RuleCondition extends \yii\db\ActiveRecord
     }
 
 
-    public static function equation($value1, $value2, $equation){
-        switch($equation){
-            case '==':
-                if($value1 == $value2){
-                    return true;
-                }
-                return false;
-                break;
+    public static function equation($condition, $contition_value, $equation, $equal_type){
+        $values = HelperData::dataExplode($contition_value); // there could be multiple values
+        $returns = [];
+        foreach($values as $value){
+            switch($equation){
+                case '==':
+                    if($condition == $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '!=':
-                if($value1 != $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '!=':
+                    if($condition != $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '>=':
-                if($value1 >= $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '>=':
+                    if($condition >= $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '<=':
-                if($value1 <= $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '<=':
+                    if($condition <= $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '!>=':
-                if($value1 < $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '!>=':
+                    if($condition < $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '!<=':
-                if($value1 > $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '!<=':
+                    if($condition > $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '>':
-                if($value1 > $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '>':
+                    if($condition > $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '<':
-                if($value1 < $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '<':
+                    if($condition < $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '!>':
-                if($value1 <= $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '!>':
+                    if($condition <= $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
 
-            case '!<':
-                if($value1 >= $value2){
-                    return true;
-                }
-                return false;
-                break;
+                case '!<':
+                    if($condition >= $value){
+                        $returns[] = true;
+                    }else {
+                        $returns[] = false;
+                    }
+                    break;
+            }
         }
-        return NULL;
+        
+        //echo('$returns') . '</br>' . PHP_EOL;
+        //var_dump($returns) . '</br>' . PHP_EOL;
+        
+        if($equal_type){
+            if(in_array($equal_type, $returns)){
+                //echo('if(in_array($equal_type, $returns)){') . '</br>' . PHP_EOL;
+                return true;
+            }
+            return false;
+        }else {
+           if(!in_array($equal_type, $returns)){
+                //echo('if(in_array($equal_type, $returns)){') . '</br>' . PHP_EOL;
+                return true;
+            }
+            return false;
+        }
     }
 }
