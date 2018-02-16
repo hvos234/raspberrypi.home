@@ -169,6 +169,11 @@ class ThermostatController extends Controller
             $model->temperature_model_id = key($model->temperature_model_ids);
         }
         
+        $model->temperature_model_fields = Thermostat::getModelFields($model->temperature_model, $model->temperature_model_id);
+        if((!isset($model->temperature_model_field) or empty($model->temperature_model_field)) and '0' !== $model->temperature_model_field){
+            $model->temperature_model_field = key($model->temperature_model_fields);
+        }
+        
         $model->weights = Thermostat::getWeights();
         
         $model->date_time = date('Y-m-d H:i');
@@ -186,8 +191,13 @@ class ThermostatController extends Controller
         return json_encode($model_ids);
     }
     
-    public function actionAjaxExecuteModel($model, $model_id){
-        $data = Thermostat::executeModel($model, $model_id);
+    public function actionAjaxGetModelFields($model, $model_id){
+        $model_fields = Thermostat::getModelFields($model, $model_id);
+        return json_encode($model_fields);
+    }
+    
+    public function actionAjaxExecuteModel($model, $model_id, $model_field = ''){
+        $data = Thermostat::executeModel($model, $model_id, $model_field);
         return json_encode($data);
     }
     

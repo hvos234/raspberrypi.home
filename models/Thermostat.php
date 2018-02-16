@@ -38,6 +38,7 @@ class Thermostat extends \yii\db\ActiveRecord
     public $on_model_ids = [];
     public $off_model_ids = [];
     public $temperature_model_ids = [];
+    public $temperature_model_fields = [];
 
     public $weights = [];
     
@@ -73,12 +74,13 @@ class Thermostat extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'on_model', 'on_model_id', 'off_model', 'off_model_id', 'temperature_model', 'temperature_model_id', 'temperature_default', 'temperature_target'], 'required'],
+            [['name', 'on_model', 'on_model_id', 'off_model', 'off_model_id', 'temperature_model', 'temperature_model_id', 'temperature_model_field', 'temperature_default', 'temperature_target'], 'required'],
             [['on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
             [['temperature_default', 'temperature_target'], 'number'],
-            [['temperature_default_max', 'temperature_target_max', 'created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['on_model', 'off_model', 'temperature_model'], 'string', 'max' => 128],
+            [['temperature_model_field'], 'string', 'max' => 255],
             //[['on_model', 'off_model', 'temperature_model'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
             // trim
             [['name'], 'trim'],
@@ -99,10 +101,9 @@ class Thermostat extends \yii\db\ActiveRecord
             'off_model_id' => Yii::t('app', 'Model id off'),
             'temperature_model' => Yii::t('app', 'Model temperature'),
             'temperature_model_id' => Yii::t('app', 'Model id temperature'),
+            'temperature_model_field' => Yii::t('app', 'Model field temperature'),
             'temperature_default' => Yii::t('app', 'Default temperature'),
-            'temperature_default_max' => Yii::t('app', 'Default maximum temperature'),
             'temperature_target' => Yii::t('app', 'Target temperature'),
-            'temperature_target_max' => Yii::t('app', 'Target maximum temperature'),
             'weight' => Yii::t('app', 'Weight'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
@@ -171,33 +172,23 @@ class Thermostat extends \yii\db\ActiveRecord
     
     public static function getModelIds($model){
         $model_ids = ['' => Yii::t('app', '- None -')];
-    
-        /*if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
-        }*/
         
-        // check if the static method modelIds exists
         if(method_exists('app\models\\' . $model, 'modelIds')){
             $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
         }
-        
+    
         return $model_ids; 
     }
     
-    /*public static function getModelFields($model){
-        $model_ids = ['' => Yii::t('app', '- None -')];
-    
-        /*if(class_exists('app\models\\' . $model)){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'modelIds'));	
-        }*/
-    
-        // check if the static method modelFields exists
-        /*if(method_exists('app\models\\' . $model, 'modelFields')){
-            $model_ids += call_user_func(array('app\models\\' . $model, 'modelFields'));	
-        }*/
-    
-        /*return $model_ids; 
-    }*/
+    public static function getModelFields($model, $model_id){
+        $fields = ['' => Yii::t('app', '- None -')];
+        
+        if(method_exists('app\models\\' . $model, 'modelFields')){
+            $fields += call_user_func(array('app\models\\' . $model, 'modelFields'), $model_id);
+        }
+        
+        return $fields; 
+    }
     
     public static function getWeights(){
         // create weights
@@ -220,21 +211,16 @@ class Thermostat extends \yii\db\ActiveRecord
         return ArrayHelper::map(Thermostat::find()->asArray()->all(), 'id', 'name');
     }
     
-    public static function executeModel($model, $model_id) {
+    public static function executeModel($model, $model_id, $model_field = '') {
         $data = [];
         
-        var_dump($model);
-        var_dump($model_id);
-        /*if(class_exists('app\models\\' . $model)){
-            $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);      
-        }*/
-        
-        // check if the static method modelFields exists
-        if(method_exists('app\models\\' . $model, 'thermostatExecute')){
-            $data = call_user_func(array('app\models\\' . $model, 'thermostatExecute'), $model_id);	
+        // check if the static method ruleCondition exists
+        if(!method_exists('app\models\\' . $model, 'thermostatExecute')){
+            return false;
         }
         
-        var_dump($data);
+        $data = call_user_func(array('app\models\\' . ucfirst($model), 'thermostatExecute'), $model_id, $model_field);
+        
         return $data;
     }
     

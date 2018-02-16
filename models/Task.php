@@ -402,7 +402,11 @@ class Task extends \yii\db\ActiveRecord
         return ArrayHelper::map($model_ids, 'id', 'name');
     }
     
-    public static function thermostatExecute($id){
-        return Task::execute($id);
+    public static function thermostatExecute($id, $field = ''){
+        $datas = Task::ruleExecute($id);
+        if('' != $field){
+            return $datas[$field];
+        }
+        return $datas;
     }
 }

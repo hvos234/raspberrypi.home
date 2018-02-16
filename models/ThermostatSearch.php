@@ -19,8 +19,8 @@ class ThermostatSearch extends Thermostat
     {
         return [
             [['id', 'on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
-            [['name', 'on_model', 'off_model', 'temperature_model', 'created_at', 'updated_at'], 'safe'],
-            [['temperature_default', 'temperature_default_max', 'temperature_target', 'temperature_target_max'], 'number'],
+            [['name', 'on_model', 'off_model', 'temperature_model', 'temperature_model_field', 'created_at', 'updated_at'], 'safe'],
+            [['temperature_default', 'temperature_target'], 'number'],
         ];
     }
 
@@ -65,9 +65,7 @@ class ThermostatSearch extends Thermostat
             'off_model_id' => $this->off_model_id,
             'temperature_model_id' => $this->temperature_model_id,
             'temperature_default' => $this->temperature_default,
-            'temperature_default_max' => $this->temperature_default_max,
             'temperature_target' => $this->temperature_target,
-            'temperature_target_max' => $this->temperature_target_max,
             'weight' => $this->weight,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -76,7 +74,8 @@ class ThermostatSearch extends Thermostat
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'on_model', $this->on_model])
             ->andFilterWhere(['like', 'off_model', $this->off_model])
-            ->andFilterWhere(['like', 'temperature_model', $this->temperature_model]);
+            ->andFilterWhere(['like', 'temperature_model', $this->temperature_model])
+            ->andFilterWhere(['like', 'temperature_model_field', $this->action_model_field]);
 
         return $dataProvider;
     }

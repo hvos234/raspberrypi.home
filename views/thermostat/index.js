@@ -49,6 +49,10 @@ $(document).ready(function(){
         thermostatSetModelIds($(this).attr('index'), 'temperature');
     });
     
+    $('.temperature_model_id').bind('change', function(event) {
+        thermostatSetModelFields($(this).attr('index'), 'temperature');
+    });    
+    
     $('.weight').bind('change', function(event) {
         thermostatChangeWeight($(this).attr('index'));
     });
@@ -67,6 +71,7 @@ $(document).ready(function(){
         var off_model_id = $('select[name="Thermostat[' + index + '][off_model_id]"]').val();
         var temperature_model = $('select[name="Thermostat[' + index + '][temperature_model]"]').val();
         var temperature_model_id = $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val();
+        var temperature_model_field = $('select[name="Thermostat[' + index + '][temperature_model_field]"]').val();
         
         var temperature_default = $('input[name="Thermostat[' + index + '][temperature_default]"]').val();
         //var temperature_default_max = $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val();
@@ -91,10 +96,9 @@ $(document).ready(function(){
                     off_model_id: off_model_id, 
                     temperature_model: temperature_model, 
                     temperature_model_id: temperature_model_id, 
+                    temperature_model_field: temperature_model_field, 
                     temperature_default: temperature_default, 
-                    //temperature_default_max: temperature_default_max, 
                     temperature_target: temperature_target,
-                    //temperature_target_max: temperature_target_max,
                     weight: weight
                 }
             },
@@ -187,11 +191,13 @@ $(document).ready(function(){
                     $('select[name="Thermostat[' + index + '][temperature_model_id]"]').empty();
                     $('select[name="Thermostat[' + index + '][temperature_model_id]"]').append($("<option></option>").attr("value", '').text(tNone));
                     $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val('');
-                       
+                      
+                    $('select[name="Thermostat[' + index + '][temperature_model_field]"]').empty();
+                    $('select[name="Thermostat[' + index + '][temperature_model_field]"]').append($("<option></option>").attr("value", '').text(tNone));
+                    $('select[name="Thermostat[' + index + '][temperature_model_field]"]').val('');
+                    
                     $('input[name="Thermostat[' + index + '][temperature_default]"]').val(0);
-                    //$('input[name="Thermostat[' + index + '][temperature_default_max]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_target]"]').val(0);
-                    //$('input[name="Thermostat[' + index + '][temperature_target_max]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_current]"]').val(0);
 
                     //var weight = $('select[name="Thermostat[' + index + '][weight]"]').val();
@@ -372,6 +378,67 @@ function thermostatSetModelIds(index, on_off_temperature){
     });
 }
 
+function thermostatSetModelFields(index, on_off_temperature){    
+    var model = '';
+    var model_id = 0;
+    var model_field_selector = {};
+    
+    if('on' == on_off_temperature){
+        model = $('select[name="Thermostat[' + index + '][on_model]"]').val();
+        model_id = $('select[name="Thermostat[' + index + '][on_model_id]"]').val();
+        return true;
+    }
+    
+    if('off' == on_off_temperature){
+        model = $('select[name="Thermostat[' + index + '][off_model]"]').val();
+        model_id = $('select[name="Thermostat[' + index + '][off_model_id]"]').val();
+        return true;
+    }
+    
+    if('temperature' == on_off_temperature){
+        model = $('select[name="Thermostat[' + index + '][temperature_model]"]').val();
+        model_id = $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val();
+        model_field_selector = $('select[name="Thermostat[' + index + '][temperature_model_field]"]');
+    }
+    
+    $(model_field_selector).empty(); // empty the select box
+        
+    $.ajax({
+        // you can not use AjaxDeviceAction as action name, like in
+        // the controller, they must be lowercase and with lines
+        url: '?r=thermostat/ajax-get-model-fields',  
+        data: {
+            model: model,
+            model_id: model_id
+        },
+        dataType: 'json', // the return is a json string
+        //async: false,
+        success: function(data) {
+            if(data.error) {
+                alert(data.error);
+                
+            }else {
+                $.each(data, function(field, name) {
+                    if('none' == field){
+                        $(model_field_selector).prepend($("<option></option>").attr("value", field).text(name)); // prepend put the none key to top
+                    }else {
+                        $(model_field_selector).append($("<option></option>").attr("value", field).text(name));
+                    }
+                });
+                
+                $(model_field_selector).find('option[value=""]').attr('selected','selected'); // select the none option
+                
+                // if there is only none hide field else show field
+                if(1 == $(model_field_selector).find('option').length){
+                    $(model_field_selector).hide();
+                }else {
+                    $(model_field_selector).show();
+                }
+            }
+        }
+    });
+}
+
 function thermostatChangeWeight(index){
     var weight = $('select[name="Thermostat[' + index + '][weight]"]').val(); 
     
@@ -483,27 +550,33 @@ function thermostatSetWeights(){
 }
 
 // thermostat
-function thermostatSetTemperature(index){    
+function thermostatSetTemperature(index){
+    var temperature_id = $('input[name="Thermostat[' + index + '][id]"]').val();
     var temperature_model = $('select[name="Thermostat[' + index + '][temperature_model]"]').val();
     var temperature_model_id = $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val();
+    var temperature_model_field = $('select[name="Thermostat[' + index + '][temperature_model_field]"]').val();
     
-    $.ajax({
-        // you can not use AjaxDeviceAction as action name, like in
-        // the controller, they must be lowercase and with lines
-        url: '?r=thermostat/ajax-execute-model',  
-        data: {model: temperature_model, model_id: temperature_model_id},
-        dataType: 'json', // the return is a json string
-        success: function(data) {
-            if(data.error) {
-                alert(data.error);
-                
-            }else {
-                $.each(data, function(field, value) {
-                    thermostatSetCurrent(index, value);
-                });
+    if('' != temperature_id){ // if the thermostat is created / updated
+        $.ajax({
+            // you can not use AjaxDeviceAction as action name, like in
+            // the controller, they must be lowercase and with lines
+            url: '?r=thermostat/ajax-execute-model',  
+            data: {
+                model: temperature_model, 
+                model_id: temperature_model_id,
+                model_field: temperature_model_field
+            },
+            dataType: 'json', // the return is a json string
+            success: function(data) {
+                if(data.error) {
+                    alert(data.error);
+
+                }else {
+                    thermostatSetCurrent(index, data);
+                }
             }
-        }
-    });    
+        });
+    }
 }
 
 function thermostatSetCurrent(index, temp){
@@ -656,7 +729,7 @@ function thermostatTargetSetSetting(index){
     clearTimeout(thermostatTargetCountDownTimeout[index]);
     
     // wait 5 seconds
-    //thermostatTargetCountDownTimeout[index] = setTimeout(function(){
+    thermostatTargetCountDownTimeout[index] = setTimeout(function(){
         $( '.thermostat-activeform' ).submit();
         
         var model = '';
@@ -699,7 +772,7 @@ function thermostatTargetSetSetting(index){
             }
         });
     //}, (1000 * 5));
-   // }, (1000));
+    }, (500));
 }
 
 // target minus hold
@@ -764,7 +837,7 @@ function thermostatDefaultSetSetting(index){
     clearTimeout(thermostatDefaultCountDownTimeout[index]);
     
     // wait 5 seconds
-    //thermostatDefaultCountDownTimeout[index] = setTimeout(function(){
+    thermostatDefaultCountDownTimeout[index] = setTimeout(function(){
         $( '.thermostat-activeform' ).submit();
         
         var model = '';
@@ -807,7 +880,7 @@ function thermostatDefaultSetSetting(index){
             }
         });
     //}, (1000 * 5));
-    //}, (1000));
+    }, (500));
 }
 
 // default minus hold

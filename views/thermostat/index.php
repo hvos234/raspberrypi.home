@@ -67,6 +67,8 @@ $this->registerCssFile('@web/css/thermostat.css');
 
                         <?= $form->field($model, '[' . $index . ']temperature_model_id', ['inputOptions' => ['class' => 'form-control temperature_model_id', 'index' => $index, 'data-role'=> 'none']])->dropDownList($model->temperature_model_ids); ?>
                         
+                        <?= $form->field($model, '[' . $index . ']temperature_model_field', ['inputOptions' => ['class' => 'form-control temperature_model_field', 'index' => $index, 'data-role'=> 'none']])->dropDownList($model->temperature_model_fields); ?>
+                        
                         <?= $form->field($model, '[' . $index . ']weight', ['inputOptions' => ['class' => 'form-control weight', 'index' => $index, 'data-role'=> 'none']])->dropDownList($model->weights); ?>
                         
                         <div class="form-group">
