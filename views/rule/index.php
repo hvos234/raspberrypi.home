@@ -30,20 +30,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'name',
             'description:ntext',
-						'weight',
+            'weight',
             'created_at',
             'updated_at',
 						
-						[
-							'class' => 'yii\grid\ActionColumn', 
-							'controller' => 'rule',
-							'template' => '{view} {update} {delete} {execute}',
-							'buttons' => [
-								'execute' => function ($url, $model, $key) {
-									return Html::a('execute', $url);
-								},
-							],
-						],
+            [
+                    'class' => 'yii\grid\ActionColumn', 
+                    'controller' => 'rule',
+                    'template' => '{view} {update} {delete} {execute}',
+                    'buttons' => [
+                            'execute' => function ($url, $model, $key) {
+                                    return Html::a('execute', $url);
+                            },
+                    ],
+            ],
         ],
     ]); ?>
 

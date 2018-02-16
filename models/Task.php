@@ -403,6 +403,7 @@ class Task extends \yii\db\ActiveRecord
     }
     
     public static function thermostatExecute($id, $field = ''){
+        return Task::ruleExecute($id);
         $datas = Task::ruleExecute($id);
         if('' != $field){
             return $datas[$field];

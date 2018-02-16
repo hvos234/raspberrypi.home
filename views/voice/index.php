@@ -9,6 +9,11 @@ use yii\widgets\Pjax;
 
 $this->title = Yii::t('app', 'Voices');
 $this->params['breadcrumbs'][] = $this->title;
+
+/*use app\models\Voice;
+
+var_dump(Voice::execute('temperatuur'));
+exit();*/
 ?>
 <div class="voice-index">
 

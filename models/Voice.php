@@ -196,14 +196,92 @@ class Voice extends \yii\db\ActiveRecord
             return false;
         }
         
-        $action = call_user_func(array('app\models\\' . ucfirst($modelVoice->action_model), 'voiceAction'), ['id' => $modelVoice->action_model_id, 'field' => $modelVoice->action_model_field]);
+        $actions = call_user_func(array('app\models\\' . ucfirst($modelVoice->action_model), 'voiceAction'), $modelVoice->action_model_id, $modelVoice->action_model_field);
         
-        if(empty($action)){
+        if(empty($actions)){
             return false;
         }
         
-        $tell = str_replace('%1', $action, $modelVoice->tell);
+        //$tell = str_replace('%1', $action, $modelVoice->tell);
+        //$tell = Voice::replace($modelVoice->tell, HelperData::dataExplode($action));
+        // i use the yii2 i18n (translation) parameter formatting
+        // see http://www.yiiframework.com/doc-2.0/guide-tutorial-i18n.html
+        //var_dump($modelVoice->tell);
+        
+        //$actions['tt'] = $actions[0];
+        
+        
+        /*foreach($actions as $key => $action){
+            if('0' === $action){
+                
+            }
+        }*/
+        $actions = Voice::convert($actions);
+        //var_dump($actions);
+        
+        return Yii::t('app', $modelVoice->tell, $actions);
+        //var_dump($tell);
+        //exit();
         
         return $tell;
+    }
+    
+    /**
+     * 
+     * @param type $values
+     * @return typeConvert strings into integers or floats
+     */
+    public static function convert ($values){
+        foreach($values as $key => $value){
+            if(is_numeric($value)){
+                $values[$key] = $value + 0; // If you want the numerical value of a string, this will return a float or int value
+            }
+        }
+        return $values;
+    }
+    
+    public static function replace ($string, $values){
+        // replace all the words start with % and a number
+        // and convert all the words with float(), int(), str() and bool()
+        $pattern = '[%]{1}[0-9]+';
+        $pattern = '(bool[(]{1}' . $pattern . '[)]{1}|' . $pattern . ')';
+        
+        //$subject = 'De temperatuur bool(%1) %4 bool(%3)in de woonkamer is %2.';
+        $subject = $string;
+        preg_match_all($pattern, $subject, $matches, PREG_PATTERN_ORDER);
+        
+        if(empty($matches[0])){
+            return $string;
+        }
+        
+        //var_dump($string);
+        //var_dump($matches);
+        //var_dump($values);
+        
+        foreach ($matches[0] as $match){
+            if(preg_match('/[0-9]+/', $match, $key_matches)){
+                $key = $key_matches[0];
+                //echo('$key: ' . $key) . PHP_EOL;
+                //echo('$match: ' . $match) . PHP_EOL;
+                //echo('$values[$key]: ' . $values[$key]) . PHP_EOL;
+                //exit();
+
+                if(0 === strpos($match, 'bool(')){
+                    /*if(0 == $values[$key] or '0' == $values[$key]){
+                        $values[$key] = false;
+                    }
+                    if(1 == $values[$key] or '1' == $values[$key]){
+                        $values[$key] = true;
+                    }*/
+                    $replace = ($values[$key] ? Yii::t('app', 'true') : Yii::t('app', 'false'));
+                    $string = str_replace($match, $replace, $string);
+
+                }else {
+                    $string = str_replace($match, $values[$key], $string);
+                }
+            }
+        }
+        
+        return $string;
     }
 }
