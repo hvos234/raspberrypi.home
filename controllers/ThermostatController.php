@@ -196,7 +196,7 @@ class ThermostatController extends Controller
         return json_encode($data);
     }*/
     
-    public function actionAjaxCreateUpdate($id){
+    public function actionAjaxCreateUpdate($id = false){
         if(!$id){
             $model = new Thermostat();
         }else {

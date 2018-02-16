@@ -45,11 +45,11 @@ $this->registerCssFile('@web/css/thermostat.css');
                         
                         <?= $form->field($model, '[' . $index . ']temperature_default', ['inputOptions' => ['class' => 'form-control temperature_default', 'index' => $index]])->hiddenInput()->label(false); ?>
                         
-                        <?= $form->field($model, '[' . $index . ']temperature_default_max', ['inputOptions' => ['class' => 'form-control temperature_default_max', 'index' => $index]])->hiddenInput()->label(false); ?>
+                        <?php //<?= $form->field($model, '[' . $index . ']temperature_default_max', ['inputOptions' => ['class' => 'form-control temperature_default_max', 'index' => $index]])->hiddenInput()->label(false); ?>
                         
                         <?= $form->field($model, '[' . $index . ']temperature_target', ['inputOptions' => ['class' => 'form-control temperature_target', 'index' => $index]])->hiddenInput()->label(false); ?>
                         
-                        <?= $form->field($model, '[' . $index . ']temperature_target_max', ['inputOptions' => ['class' => 'form-control temperature_target_max', 'index' => $index]])->hiddenInput()->label(false); ?>
+                         <?php //<?= $form->field($model, '[' . $index . ']temperature_target_max', ['inputOptions' => ['class' => 'form-control temperature_target_max', 'index' => $index]])->hiddenInput()->label(false); ?>
                         
                         <?= $form->field($model, '[' . $index . ']temperature_current', ['inputOptions' => ['class' => 'form-control temperature_current', 'index' => $index]])->hiddenInput()->label(false); ?>
                         

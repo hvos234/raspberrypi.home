@@ -11,13 +11,14 @@ var thermostatDefaultMinusTimeout;
 var thermostatDefaultPlusTimeout;
 var thermostatDefaultCountDownTimeout = [];
 
+//$.pjax.defaults.scrollTo = false;
 
 $(document).ready(function(){ 
     // accordion
     $( '.accordion.enabled' ).accordion({
-      collapsible: true,
-      active: true,
-      animate: 200
+        collapsible: true,
+        active: true,
+        animate: 200
     });
     
     // sortable
@@ -68,9 +69,9 @@ $(document).ready(function(){
         var temperature_model_id = $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val();
         
         var temperature_default = $('input[name="Thermostat[' + index + '][temperature_default]"]').val();
-        var temperature_default_max = $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val();
+        //var temperature_default_max = $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val();
         var temperature_target = $('input[name="Thermostat[' + index + '][temperature_target]"]').val();
-        var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
+        //var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
         var temperature_current = $('input[name="Thermostat[' + index + '][temperature_current]"]').val();
 
         var weight = $('select[name="Thermostat[' + index + '][weight]"]').val();
@@ -91,9 +92,9 @@ $(document).ready(function(){
                     temperature_model: temperature_model, 
                     temperature_model_id: temperature_model_id, 
                     temperature_default: temperature_default, 
-                    temperature_default_max: temperature_default_max, 
+                    //temperature_default_max: temperature_default_max, 
                     temperature_target: temperature_target,
-                    temperature_target_max: temperature_target_max,
+                    //temperature_target_max: temperature_target_max,
                     weight: weight
                 }
             },
@@ -119,6 +120,22 @@ $(document).ready(function(){
         });
         
         return false;
+    });
+    
+    // if there is a error do not scroll to top
+    // but open the settings of the thermostat and scroll to the input name
+    //$('.thermostat-activeform').unbind('afterValidate'); // unbind every afterValidate event, or it will be executed double
+    //$('#w2').unbind('afterValidate'); // unbind every afterValidate event, or it will be executed double
+    $('.thermostat-activeform').on('afterValidate', function (event, messages) {
+        event.preventDefault(); 
+        event.stopPropagation();
+        
+        if(typeof $('.has-error').first().offset() !== 'undefined') {
+            $('html, body').stop(); // other animate 
+            $('html, body').animate({
+                scrollTop: $('.has-error').first().offset().top
+            }, 1000);
+        }
     });
     
     // delete
@@ -172,9 +189,9 @@ $(document).ready(function(){
                     $('select[name="Thermostat[' + index + '][temperature_model_id]"]').val('');
                        
                     $('input[name="Thermostat[' + index + '][temperature_default]"]').val(0);
-                    $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val(0);
+                    //$('input[name="Thermostat[' + index + '][temperature_default_max]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_target]"]').val(0);
-                    $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val(0);
+                    //$('input[name="Thermostat[' + index + '][temperature_target_max]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_current]"]').val(0);
 
                     //var weight = $('select[name="Thermostat[' + index + '][weight]"]').val();
@@ -220,7 +237,7 @@ $(document).ready(function(){
         thermostatDefaultCountDownTimeout[index];
                 
         // drag target pointer
-        $('.target-pointer[index="' + index + '"]').bind('vmousedown', function(event) {
+        $('.target-pointer[index="' + index + '"]').bind('mousedown vmousedown', function(event) {
             thermostatTargetStartDrag(index, event);
         });
     
@@ -241,7 +258,7 @@ $(document).ready(function(){
         
         // hold down the minus and plus of the target
         //var thermostatTargetMinusTimeout;
-        $('.thermostat .target .minus[index="' + index + '"], .detail-view .target-minus[index="' + index + '"]').bind('vmousedown', function(event) {
+        $('.thermostat .target .minus[index="' + index + '"], .detail-view .target-minus[index="' + index + '"]').bind('mousedown vmousedown', function(event) {
             thermostatTargetMinusStart(index);
             thermostatTargetMinusTimeout = setInterval(function(){
                 thermostatTargetMinus(index);
@@ -251,7 +268,7 @@ $(document).ready(function(){
         });
 
         //var thermostatTargetPlusTimeout;
-        $('.thermostat .target .plus[index="' + index + '"], .detail-view .target-plus[index="' + index + '"]').bind('vmousedown', function(event) {
+        $('.thermostat .target .plus[index="' + index + '"], .detail-view .target-plus[index="' + index + '"]').bind('mousedown vmousedown', function(event) {
             thermostatTargetPlusStart(index);
             thermostatTargetPlusTimeout = setInterval(function(){
                 thermostatTargetPlus(index);
@@ -276,7 +293,7 @@ $(document).ready(function(){
         
         // hold down the minus and plus of the default
         //var thermostatDefaultMinusTimeout;
-        $('.detail-view .default-minus[index="' + index + '"]').bind('vmousedown', function(event) {
+        $('.detail-view .default-minus[index="' + index + '"]').bind('mousedown vmousedown', function(event) {
             thermostatDefaultMinusStart(index);
             thermostatDefaultMinusTimeout = setInterval(function(){
                 thermostatDefaultMinus(index);
@@ -286,7 +303,7 @@ $(document).ready(function(){
         });
 
         //var thermostatDefaultPlusTimeout;
-        $('.detail-view .default-plus[index="' + index + '"]').bind('vmousedown', function(event) {
+        $('.detail-view .default-plus[index="' + index + '"]').bind('mousedown vmousedown', function(event) {
             thermostatDefaultPlusStart(index);        
             thermostatDefaultPlusTimeout = setInterval(function(){
                 thermostatDefaultPlus(index);
@@ -527,7 +544,7 @@ function thermostatSetTarget(index, temp){
     //target = temp;
     // no update input
     $('.temperature_target[index="' + index + '"]').val(temp);
-    $('.temperature_target_max[index="' + index + '"]').val((temp + 1));
+    //$('.temperature_target_max[index="' + index + '"]').val((temp + 1));
 }
 
 function thermostatSetDefault(index, temp){
@@ -541,7 +558,7 @@ function thermostatSetDefault(index, temp){
     //_default = temp;
     // no update input
     $('.temperature_default[index="' + index + '"]').val(temp);
-    $('.temperature_default_max[index="' + index + '"]').val((temp + 1));
+    //$('.temperature_default_max[index="' + index + '"]').val((temp + 1));
 }
 
 // thermostate rotate current pointer overlay
@@ -590,7 +607,7 @@ function thermostatTargetStartDrag(index, event){
     
     thermostatTargetDrag(index, startDragPos);
     
-    $(document).bind('vmouseup', function(event) {    
+    $(document).bind('mouseup vmouseup', function(event) {    
         thermostatTargetStopDrag(index);
     });
 }
@@ -598,7 +615,7 @@ function thermostatTargetStartDrag(index, event){
 function thermostatTargetDrag(index, startDragPos){
     var currentDragPos = { x: -1, y: -1 };
     
-    $(document).bind('vmousemove', function(event) {
+    $(document).bind('mousemove vmousemove', function(event) {
         if (event.which == 1 || event.which == 0) { // if left mouse button is still prest, and the right (right or 0 is also for the phone touch)
             currentDragPos.x = event.pageX;
             currentDragPos.y = event.pageY;
@@ -613,8 +630,8 @@ function thermostatTargetDrag(index, startDragPos){
 }
 
 function thermostatTargetStopDrag(index){
-    $(document).unbind('vmousemove');
-    $(document).unbind('vmouseup');
+    $(document).unbind('mousemove vmousemove');
+    $(document).unbind('mouseup vmouseup');
     
     thermostatTargetSetSetting(index);
 }
@@ -639,7 +656,9 @@ function thermostatTargetSetSetting(index){
     clearTimeout(thermostatTargetCountDownTimeout[index]);
     
     // wait 5 seconds
-    thermostatTargetCountDownTimeout[index] = setTimeout(function(){        
+    //thermostatTargetCountDownTimeout[index] = setTimeout(function(){
+        $( '.thermostat-activeform' ).submit();
+        
         var model = '';
         var model_id = '';
         
@@ -649,17 +668,17 @@ function thermostatTargetSetSetting(index){
         var off_model_id = $('select[name="Thermostat[' + index + '][off_model_id]"]').val();
         
         var temperature_target = $('input[name="Thermostat[' + index + '][temperature_target]"]').val();
-        var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
+        //var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
         var temperature_current = $('input[name="Thermostat[' + index + '][temperature_current]"]').val();
 
         // if temperature_current is lower than temperature_target switch on
-        if(temperature_current < temperature_target){
+        if(temperature_current <= temperature_target){
             model = on_model; 
             model_id = on_model_id; 
         }
         
         // if temperature_current is higher than temperature_target_max switch off
-        if(temperature_current < temperature_target_max){
+        if(temperature_current > temperature_target){
             model = off_model; 
             model_id = off_model_id; 
         }
@@ -679,7 +698,8 @@ function thermostatTargetSetSetting(index){
                 }
             }
         });
-    }, (1000 * 5));
+    //}, (1000 * 5));
+   // }, (1000));
 }
 
 // target minus hold
@@ -687,7 +707,7 @@ function thermostatTargetMinusStart(index){
   //startTarget = target;
   startTarget = parseFloat($('.temperature_target[index="' + index + '"]').val());
   
-  $(document).bind('vmouseup', function(event) {
+  $(document).bind('mouseup vmouseup', function(event) {
       
       thermostatTargetMinusStop(index);
   });
@@ -696,7 +716,7 @@ function thermostatTargetMinusStart(index){
 function thermostatTargetMinusStop(index){
   clearInterval(thermostatTargetMinusTimeout);
   
-  $(document).unbind('vmouseup');
+  $(document).unbind('mouseup vmouseup');
   
   thermostatTargetSetSetting(index);
   
@@ -708,7 +728,7 @@ function thermostatTargetPlusStart(index){
   //startTarget = target;
   startTarget = parseFloat($('.temperature_target[index="' + index + '"]').val());
   
-  $(document).bind('vmouseup', function(event) {
+  $(document).bind('mouseup vmouseup', function(event) {
       
       thermostatTargetPlusStop(index);
   });
@@ -717,7 +737,7 @@ function thermostatTargetPlusStart(index){
 function thermostatTargetPlusStop(index){
   clearInterval(thermostatTargetPlusTimeout);
   
-  $(document).unbind('vmouseup');
+  $(document).unbind('mouseup vmouseup');
   
   thermostatTargetSetSetting(index);
   
@@ -744,7 +764,9 @@ function thermostatDefaultSetSetting(index){
     clearTimeout(thermostatDefaultCountDownTimeout[index]);
     
     // wait 5 seconds
-    thermostatDefaultCountDownTimeout[index] = setTimeout(function(){        
+    //thermostatDefaultCountDownTimeout[index] = setTimeout(function(){
+        $( '.thermostat-activeform' ).submit();
+        
         var model = '';
         var model_id = '';
         
@@ -754,17 +776,17 @@ function thermostatDefaultSetSetting(index){
         var off_model_id = $('select[name="Thermostat[' + index + '][off_model_id]"]').val();
         
         var temperature_default = $('input[name="Thermostat[' + index + '][temperature_default]"]').val();
-        var temperature_default_max = $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val();
+        //var temperature_default_max = $('input[name="Thermostat[' + index + '][temperature_default_max]"]').val();
         var temperature_current = $('input[name="Thermostat[' + index + '][temperature_current]"]').val();
 
         // if temperature_current is lower than temperature_default switch on
-        if(temperature_current < temperature_default){
+        if(temperature_current <= temperature_default){
             model = on_model; 
             model_id = on_model_id; 
         }
         
         // if temperature_current is higher than temperature_default_max switch off
-        if(temperature_current < temperature_default_max){
+        if(temperature_current > temperature_default){
             model = off_model; 
             model_id = off_model_id; 
         }
@@ -784,7 +806,8 @@ function thermostatDefaultSetSetting(index){
                 }
             }
         });
-    }, (1000 * 5));
+    //}, (1000 * 5));
+    //}, (1000));
 }
 
 // default minus hold
@@ -792,7 +815,7 @@ function thermostatDefaultMinusStart(index){
   //startDefault = _default;
   startDefault = parseFloat($('.temperature_default[index="' + index + '"]').val());
   
-  $(document).bind('vmouseup', function(event) {
+  $(document).bind('mouseup vmouseup', function(event) {
       
       thermostatDefaultMinusStop(index);
   });
@@ -801,7 +824,7 @@ function thermostatDefaultMinusStart(index){
 function thermostatDefaultMinusStop(index){
   clearInterval(thermostatDefaultMinusTimeout);
   
-  $(document).unbind('vmouseup');
+  $(document).unbind('mouseup vmouseup');
   
   thermostatDefaultSetSetting(index);
   
@@ -813,7 +836,7 @@ function thermostatDefaultPlusStart(index){
   //startDefault = _default;
   startDefault = parseFloat($('.temperature_default[index="' + index + '"]').val());
   
-  $(document).bind('vmouseup', function(event) {
+  $(document).bind('mouseup vmouseup', function(event) {
       
       thermostatDefaultPlusStop(index);
   });
@@ -822,7 +845,7 @@ function thermostatDefaultPlusStart(index){
 function thermostatDefaultPlusStop(index){
   clearInterval(thermostatDefaultPlusTimeout);
   
-  $(document).unbind('vmouseup');
+  $(document).unbind('mouseup vmouseup');
   
   thermostatDefaultSetSetting(index);
   

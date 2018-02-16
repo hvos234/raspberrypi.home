@@ -53,16 +53,30 @@ class Thermostat extends \yii\db\ActiveRecord
         return '{{%thermostat}}';
     }
     
+    public function init() {
+        //$this->active = 0;
+
+        // default values, do not declare them in the Controller
+        $this->temperature_default = 0;
+        //$this->temperature_default_max = 0;
+
+        $this->temperature_target = 0;
+        //$this->temperature_target_max = 0;
+
+        parent::init();
+	}
+
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['name', 'on_model', 'on_model_id', 'off_model', 'off_model_id', 'temperature_model', 'temperature_model_id', 'temperature_default', 'temperature_default_max', 'temperature_target', 'temperature_target_max'], 'required'],
+            [['name', 'on_model', 'on_model_id', 'off_model', 'off_model_id', 'temperature_model', 'temperature_model_id', 'temperature_default', 'temperature_target'], 'required'],
             [['on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
-            [['temperature_default', 'temperature_default_max', 'temperature_target', 'temperature_target_max'], 'number'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['temperature_default', 'temperature_target'], 'number'],
+            [['temperature_default_max', 'temperature_target_max', 'created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
             [['on_model', 'off_model', 'temperature_model'], 'string', 'max' => 128],
             //[['on_model', 'off_model', 'temperature_model'], 'compare', 'compareValue' => 'none', 'operator' => '!='],
