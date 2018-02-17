@@ -19,8 +19,8 @@ class ThermostatSearch extends Thermostat
     {
         return [
             [['id', 'on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
-            [['name', 'on_model', 'off_model', 'temperature_model', 'temperature_model_field', 'created_at', 'updated_at'], 'safe'],
-            [['temperature_default', 'temperature_target'], 'number'],
+            [['name', 'on_model', 'off_model', 'temperature_model', 'temperature_model_field', 'temperature_current', 'created_at', 'updated_at'], 'safe'],
+            [['temperature_current', 'temperature_default', 'temperature_target'], 'number'],
         ];
     }
 
@@ -64,6 +64,7 @@ class ThermostatSearch extends Thermostat
             'on_model_id' => $this->on_model_id,
             'off_model_id' => $this->off_model_id,
             'temperature_model_id' => $this->temperature_model_id,
+            'temperature_current' => $this->temperature_current,
             'temperature_default' => $this->temperature_default,
             'temperature_target' => $this->temperature_target,
             'weight' => $this->weight,
