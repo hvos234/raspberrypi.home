@@ -24,7 +24,12 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'action_model_field', ['inputOptions' => ['class' => 'form-control action_model_field']])->dropDownList($model->action_model_fields); ?>
 
-    <?= $form->field($model, 'tell')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'tell_failure')->textInput(['maxlength' => true]) ?>
+    
+    <?= $form->field($model, 'tell_success')->textInput(['maxlength' => true])
+        ->hint(Yii::t('app', 'Do not use special characters but whole words. Like "percent" instead of "%".
+            <br/>Use "{%}" to put the result of the action at that place in the sentence.
+            <br/>You also can use "compare", "date" or "boolean", like "{%, compare, 0=not, 1=well}" or "{%, date, \'Y-m-d\'}" or "{%, boolean}".')) ?>
 
     <?= $form->field($model, 'weight', ['inputOptions' => ['class' => 'form-control weight']])->dropDownList($model->weights); ?>
 

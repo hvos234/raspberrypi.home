@@ -57,6 +57,8 @@ class Thermostat extends \yii\db\ActiveRecord
         $this->temperature_current = 0;
         $this->temperature_default = 0;
         $this->temperature_target = 0;
+        
+        $this->on_off = 0;
 
         parent::init();
     }
@@ -69,7 +71,7 @@ class Thermostat extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'on_model', 'on_model_id', 'off_model', 'off_model_id', 'temperature_model', 'temperature_model_id', 'temperature_model_field', 'temperature_default', 'temperature_target'], 'required'],
-            [['on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
+            [['on_model_id', 'off_model_id', 'temperature_model_id', 'on_off', 'weight'], 'integer'],
             [['temperature_current', 'temperature_default', 'temperature_target'], 'number'],
             [['temperature_current', 'created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 255],
@@ -99,6 +101,7 @@ class Thermostat extends \yii\db\ActiveRecord
             'temperature_current' => Yii::t('app', 'Current temperature'),
             'temperature_default' => Yii::t('app', 'Default temperature'),
             'temperature_target' => Yii::t('app', 'Target temperature'),
+            'on_off' => Yii::t('app', 'Thermostat on or off'),
             'weight' => Yii::t('app', 'Weight'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
@@ -149,7 +152,7 @@ class Thermostat extends \yii\db\ActiveRecord
         
         $fields = [];
         foreach($attributeLabels as $field => $name){
-            if('id' != $field){
+            if('id' != $field and 'created_at' != $field and 'updated_at' != $field){
                 $fields[$field] = $name;
             }
         }
@@ -233,5 +236,10 @@ class Thermostat extends \yii\db\ActiveRecord
             return false;
         }
         return true;
+    }
+    
+    public static function voiceAction($id, $field = ''){
+        $model = Thermostat::findOne($id);
+        return $model->{$field};
     }
 }

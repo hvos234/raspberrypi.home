@@ -19,7 +19,7 @@ class VoiceSearch extends Voice
     {
         return [
             [['id', 'action_model_id', 'weight'], 'integer'],
-            [['name', 'description', 'words', 'action_model', 'action_model_field', 'tell', 'created_at', 'updated_at'], 'safe'],
+            [['name', 'description', 'words', 'action_model', 'action_model_field', 'tell_failure', 'tell_success', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -71,7 +71,8 @@ class VoiceSearch extends Voice
             ->andFilterWhere(['like', 'words', $this->words])
             ->andFilterWhere(['like', 'action_model', $this->action_model])
             ->andFilterWhere(['like', 'action_model_field', $this->action_model_field])
-            ->andFilterWhere(['like', 'tell', $this->tell]);
+            ->andFilterWhere(['like', 'tell_failure', $this->tell_failure])
+            ->andFilterWhere(['like', 'tell_success', $this->tell_success]);
 
         return $dataProvider;
     }

@@ -49,14 +49,14 @@ class Voice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'description', 'words', 'action_model', 'action_model_id', 'tell', 'weight'], 'required'],
+            [['name', 'description', 'words', 'action_model', 'action_model_id', 'tell_failure', 'tell_success', 'weight'], 'required'],
             [['description'], 'string'],
             [['action_model_id', 'weight'], 'integer'],
             [['action_model_field', 'created_at', 'updated_at'], 'safe'],
             [['created_at', 'updated_at'], 'safe'],
             [['name', 'words', 'action_model_field'], 'string', 'max' => 255],
             [['action_model'], 'string', 'max' => 128],
-            [['tell'], 'string', 'max' => 99],
+            [['tell_failure', 'tell_success'], 'string', 'max' => 99],
             // custom
             ['action_model_field', 'required', 'when' => function($model) {
                 return !in_array($model->action_model, ['Rule', 'RuleExtra']);
@@ -68,7 +68,7 @@ class Voice extends \yii\db\ActiveRecord
                 return false;
             }"],
             // trim
-            [['name', 'words', 'tell'], 'trim'],
+            [['name', 'words', 'tell_failure', 'tell_success'], 'trim'],
             // Make sure empty input is stored as null in the database
             ['action_model_field', 'default', 'value' => null],
         ];
@@ -87,7 +87,8 @@ class Voice extends \yii\db\ActiveRecord
             'action_model' => Yii::t('app', 'Action'),
             'action_model_id' => Yii::t('app', 'Action id'),
             'action_model_field' => Yii::t('app', 'Action field'),
-            'tell' => Yii::t('app', 'Tell'),
+            'tell_failure' => Yii::t('app', 'Tell when fails'),
+            'tell_success' => Yii::t('app', 'Tell when successfull'),
             'weight' => Yii::t('app', 'Weight'),
             'created_at' => Yii::t('app', 'Created at'),
             'updated_at' => Yii::t('app', 'Updated at'),
@@ -196,11 +197,17 @@ class Voice extends \yii\db\ActiveRecord
             return false;
         }
         
-        $actions = call_user_func(array('app\models\\' . ucfirst($modelVoice->action_model), 'voiceAction'), $modelVoice->action_model_id, $modelVoice->action_model_field);
+        $action = call_user_func(array('app\models\\' . ucfirst($modelVoice->action_model), 'voiceAction'), $modelVoice->action_model_id, $modelVoice->action_model_field);
         
-        if(empty($actions)){
-            return false;
+        if(false === $action or is_null($action)){
+            $tell = $modelVoice->tell_failure;
+        }else {
+            $tell = $modelVoice->tell_success;
         }
+        
+        //var_dump('execute');
+        //var_dump($action);
+        //var_dump($tell);
         
         //$tell = str_replace('%1', $action, $modelVoice->tell);
         //$tell = Voice::replace($modelVoice->tell, HelperData::dataExplode($action));
@@ -216,12 +223,14 @@ class Voice extends \yii\db\ActiveRecord
                 
             }
         }*/
-        $actions = Voice::convert($actions);
+        //$actions = Voice::convert($actions);
         //var_dump($actions);
         
-        return Yii::t('app', $modelVoice->tell, $actions);
+        //return Yii::t('app', $modelVoice->tell, $actions);
         //var_dump($tell);
         //exit();
+        
+        $tell = Voice::replace($tell, $action);
         
         return $tell;
     }
@@ -231,20 +240,24 @@ class Voice extends \yii\db\ActiveRecord
      * @param type $values
      * @return typeConvert strings into integers or floats
      */
-    public static function convert ($values){
+    /*public static function convert ($values){
         foreach($values as $key => $value){
             if(is_numeric($value)){
                 $values[$key] = $value + 0; // If you want the numerical value of a string, this will return a float or int value
             }
         }
         return $values;
-    }
+    }*/
     
-    public static function replace ($string, $values){
+    public static function replace ($string, $value){
         // replace all the words start with % and a number
         // and convert all the words with float(), int(), str() and bool()
-        $pattern = '[%]{1}[0-9]+';
-        $pattern = '(bool[(]{1}' . $pattern . '[)]{1}|' . $pattern . ')';
+        //$pattern = '[%]{1}[0-9]+';
+        //$pattern = '(bool[(]{1}' . $pattern . '[)]{1}|' . $pattern . ')';
+        
+        //var_dump('replace');
+        
+        $pattern = '/[{][%](.*)[}]/';
         
         //$subject = 'De temperatuur bool(%1) %4 bool(%3)in de woonkamer is %2.';
         $subject = $string;
@@ -256,10 +269,65 @@ class Voice extends \yii\db\ActiveRecord
         
         //var_dump($string);
         //var_dump($matches);
-        //var_dump($values);
+        //var_dump($value);
         
         foreach ($matches[0] as $match){
-            if(preg_match('/[0-9]+/', $match, $key_matches)){
+            //var_dump('$match');
+            //var_dump($match);
+            
+            $pos = strpos($string, $match);
+            
+            if(false === strpos($match, ',')){
+                //var_dump('false');
+                $option_value = $value;
+                
+            }else {
+                $options = HelperData::dataExplode(trim(str_replace(['{', '}'], '', $match)));
+                $type = trim($options[1]);
+                //var_dump($type);
+                
+                switch($type){
+                    case 'compare':
+                        //var_dump('compare');
+                        
+                        for($i=2; $i <= $options; $i++){
+                            list($option_string, $option_value) = explode('=', $options[$i]);
+                            trim($option_string);
+                            trim($option_value);
+                            
+                            if($value == $option_string){
+                                break; // exit the switch
+                            }
+                        }
+                        break;
+                    case 'date':
+                        //var_dump('date');
+                        
+                        $options_string = $options[1];
+                        $option_value = date($options_string, strtotime($value));
+                        break;
+                    case 'boolean':
+                        //var_dump('boolean');
+                        
+                        if(0 == $value or '0' == $value or false == $value){
+                            $option_value = Yii::t('app', 'false');
+                        }else {
+                            $option_value = Yii::t('app', 'true');
+                        }
+                        break;
+                    default:
+                       $option_value = $value;
+                        break;
+                }
+                
+                
+            }
+            
+            $string = substr_replace($string, trim($option_value), $pos, strlen($match));
+            
+            
+            
+            /*if(preg_match('/[0-9]+/', $match, $key_matches)){
                 $key = $key_matches[0];
                 //echo('$key: ' . $key) . PHP_EOL;
                 //echo('$match: ' . $match) . PHP_EOL;
@@ -273,13 +341,13 @@ class Voice extends \yii\db\ActiveRecord
                     if(1 == $values[$key] or '1' == $values[$key]){
                         $values[$key] = true;
                     }*/
-                    $replace = ($values[$key] ? Yii::t('app', 'true') : Yii::t('app', 'false'));
+                    /*$replace = ($values[$key] ? Yii::t('app', 'true') : Yii::t('app', 'false'));
                     $string = str_replace($match, $replace, $string);
 
                 }else {
                     $string = str_replace($match, $values[$key], $string);
                 }
-            }
+            }*/
         }
         
         return $string;

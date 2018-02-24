@@ -52,6 +52,8 @@ $this->registerCssFile('@web/css/thermostat.css');
                         <?= $form->field($model, '[' . $index . ']temperature_target', ['inputOptions' => ['class' => 'form-control temperature_target', 'index' => $index]])->hiddenInput()->label(false); ?>
                         
                         <?php //<?= $form->field($model, '[' . $index . ']temperature_target_max', ['inputOptions' => ['class' => 'form-control temperature_target_max', 'index' => $index]])->hiddenInput()->label(false); ?>
+                       
+                        <?= $form->field($model, '[' . $index . ']on_off', ['inputOptions' => ['class' => 'form-control temperature_on_off', 'index' => $index]])->hiddenInput()->label(false); ?>
                                                 
                         <?= $form->field($model, '[' . $index . ']name', ['inputOptions' => ['class' => 'form-control name', 'index' => $index, 'data-role'=> 'none']])->textInput(['maxlength' => true]) ?>
                         

@@ -78,6 +78,8 @@ $(document).ready(function(){
         var temperature_target = $('input[name="Thermostat[' + index + '][temperature_target]"]').val();
         //var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
         var temperature_current = $('input[name="Thermostat[' + index + '][temperature_current]"]').val();
+        
+        var on_off = $('input[name="Thermostat[' + index + '][on_off]"]').val();
 
         var weight = $('select[name="Thermostat[' + index + '][weight]"]').val();
         
@@ -99,6 +101,7 @@ $(document).ready(function(){
                     temperature_model_field: temperature_model_field, 
                     temperature_default: temperature_default, 
                     temperature_target: temperature_target,
+                    on_off: on_off,
                     weight: weight
                 }
             },
@@ -199,6 +202,8 @@ $(document).ready(function(){
                     $('input[name="Thermostat[' + index + '][temperature_default]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_target]"]').val(0);
                     $('input[name="Thermostat[' + index + '][temperature_current]"]').val(0);
+                    
+                    $('input[name="Thermostat[' + index + '][on_off]"]').val(0);
 
                     //var weight = $('select[name="Thermostat[' + index + '][weight]"]').val();
                     
@@ -730,8 +735,6 @@ function thermostatTargetSetSetting(index){
     
     // wait 5 seconds
     thermostatTargetCountDownTimeout[index] = setTimeout(function(){
-        $( '.thermostat-activeform' ).submit();
-        
         var model = '';
         var model_id = '';
         
@@ -743,18 +746,25 @@ function thermostatTargetSetSetting(index){
         var temperature_target = $('input[name="Thermostat[' + index + '][temperature_target]"]').val();
         //var temperature_target_max = $('input[name="Thermostat[' + index + '][temperature_target_max]"]').val();
         var temperature_current = $('input[name="Thermostat[' + index + '][temperature_current]"]').val();
-
+        
         // if temperature_current is lower than temperature_target switch on
-        if(temperature_current <= temperature_target){
+        if(parseFloat(temperature_current) <= parseFloat(temperature_target)){ // use parseFloat(, or the comparision can fail
             model = on_model; 
-            model_id = on_model_id; 
+            model_id = on_model_id;
+            
+            $('input[name="Thermostat[' + index + '][on_off]"]').val(1);
+            
         }
         
         // if temperature_current is higher than temperature_target_max switch off
-        if(temperature_current > temperature_target){
+        if(parseFloat(temperature_current) > parseFloat(temperature_target)){ // use parseFloat(, or the comparision can fail
             model = off_model; 
-            model_id = off_model_id; 
+            model_id = off_model_id;
+            
+            $('input[name="Thermostat[' + index + '][on_off]"]').val(0);
         }
+        
+        $( '.thermostat-activeform' ).submit();
         
         $.ajax({
             // you can not use AjaxDeviceAction as action name, like in

@@ -18,7 +18,7 @@ class ThermostatSearch extends Thermostat
     public function rules()
     {
         return [
-            [['id', 'on_model_id', 'off_model_id', 'temperature_model_id', 'weight'], 'integer'],
+            [['id', 'on_model_id', 'off_model_id', 'temperature_model_id', 'on_off', 'weight'], 'integer'],
             [['name', 'on_model', 'off_model', 'temperature_model', 'temperature_model_field', 'temperature_current', 'created_at', 'updated_at'], 'safe'],
             [['temperature_current', 'temperature_default', 'temperature_target'], 'number'],
         ];
@@ -67,6 +67,7 @@ class ThermostatSearch extends Thermostat
             'temperature_current' => $this->temperature_current,
             'temperature_default' => $this->temperature_default,
             'temperature_target' => $this->temperature_target,
+            'on_off' => $this->on_off,
             'weight' => $this->weight,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
