@@ -11,22 +11,24 @@ use Yii;
 
 use yii\console\Controller;
 
-use app\models\Voice;
+use app\models\Message;
 
 /**
  * This console controller is called by the server cron
  */
-class VoiceController extends Controller
+class MessageController extends Controller
 {
     /**
      * This command echoes what you have entered as the message.
      * @param string $message the message to be echoed.
      */
-    public function actionIndex($voice)
+    public function actionIndex($message)
     {
-        Yii::info('VoiceController', 'execute');
-        $tell = Voice::execute($voice);
-        echo ($tell) . "\n";
+        //Yii::info('MessageController', 'create');
+        $model = new Message();
+        if(!$model->create($message)){
+            return 1;
+        }
         return 0;
     }
 }

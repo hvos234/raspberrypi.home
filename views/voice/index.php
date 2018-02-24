@@ -46,3 +46,5 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 <?php Pjax::end(); ?></div>
+
+<?=$this->render('@app/views/message/index')?>

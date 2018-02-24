@@ -41,9 +41,18 @@ while true; do
     voice
     echo "What ?"
     echo "$stt"
+
+    cmd="/usr/bin/php /var/www/html/home/yii message"
+    cmd+=" 'What ?'"
+    $(eval $cmd)
     
     if [ "$stt" = "$magic_word" ]; then
         echo "Hello !"
+
+        cmd="/usr/bin/php /var/www/html/home/yii message"
+        cmd+=" Hello !"
+        $(eval $cmd)
+
         omxplayer hello.mp3
 
         # wait for command
@@ -52,6 +61,12 @@ while true; do
         if [ ! -z "$stt" ]; then
             echo "You said:"
             echo "$stt"
+
+            cmd="/usr/bin/php /var/www/html/home/yii message"
+            cmd+=" Je zei: "
+            cmd+=" $stt"
+            $(eval $cmd)
+            
             ./tts.sh "Je zei: " + "$stt"
             
             cmd="/usr/bin/php /var/www/html/home/yii voice"
@@ -60,10 +75,19 @@ while true; do
             
             echo "Tell: "
             echo "$tts"
+
+            cmd="/usr/bin/php /var/www/html/home/yii message"
+            cmd+=" $tts"
+            $(eval $cmd)
+            
             ./tts.sh "$tts"
             
         else
             echo "Nothing !"
+            cmd="/usr/bin/php /var/www/html/home/yii message"
+            cmd+=" Nothing !"
+            $(eval $cmd)
+            
             omxplayer nothing.mp3
         fi
     fi
