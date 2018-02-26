@@ -14,6 +14,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
 //var_dump(Voice::execute('Wat is de temperatuur in de woonkamer thuis'));
 //exit();
+
+use app\models\Notice;
+$model = new Notice();
+var_dump($model->set('Hello World !'));
+//exit();
 ?>
 <div class="voice-index">
 
@@ -47,4 +52,4 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
 <?php Pjax::end(); ?></div>
 
-<?=$this->render('@app/views/message/index')?>
+<?=$this->render('@app/views/notice/index')?>

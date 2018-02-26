@@ -7,6 +7,7 @@ $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    'language' => 'nl', // added to support i18n, netherlands
     'timezone' => 'Europe/Amsterdam',
     'controllerNamespace' => 'app\commands',
     'components' => [

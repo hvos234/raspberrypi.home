@@ -9,6 +9,8 @@ use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
 
+//use frontend\widgets\Alert; // for displaying flash messages
+
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -79,6 +81,13 @@ AppAsset::register($this);
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
+        
+        <?php // get all flash message and display them ?>
+        <?php
+        foreach (Yii::$app->session->getAllFlashes() as $key => $message) {
+            echo '<div class="alert alert-' . $key . '">' . $message . '</div>';
+        } ?>
+        
         <?= $content ?>
     </div>
 </div>
