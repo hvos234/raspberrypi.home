@@ -10,6 +10,8 @@ use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
 
 //use frontend\widgets\Alert; // for displaying flash messages
+use yii\bootstrap\Alert;
+//use yii\bootstrap\BootstrapAsset;
 
 AppAsset::register($this);
 ?>
@@ -84,9 +86,27 @@ AppAsset::register($this);
         
         <?php // get all flash message and display them ?>
         <?php
-        foreach (Yii::$app->session->getAllFlashes() as $key => $message) {
-            echo '<div class="alert alert-' . $key . '">' . $message . '</div>';
+        /*foreach (Yii::$app->session->getAllFlashes() as $type => $messages) {
+            if(!is_array($messages)){
+                echo '<div class="alert alert-' . $type . '">' . $messages . '</div>';
+            }else {
+                foreach($messages as $message){
+                    echo '<div class="alert alert-' . $type . '">' . $message . '</div>';
+                }
+            }
+        }*/ ?>
+        
+        <?php
+        foreach (Yii::$app->session->getAllFlashes() as $type => $flashes) {
+            if(!is_array($flashes)){
+                echo Alert::widget(['options' => ['class' => 'alert-' . $type], 'body' => $flashes]);
+            }else {
+                foreach($flashes as $flash){
+                    echo Alert::widget(['options' => ['class' => 'alert-' . $type], 'body' => $flash]);
+                }
+            }
         } ?>
+        
         
         <?= $content ?>
     </div>

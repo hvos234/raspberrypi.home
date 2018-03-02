@@ -18,14 +18,19 @@ class Notice extends Model {
         // check if message directory exists, if not create it
         if (file_exists($this->path)) {
             if(!is_dir($this->path)){
-                Yii::$app->session->setFlash('error', 'Model Notice, in init, @runtime/notice is not a dir !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in init, @runtime/notice is not a dir !'));
                 return false;
             }
         }else {
             if(!mkdir($this->path, 0775)){
-                Yii::$app->session->setFlash('error', 'Model Notice, in init, can not make dir @runtime/notice !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in init, can not make dir @runtime/notice !'));
                 return false;
             }
+        }
+        
+        if(!$this->deleteOld(20)){
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in init, can not delete last 20 files in dir @runtime/notice !'));
+            return false;
         }
 
         parent::init();
@@ -50,19 +55,19 @@ class Notice extends Model {
                 
             if (!$handle = fopen($filename, 'a')) {
                 // echo "Cannot open file ($filename)";
-                Yii::$app->session->setFlash('error', 'Model Notice, in set, can not open file @runtime/notice/notice_' . $microtime . ' !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in set, can not open file @runtime/notice/notice_' . $microtime . ' !'));
                 return false;
             }
             
             if (fwrite($handle, $notice) === FALSE) {
                 fclose($handle);
                 //echo "Cannot write to file ($filename)";
-                Yii::$app->session->setFlash('error', 'Model Notice, in set, can not write to file @runtime/notice/notice_' . $microtime . ' !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in set, can not write to file @runtime/notice/notice_' . $microtime . ' !'));
                 return false;
             }
             
             // echo "Success, wrote ($notice) to file ($filename)";
-            Yii::$app->session->setFlash('success', 'Model Notice, in set, write notice to file @runtime/notice/notice_' . $microtime . ' !');
+            //Yii::$app->session->addFlash('success', Yii::t('app', 'Model Notice, in set, write notice to file @runtime/notice/notice_' . $microtime . ' !'));
             fclose($handle);
             return true;
         }
@@ -70,7 +75,7 @@ class Notice extends Model {
         public function get($microtime){
             //var_dump($microtime);
             if(!$notice = file_get_contents($this->path . '/notice_' . $microtime)){
-                Yii::$app->session->setFlash('error', 'Model Notice, in get, can not get file contents of file @runtime/notice/notice_' . $microtime . ' !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in get, can not get file contents of file @runtime/notice/notice_' . $microtime . ' !'));
                 return false;
             }
             //var_dump('$notice');
@@ -78,10 +83,18 @@ class Notice extends Model {
             return $notice;
         }
         
-        public function getlast($number = 10){
+        public function delete($microtime){
+            if(!unlink($this->path . '/notice_' . $microtime)){
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in delete, can not delete file @runtime/notice/notice_' . $microtime . ' !'));
+                return false;
+            }
+            return true;
+        }
+        
+        public function getLast($number = 10){
             $notices = [];
             if(!$files = scandir($this->path, SCANDIR_SORT_DESCENDING)){
-                Yii::$app->session->setFlash('error', 'Model Notice, in getlast, can not get files in directory @runtime/notice !');
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in getLast, can not get files in directory @runtime/notice !'));
                 return false;
             }
             
@@ -100,5 +113,32 @@ class Notice extends Model {
                 }
             }
             return $notices;
+        }
+        
+        public function deleteOld($number_left = 20){
+            if(!$files = scandir($this->path, SCANDIR_SORT_DESCENDING)){
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Notice, in deleteOld, can not get files in directory @runtime/notice !'));
+                return false;
+            }
+            
+            $i = 1;
+            $error = false;
+            foreach($files as $file){
+                if(0 === strpos($file, 'notice_')){
+                    if($i >= $number_left){
+                        $microtime = str_replace('notice_', '', $file);
+                        if(!$this->delete($microtime)){
+                            $error = true;
+                        }
+                    }
+                    $i++;
+                }
+            }
+            
+            if($error){
+                return false;
+            }
+            
+            return true;
         }
 }

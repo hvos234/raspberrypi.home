@@ -73,7 +73,7 @@ class NoticeController extends Controller
     
     public function actionAjaxGetNoticesLast(){
         $model = new Notice();
-        $notices = $model->getlast(10);
+        $notices = $model->getLast(10);
         //var_dump($notices);
         return json_encode($notices); 
     }

@@ -128,14 +128,22 @@ class Rule extends \yii\db\ActiveRecord
         $condition = RuleCondition::execute($id);
 
         if(!$condition){
+            Yii::$app->session->addFlash('warning', Yii::t('app', 'Condition fails !'));
             return false;
         }
+        
+        Yii::$app->session->addFlash('success', Yii::t('app', 'Condition succeeded !'));
 
         $action = RuleAction::execute($id);
 
         if(!$action){
+            Yii::$app->session->addFlash('warning', Yii::t('app', 'Action fails !'));
             return false;
         }
+        
+        Yii::$app->session->addFlash('success', Yii::t('app', 'Action succeeded !'));
+        
+        Yii::$app->session->addFlash('success', Yii::t('app', 'Rule executed !'));
         
         return true;
     }
@@ -146,7 +154,7 @@ class Rule extends \yii\db\ActiveRecord
     
     // default rule functions
     public static function ruleCondition($id, $field = '', $value = ''){
-        return Rule::ruleExecute($id);
+        return RuleCondition::execute($id);
     }
 
     public static function ruleAction($id, $field = '', $data = ''){

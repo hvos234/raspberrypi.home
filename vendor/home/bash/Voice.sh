@@ -4,13 +4,23 @@ threshold_min=-700 # the minimale threshold is for short noices
 
 magic_word="\"hallo\"" # the variable stt has also extra qoutes \"
 
+# argument
+if [ $# -ne 1 ]; then
+    echo $0: usage: Voice.sh path
+    exit 1
+fi
+
+path=$1
+
 function voice {
+    path=$1
+
     stt=""
-    cmd="sox -t alsa default stt.flac channels 1 rate 16000"
+    cmd="sox -t alsa default $path/stt.flac channels 1 rate 16000"
 
     # with trim, it is the duration of the recording
-    if [ "$1" == "-trim" ] ; then
-        cmd+=" trim $2"
+    if [ "$2" == "-trim" ] ; then
+        cmd+=" trim $3"
     fi
 
     # record only when there is sound, and cuts out the silence and no gaps and no long silences
@@ -21,17 +31,19 @@ function voice {
     eval $cmd
 
     # get the statistics of the recording
-    _stat=$(sox -t .flac stt.flac -n stat 2>&1)
+    _stat=$(sox -t .flac $path/stt.flac -n stat 2>&1)
     # get the max amp en min amp from the stat
     max_amp=$(echo "$_stat" | awk '/^Maximum\ amplitude/ {print int($3 * 1000)}')
     min_amp=$(echo "$_stat" | awk '/^Minimum\ amplitude/ {print int($3 * 1000)}')
 
     # check if max_amp is more or equal to the threshold
     if [ "$max_amp" -ge "$threshold_max" ] && [ "$min_amp" -ge "$threshold_min" ]; then
-        stt=$(./stt.sh)
+        stt=$($path/stt.sh)
         return
     fi
 }
+
+
 
 #tts=$(/usr/bin/php /var/www/html/home/yii voice "woonkamer")
 #echo "wat"
@@ -56,7 +68,7 @@ while true; do
         omxplayer hello.mp3
 
         # wait for command
-        voice "-trim" "0 10"
+        voice $path "-trim" "0 10"
         
         if [ ! -z "$stt" ]; then
             echo "You said:"

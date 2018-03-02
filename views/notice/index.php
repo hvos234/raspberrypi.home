@@ -4,15 +4,18 @@ use yii\helpers\Html;
 
 use app\models\Notice;
 
-$this->title = 'Notice';
+//$this->title = 'Notice';
 
-/*var_dump(round(microtime(true) * 1000));
-var_dump(microtime(true));
-var_dump(time());*/
+$this->registerCssFile('@web/css/notice.css');
 ?>
 <div class="notice-index">
-    <h2><?= Html::encode($this->title) ?></h2>
-    <div class="notices"></div>
+    <div class="notice-header">
+        <h4><?= Html::encode('Notice') ?></h4>
+        <a href="javascript:void(0);" class="notice-open"><i class="glyphicon glyphicon-chevron-up"></i></a>
+        <a href="javascript:void(0);" class="notice-close"><i class="glyphicon glyphicon-chevron-down"></i></a>
+    </div>
+    
+    <div class="notices container"></div>
 </div>
 
 <?php
