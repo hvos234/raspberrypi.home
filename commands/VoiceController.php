@@ -26,6 +26,9 @@ class VoiceController extends Controller
     {
         Yii::info('VoiceController', 'execute');
         $tell = Voice::execute($voice);
+        if(!$tell){
+            $tell = yii::t('app', 'Could not find voice !');
+        }
         echo ($tell) . "\n";
         return 0;
     }

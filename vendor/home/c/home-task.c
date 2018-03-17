@@ -225,13 +225,17 @@ int main(int argc, char *argv[])
                 sprintf(buf, (opt=='S' ? "%s\n" : "%s"), optarg);
                 
                 do {
-                    if(_home_task_signal==0) return(0);
+                    if(_home_task_signal==0) {
+                        serialport_close(fd);
+                        return(0);
+                    }
                     
                     // send
                     if( !quiet ) printf("send string:%s\n", buf);
                     rc = serialport_write(fd, buf);
                     if(rc==-1) {
                         home_task_error("error writing");
+                        serialport_close(fd);
                         return(1);
                     }
 
@@ -243,12 +247,14 @@ int main(int argc, char *argv[])
                         if( !quiet ) printf("read string:");
                         printf("%s\n", read);
                         if (strlen(command) != 0) home_task_command(command, read, quiet);
+                        serialport_close(fd);
                         return(0);
                     }
                     
                 } while( retry>0 );
                 
                 home_task_error("error sending");
+                serialport_close(fd);
                 return(1);
                 break;
             /*case 'i':
@@ -281,6 +287,7 @@ int main(int argc, char *argv[])
                     }
                 }
                 home_task_error("error reading");
+                serialport_close(fd);
                 return(1);
                 break;
             case 'F':
@@ -297,5 +304,6 @@ int main(int argc, char *argv[])
 
     // use return instead exit, for proper clean up of the program
     // see https://stackoverflow.com/questions/30250934/how-to-end-c-code 53 and 355
+    serialport_close(fd);
     return(0);
 } // end main

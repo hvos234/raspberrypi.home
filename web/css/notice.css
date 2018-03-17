@@ -51,6 +51,22 @@
     overflow-y: scroll;
 }
 
+@media (min-width: 768px) {
+  .notice-index .notices {
+    height: 120px;
+  }
+}
+@media (min-width: 992px) {
+  .notice-index .notices {
+    height: 180px;
+  }
+}
+@media (min-width: 1200px) {
+  .notice-index .notices {
+    height: 240px;
+  }
+}
+
 .notice-index .notices .date {
     text-align: right;
 }

@@ -36,7 +36,7 @@ $this->registerCssFile('@web/css/thermostat.css');
             <div class="left portlet-header"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span></div>
 
             <div class="right">
-                <div class="accordion <?= (($model->id == 0 && $index != 0) ? 'disabled' : 'enabled') ?>">
+                <div class="thermostat-form accordion <?= (($model->id == 0 && $index != 0) ? 'disabled' : 'enabled') ?>">
                     
                     <h3 class="thermostat-header" index="<?= $index; ?>"><span class="text"><?= (empty($model->name) ? 'Thermostat ' . $index : $model->name)?></span></h3>
 
@@ -82,7 +82,7 @@ $this->registerCssFile('@web/css/thermostat.css');
                     </div>
                 </div>
                 
-                <div class="device-view table">
+                <div class="thermostat-dial col-xs-12 col-sm-6">
 		
                     <div class="thermostat" index="<?= $index ?>">
 
@@ -116,38 +116,40 @@ $this->registerCssFile('@web/css/thermostat.css');
                         </div>
                     </div>
                 </div>
-                <?= DetailView::widget([
-                    'model' => $model,
-                    'attributes' => [
-                        [
-                            'attribute' => 'date_time',
-                            'format' => 'raw',
-                            'value' => Html::tag('span', $model->date_time, ['class' => 'date_time', 'index' => $index]),
+                <div class="thermostat-table col-xs-12 col-sm-6">
+                    <?= DetailView::widget([
+                        'model' => $model,
+                        'attributes' => [
+                            [
+                                'attribute' => 'date_time',
+                                'format' => 'raw',
+                                'value' => Html::tag('span', $model->date_time, ['class' => 'date_time', 'index' => $index]),
+                            ],
+                            [
+                                'attribute' => 'current',
+                                'format' => 'raw',
+                                'value' => Html::tag('span', $model->temperature_current, ['class' => 'current', 'index' => $index]) . 'º',
+                            ],
+                            [
+                                'attribute' => 'target',
+                                'format' => 'raw',
+                                'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus minus', 'index' => $index]) . Html::tag('span', $model->temperature_target, ['class' => 'target', 'index' => $index]) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus plus', 'index' => $index]),
+                            ],
+                            [
+                                'attribute' => 'default',
+                                'format' => 'raw',
+                                'value' => Html::a('-', 'javascript:void(0);', ['class' => 'default-minus minus', 'index' => $index]) . Html::tag('span', $model->temperature_default, ['class' => 'default', 'index' => $index]) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'default-plus plus', 'index' => $index]),
+                            ],
+                            /*[
+                                'attribute' => 'i_am_really_at_home',
+                                'format' => 'raw',
+                                'value' => Html::tag('span', ($model->i_am_really_at_home == 0) ? 'No' : 'Yes', ['class' => 'i_am_really_at_home']),
+                            ],*/
                         ],
-                        [
-                            'attribute' => 'current',
-                            'format' => 'raw',
-                            'value' => Html::tag('span', $model->temperature_current, ['class' => 'current', 'index' => $index]) . 'º',
-                        ],
-                        [
-                            'attribute' => 'target',
-                            'format' => 'raw',
-                            'value' => Html::a('-', 'javascript:void(0);', ['class' => 'target-minus minus', 'index' => $index]) . Html::tag('span', $model->temperature_target, ['class' => 'target', 'index' => $index]) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'target-plus plus', 'index' => $index]),
-                        ],
-                        [
-                            'attribute' => 'default',
-                            'format' => 'raw',
-                            'value' => Html::a('-', 'javascript:void(0);', ['class' => 'default-minus minus', 'index' => $index]) . Html::tag('span', $model->temperature_default, ['class' => 'default', 'index' => $index]) . 'º' . Html::a('+', 'javascript:void(0);', ['class' => 'default-plus plus', 'index' => $index]),
-                        ],
-                        /*[
-                            'attribute' => 'i_am_really_at_home',
-                            'format' => 'raw',
-                            'value' => Html::tag('span', ($model->i_am_really_at_home == 0) ? 'No' : 'Yes', ['class' => 'i_am_really_at_home']),
-                        ],*/
-                    ],
-                ]) ?>
-            
-                <?php ActiveForm::end(); ?>
+                    ]) ?>
+
+                    <?php ActiveForm::end(); ?>
+                </div>
             </div>
         </li>
         

@@ -14,6 +14,14 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'user' => [
+            'class' => 'yii\web\User',
+            'identityClass' => 'app\models\User',
+            //'enableAutoLogin' => true,
+        ],
+        'session' => [ // for use session in console application
+            'class' => 'yii\web\Session'
+        ],
         'log' => [
             //'traceLevel' => YII_DEBUG ? 3 : 0,
             'traceLevel' => 0,

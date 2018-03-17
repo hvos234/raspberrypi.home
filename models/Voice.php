@@ -257,7 +257,8 @@ class Voice extends \yii\db\ActiveRecord
         
         //var_dump('replace');
         
-        $pattern = '/[{][%](.*)[}]/';
+        //$pattern = '/[{][%](.*)[}]/';
+        $pattern = '/{([^}]*)}/';
         
         //$subject = 'De temperatuur bool(%1) %4 bool(%3)in de woonkamer is %2.';
         $subject = $string;

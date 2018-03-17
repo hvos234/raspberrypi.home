@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 //use app\models\Voice;
 
-//var_dump(Voice::execute('Wat is de temperatuur in de woonkamer thuis'));
+//var_dump(Voice::execute('Ben ik thuis'));
 //exit();
 
 use app\models\Notice;

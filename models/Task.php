@@ -98,60 +98,79 @@ class Task extends \yii\db\ActiveRecord
         return $this->hasOne(Task::className(), ['id' => 'action_id']);
     }*/
 		
-		public static function execute($id){
-			$model = Task::findOne($id);
+    public static function execute($id){
+        $model = Task::findOne($id);
 			
-			$data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
-            $data = str_replace(':', '::', $data);
-            $datas = HelperData::dataExplode($data);
-            
-            foreach ($datas as $name => $value){
-                $modelLog = new Log();
-                $modelLog->model = 'task';
-                $modelLog->model_id = $id;
-                $modelLog->name = $name;
-                $modelLog->value = $value;
-                if(!$modelLog->save()){
-                    return false;
-                }
+        $data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
+        $data = str_replace(':', '::', $data);
+        $datas = HelperData::dataExplode($data);
+
+        foreach ($datas as $name => $value){
+            $modelLog = new Log();
+            $modelLog->model = 'task';
+            $modelLog->model_id = $id;
+            $modelLog->name = $name;
+            $modelLog->value = $value;
+            if(!$modelLog->save()){
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in execute, can not save log ! Name: {name} , value: {value} !', ['name' => $name, 'value' => $value]));
+                return false;
             }
+        }
             
-            // check for a error in the data
-			foreach (['error:', 'err:'] as $needle){
-				if(false !== strpos($data, $needle)){
-					return false;
-				}
-			}	
-            
-            return $datas;
-		}
+        // check for a error in the data
+        foreach (['error:', 'err:'] as $needle){
+            if(false !== strpos($data, $needle)){
+                list($err, $error) = explode(':', $data);
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in execute, a error occured when transmitting ! Error: {error} !', ['error' => $error]));
+                return false;
+            }
+        }	
+        
+        Yii::$app->session->addFlash('success', Yii::t('app', 'Task executed ! Data: {data} !', ['data' => $data]));
+        return $datas;
+    }
                 
-    public static function startService(){
+    /*public static function startService(){
         $command = "sudo /bin/systemctl start HomeTaskReceiver.service";
         exec(escapeshellcmd($command), $output, $return_var);
 
         if(0 != $return_var){
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in startService, can not start service ! Output: {output},  return_var: {return_var} !', ['output' => var_export($output, true), 'return_var' => $return_var]));
             return false;
         }
 
         return true;
-    }
+    }*/
 
-    public static function stopService(){
+    /*public static function stopService(){
         $command = "sudo /bin/systemctl stop HomeTaskReceiver.service";
         exec(escapeshellcmd($command), $output, $return_var);
 
         if(0 != $return_var){
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in stopService, can not stop service ! Output: {output},  return_var: {return_var} !', ['output' => var_export($output, true), 'return_var' => $return_var]));
             return false;
         }
 
         return true;
-    }
+    }*/
 
     public static function startReceiver(){
         //  >/dev/null 2>/dev/null & start program in background with no output as return
-        $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -c "/usr/bin/php ' . Yii::getAlias('@app/yii') . ' task-receiver" -r >/dev/null 2>/dev/null &';
+        $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -c "/usr/bin/php ' . Yii::getAlias('@app/yii') . ' task-receiver" -r -d >/dev/null 2>/dev/null &';
         $output = shell_exec($command);
+        
+        // check if process is running
+        /*$command = 'sudo /bin/bash ' . Yii::getAlias('@vendor/home/c/home-task-aux.sh') . ' "' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -c /usr/bin/php ' . Yii::getAlias('@app/yii') . ' task-receiver -r"';
+        exec(escapeshellcmd($command), $output, $return_var);
+        var_dump($command);
+        var_dump($output);
+        var_dump($return_var);
+        exit();
+        
+        if(0 != $return_var){
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in startReceiver, service is not running ! Output: {output},  return_var: {return_var} !', ['output' => var_export($output, true), 'return_var' => $return_var]));
+            return false;
+        }*/
 
         return true;
     }
@@ -170,12 +189,13 @@ class Task extends \yii\db\ActiveRecord
         //$command = 'sudo /usr/bin/pkill -TERM "home-task"';
         // write a script that kills the user and then give normal_user the right to run that script
         // see https://stackoverflow.com/questions/18359433/how-to-allow-a-normal-user-to-kill-a-certain-root-application-in-visudo-with-no 4
-        $command = 'sudo /bin/bash /var/www/html/home/vendor/home/c/home-task-kill.sh';
+        $command = 'sudo /bin/bash ' . Yii::getAlias('@vendor/home/c/home-task-kill.sh');
         exec(escapeshellcmd($command), $output, $return_var);
         
         // EXIT STATUS
         // see https://www.systutorials.com/docs/linux/man/1-pkill/
         if(0 != $return_var and 1 != $return_var){
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in stopReceiver, can not stop receiver ! Output: {output},  return_var: {return_var} !', ['output' => var_export($output, true), 'return_var' => $return_var]));
             return false;
         }
         
@@ -195,9 +215,11 @@ class Task extends \yii\db\ActiveRecord
         
         while (true){ // if the return is not this transmition do it again
             
-            $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -R ' . $retry . ' -t ' . $timeout . ' -s "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$"';
+            $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -R ' . $retry . ' -t ' . $timeout . ' -s "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$" -d 2>&1';
+            // sudo /var/www/html/home/vendor/home/c/home-task -b 9600 -p /dev/ttyUSB0 -q -R 3 -t 4000 -s "^fr:1;to:4;ac:3'$"
             // use shell_exec istead of exec "Try shell_exec() instead. exec should not invoke ANY shell to execute your program."
             // see https://stackoverflow.com/questions/1792643/how-do-i-change-the-shell-for-phps-exec
+            // 2>&1, see http://php.net/manual/en/function.shell-exec.php, 130
             $output = shell_exec($command);
             
             if(is_null($output)){
