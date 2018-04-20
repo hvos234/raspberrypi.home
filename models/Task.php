@@ -104,7 +104,7 @@ class Task extends \yii\db\ActiveRecord
         $data = Task::transmitter($model->from_device_id, $model->to_device_id, $model->action_id);
         $data = str_replace(':', '::', $data);
         $datas = HelperData::dataExplode($data);
-
+        
         foreach ($datas as $name => $value){
             $modelLog = new Log();
             $modelLog->model = 'task';
@@ -118,9 +118,9 @@ class Task extends \yii\db\ActiveRecord
         }
             
         // check for a error in the data
-        foreach (['error:', 'err:'] as $needle){
+        foreach (['error::', 'err::'] as $needle){
             if(false !== strpos($data, $needle)){
-                list($err, $error) = explode(':', $data);
+                list($err, $error) = explode('::', $data);
                 Yii::$app->session->addFlash('error', Yii::t('app', 'Model Task, in execute, a error occured when transmitting ! Error: {error} !', ['error' => $error]));
                 return false;
             }
@@ -202,16 +202,86 @@ class Task extends \yii\db\ActiveRecord
         return true;
     }
 		
-    public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4000){
+    public static function transmitter($from_device_id, $to_device_id, $action_id, $retry = 3, $delay = 3, $timeout = 4){
         // sudo nano /etc/sudoers
         // Cmnd_Alias HOMETASK = /var/www/html/home/vendor/home/c/home-task
         // Cmnd_Alias HOMETASKKILL = /bin/bash /var/www/html/home/vendor/home/c/home-task-kill.sh
         // %www-data ALL=(ALL) NOPASSWD: HOMETASK
         // %www-data ALL=(ALL) NOPASSWD: HOMETASKKILL
         
+        for($i=1; $i <= $retry; $i++){
+            $command = 'sudo /usr/bin/python ' . Yii::getAlias('@vendor/home/python/home_task_transmitter.py') . ' -p ' . Yii::getAlias('@app/yii') . ' -fr ' . $from_device_id . ' -to ' . $to_device_id . ' -ac ' . $action_id . ' -t ' . $timeout;
+            //exec(escapeshellcmd($command), $output, $return_var);
+            
+            $output = shell_exec($command);
+            $output = explode(PHP_EOL, $output); // shell_exec returns one string
+            
+            $return = Task::sscanfOutput($output);
+            
+            if(!$return){
+                    $message = 'err:no output';
+            }else {
+                // from and to are exchanged
+                $from = 0;
+                $to = 0;
+                $action = 0;
+                $message = '';
+                list($from, $to, $action, $message) = $return;
+
+                if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
+                    return $message;
+                }else {
+                    Task::receiver($output);
+                    $i--;
+                }
+            }
+            
+            return $message;
+            
+            /*if(0 == $return_var){ // everything is oke
+                $return = Task::sscanfOutput($output);
+                
+                if(!$return){
+                    $message = 'err:no output';
+                    
+                }else {
+                    // from and to are exchanged
+                    $from = 0;
+                    $to = 0;
+                    $action = 0;
+                    $message = '';
+                    list($from, $to, $action, $message) = $return;
+
+                    if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
+                        return $message;
+                    }else {
+                        Task::receiver($output);
+                        $i--;
+                    }
+                }
+                
+            }else {
+                $return = Task::sscanfOutput($output);
+                
+                if(!$return){
+                    $message = 'err:retry';
+                    
+                }else {
+                    // from and to are exchanged
+                    $from = 0;
+                    $to = 0;
+                    $action = 0;
+                    $message = '';
+                    list($from, $to, $action, $message) = $return;
+                }
+            }*/
+        }
+        
+        return $message;
+        
         /*if(!Task::stopReceiver()){
             return 'err:failed stop';
-        }*/
+        }
         
         while (true){ // if the return is not this transmition do it again
             
@@ -224,18 +294,18 @@ class Task extends \yii\db\ActiveRecord
             $output = shell_exec($command);
             
             if(is_null($output)){
-                /*if(!Task::startReceiver()){
+                if(!Task::startReceiver()){
                     return 'err:failed start';
-                }*/
+                }
                 return 'err:failed exec';
             }
             
             $output = explode(PHP_EOL, $output); // shell_exec returns one string
             $return = Task::sscanfOutput($output);
             if(!$return){
-                /*if(!Task::startReceiver()){
+                if(!Task::startReceiver()){
                     return 'err:failed start';
-                }*/
+                }
                 return 'err:no output';
             }
 
@@ -247,9 +317,9 @@ class Task extends \yii\db\ActiveRecord
             list($from, $to, $action, $message) = $return;
 
             if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
-                /*if(!Task::startReceiver()){
+                if(!Task::startReceiver()){
                     return 'err:failed start';
-                }*/
+                }
                 return $message;
 
             }else {
@@ -259,10 +329,10 @@ class Task extends \yii\db\ActiveRecord
             }
         }
         
-        /*if(!Task::startReceiver()){
+        if(!Task::startReceiver()){
             return 'err:failed start';
-        }*/
-        return 'err:failed return';
+        }
+        return 'err:failed return';*/
     }
 				
 		public static function receiver($output){

@@ -14,11 +14,12 @@ class home_os:
         #print "pgrep: "
         #print pattern
         try:
-            return subprocess.check_output(["pgrep", "-f", pattern]) # -f is full path
+            return subprocess.check_output(["sudo", "pgrep", "-f", pattern]) # -f is full path
         except subprocess.CalledProcessError, e:
             return False
     
     def start(self, args, background=False):
+        args.insert(0, "sudo")
         #print "start: "
         #print args
         if False == background:

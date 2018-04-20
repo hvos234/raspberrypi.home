@@ -10,7 +10,7 @@ parser.add_argument('-to', '--to', help="give the device id witch it will send t
 parser.add_argument('-ac', '--action', help="give the action id", dest='ac', default='0')
 parser.add_argument('-msg', '--message', help="give data to send with it", dest='msg', default='None')
 parser.add_argument('-p', '--path', help="give the full path to root", dest='p', default='0')
-
+parser.add_argument('-t', '--timeout', help="give the number of seconds, for script timeout", dest='t', default=4)
 args = parser.parse_args()
 
 fr = args.fr
@@ -18,6 +18,7 @@ to = args.to
 ac = args.ac
 msg = args.msg
 p = args.p
+t = args.t
 
 # logging
 #from home_transmitter_logging import logger
@@ -43,14 +44,14 @@ _home_serial = home_serial()
 def receiver_start():    
     print "Home Transmitter Receiver Start!"
     if False == _home_os.start(["/usr/bin/python", p + "/vendor/home/python/home_task_receiver.py", "-p", p], True):
-        print "^fr:" + to + ";to:" + fr + ";ac:" + ac + ";msg:err:recieverstart$"
+        print "^fr:" + to + ";to:" + fr + ";ac:" + ac + ";msg:err:reciever start$"
         sys.exit(1)
 
 def receiver_stop():
     print "Home Transmitter Receiver Stop!"
-    if False == _home_os.stop(["/usr/bin/python", p + "/vendor/home/python/home_task_receiver.py", "-p", p]):
-        print "^fr:" + to + ";to:" + fr + ";ac:" + ac + ";msg:err:recieverstop$"
-        sys.exit(1)
+    #if False == _home_os.stop(["/usr/bin/python", p + "/vendor/home/python/home_task_receiver.py", "-p", p]):
+    #    print "^fr:" + to + ";to:" + fr + ";ac:" + ac + ";msg:err:reciever stop$"
+    #    sys.exit(1)
     
 # cleanup
 def cleanup():
@@ -85,14 +86,14 @@ atexit.register(cleanup)
 #print _home_os.pgrep(["/usr/bin/python", "/var/www/html/home/vendor/home/python/home_task_transmitter.py", "-p", p, "-fr", fr, "-to", to, "-ac", ac])
 
 # receiver stop
-receiver_stop()
+#receiver_stop()
 #sys.exit(0)
 
 # serial connect
 _home_serial.connect(3)
 time.sleep(1) # wait to device is started up
 # wait to device is started up
-timeout = 4 # seconds
+timeout = int(t) # seconds
 timeout_start = time.time()
 
 # run
