@@ -209,13 +209,14 @@ class Task extends \yii\db\ActiveRecord
         // %www-data ALL=(ALL) NOPASSWD: HOMETASK
         // %www-data ALL=(ALL) NOPASSWD: HOMETASKKILL
         
-        if(!Task::stopReceiver()){
+        /*if(!Task::stopReceiver()){
             return 'err:failed stop';
-        }
+        }*/
         
         while (true){ // if the return is not this transmition do it again
             
             $command = 'sudo ' . Yii::getAlias('@vendor/home/c/home-task') . ' -b 9600 -p /dev/ttyUSB0 -q -R ' . $retry . ' -t ' . $timeout . ' -s "^fr:' . $from_device_id . ';to:' . $to_device_id . ';ac:' . $action_id . '$" -d 2>&1';
+            $command = 'ls -l';
             // sudo /var/www/html/home/vendor/home/c/home-task -b 9600 -p /dev/ttyUSB0 -q -R 3 -t 4000 -s "^fr:1;to:4;ac:3'$"
             // use shell_exec istead of exec "Try shell_exec() instead. exec should not invoke ANY shell to execute your program."
             // see https://stackoverflow.com/questions/1792643/how-do-i-change-the-shell-for-phps-exec
@@ -223,18 +224,18 @@ class Task extends \yii\db\ActiveRecord
             $output = shell_exec($command);
             
             if(is_null($output)){
-                if(!Task::startReceiver()){
+                /*if(!Task::startReceiver()){
                     return 'err:failed start';
-                }
+                }*/
                 return 'err:failed exec';
             }
             
             $output = explode(PHP_EOL, $output); // shell_exec returns one string
             $return = Task::sscanfOutput($output);
             if(!$return){
-                if(!Task::startReceiver()){
+                /*if(!Task::startReceiver()){
                     return 'err:failed start';
-                }
+                }*/
                 return 'err:no output';
             }
 
@@ -246,9 +247,9 @@ class Task extends \yii\db\ActiveRecord
             list($from, $to, $action, $message) = $return;
 
             if($from == $from_device_id and $to == $to_device_id and $action == $action_id){
-                if(!Task::startReceiver()){
+                /*if(!Task::startReceiver()){
                     return 'err:failed start';
-                }
+                }*/
                 return $message;
 
             }else {
@@ -258,9 +259,9 @@ class Task extends \yii\db\ActiveRecord
             }
         }
         
-        if(!Task::startReceiver()){
+        /*if(!Task::startReceiver()){
             return 'err:failed start';
-        }
+        }*/
         return 'err:failed return';
     }
 				
